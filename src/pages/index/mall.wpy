@@ -1,0 +1,125 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-mall">  
+    <!-- 轮播 -->
+    <banner :bannerAdv.sync="bannerAdv"></banner>
+    
+    <search :userId.sync="userId" :cartNum.sync="cartNum"></search>
+    <!-- 类型材质 -->
+    <types></types>
+
+    <!-- 商品活动 -->
+    <activity wx:if="{{false}}"></activity>
+
+    <!-- 小编推荐 -->
+    <view class="mall-recommed">
+      <view class="title font-size--32 wow-flex is-align-middle">
+        <image class="icon" src="../../images/mall/ico_shop_recommend.png" mode="aspectFill"></image>
+        <view>小编推荐</view>
+      </view>
+      <goodList :list.sync="lists"></goodList>
+    </view>
+
+    <loading wx:if="{{hasMoreData}}"></loading>
+
+    <custom-tabbar tabbar="{{tabbar}}"></custom-tabbar>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Search from '../../components/search'
+  import Banner from './modules/banner'
+  import Types from './modules/types'
+  import Activity from './modules/activity'
+  import GoodList from '../../components/goodList'
+  import Loading from '../../components/loading'
+  import goodsApi from '../../api/goods'
+  import advertisementApis from '../../api/advertisement'
+  import CommonMixin from '../../mixins/common'
+  export default class Mall extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      usingComponents: {
+        'custom-tabbar': '../../custom-tab-bar/index'
+      }
+    }
+    mixins = [CommonMixin]
+    components = {
+      banner: Banner,
+      types: Types,
+      activity: Activity,
+      goodList: GoodList,
+      search: Search,
+      loading: Loading
+    }
+    data = {
+      tabbar: {},
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false,
+      bannerAdv: {}
+    }
+    methods = {
+    }
+    async getAdvertisement () { // 广告位接口
+      try {
+        const { data } = await advertisementApis.queryAdvertisements()
+        this.bannerAdv = data.filter(item => item.advertisementType === 2)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getRecommend () {
+      try {
+        let { start, limits, lists } = this
+        const opts = {
+          start,
+          limits
+        }
+        let { data } = await goodsApi.recommended(opts)
+        if (start === 0) {
+          lists = []
+        }
+        this.lists = lists.concat(data.data)
+        if (data.data.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start++
+        }
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    onLoad () {
+      // 隐藏系统tabbar
+      wx.hideTabBar()
+      wepy.$instance.editTabbar()
+      this.getRecommend()
+      this.getAdvertisement()
+    }
+
+    onReachBottom () {
+      if (this.hasMoreData) {
+        this.getRecommend()
+      }
+    }
+    onUnload () {
+    }
+
+    onHide () {
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/mall/common.postcss';
+</style>

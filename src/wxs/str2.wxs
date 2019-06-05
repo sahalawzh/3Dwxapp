@@ -1,0 +1,5 @@
+module.exports = {
+  str2: function (v) {
+    return (v < 10 ? '0' : '') + +v
+  }
+}

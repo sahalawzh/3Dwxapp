@@ -1,0 +1,302 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-goods-list">
+    <view class="opertion-box">
+      <view class="search-sign">
+        <view class="search-sign__control wow-flex is-align-middle">
+          <view class="search-box font-size--28" @tap.stop="handleToSearch">搜索一下</view>
+          <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-box open-type-btn">
+            <image class="cart-icon" src="../../images/common/btn_cart_black.png" mode="aspectFill"></image>
+            <view class="cart-box__sign" wx:if="{{cartNum}}"></view>
+          </navigator>
+          <button wx:else data-url="/pages/cart/index"  open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber"  class="cart-box open-type-btn">
+            <image class="cart-icon" src="../../images/common/btn_cart_black.png" mode="aspectFill"></image>
+            <view class="cart-box__sign" wx:if="{{cartNum}}"></view>
+          </button>
+        </view>
+        <view class="search-sign__menu">
+          <view class="wow-flex is-align-middle is-justify-space-between font-size--28">
+            <view class="tab" wx:for="{{tab}}" wx:key="item" :class="{'active': tabActive === item.id}" @tap.stop="hanldeToTab({{item}})">{{item.label}}</view>
+          </view>
+        </view>
+      </view>
+
+      <goodsTab :order.sync="order" :type.sync="types"></goodsTab>
+    </view> 
+
+    <view class="goods">
+      <goodList :list.sync="lists" wx:if="{{lists.length}}"></goodList>
+      <view class="font-size--28 goods-empty" wx:else>没有符合条件的商品</view>
+    </view>
+
+    <view class="float-box {{isRuleTrue ? 'isRuleShow' : 'isRuleHide'}}" catchtouchmove="true">
+      <view class="float-box-mask" @tap.stop="handleClosePopup"></view>
+      <view class="float-box-wrap float-box-right">
+        <view class="animation-element">
+
+          <scroll-view scroll-y="true" class="float-box-scroll">
+            <view class="items">
+              <view class="items-item">
+                <view class="wow-flex items-item__radio">
+                  <view class="wow-flex is-align-middle items-item__topic" @tap.stop="handleToServer('modelFile')" :class="{'active': modelFileSelected}">
+                    <view class="font-size--26 label">用模型直接打印</view>
+                  </view>
+                  <view class="wow-flex is-align-middle items-item__topic" @tap.stop="handleToServer('video')" :class="{'active': videoSelected}">
+                    <view class="font-size--26 label">有制作教程</view>
+                  </view>
+                  <view class="wow-flex is-align-middle items-item__topic" @tap.stop="handleToServer('stock')" :class="{'active': stockSelected}">
+                    <view class="font-size--26 label">现货</view>
+                  </view>
+                  </view>
+                </view>
+                <view class="items-item" wx:if="{{topicList.length}}">
+                  <view class="items-item__title font-size--28">相关话题</view>
+                  <view class="wow-flex items-item__radio">
+                    <view class="wow-flex is-align-middle items-item__topic" :class="{'active': item.checked}" wx:for="{{topicList}}" wx:key="index" @tap.stop="handleSelectTopic({{index}}, {{item}})">
+                      <image class="icon" src="../../images/common/ico_Topics_{{item.checked ? 'select' : 'gray'}}.png" mode="aspectFill"></image>
+                      <view class="font-size--26 label">{{ item.topic }}</view>
+                    </view>
+                  </view>
+                </view>
+
+                <view class="items-item">
+                  <view class="items-item__title font-size--28">价格区间</view>
+                  <view class="wow-flex is-align-middle font-size--26 section">
+                    <input type="digit" bindinput="handleGetLowPrice" class="section-control" placeholder-class="section-control__placeholder" placeholder="最高价"/>
+                    <text class="section-bar">-</text>
+                    <input type="digit" bindinput="handleGetHightPrice" class="section-control" placeholder-class="section-control__placeholder" placeholder="最低价"/>
+                  </view>
+                </view>
+              </view>
+
+            </view>
+          </scroll-view>
+
+          <view class="btn-wrap">
+            <button class="btn font-size--26" @tap.stop="handleToConfirm">确定</button>
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Tab from './modules/tab'
+  import goodsApis from '../../api/goods'
+  import GoodList from '../../components/goodList'
+  import wxUtils from '../../utils/wxutils'
+  import CommonMixin from '../../mixins/common'
+  export default class GoodsList extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    components = {
+      goodsTab: Tab,
+      goodList: GoodList
+    }
+    mixins = [CommonMixin]
+    data = {
+      isPerson: false,
+      start: 1,
+      limits: 20,
+      types: 'buy_number',
+      order: 'desc',
+      lists: [],
+      hasMoreData: false, // 默认不用拉数据
+      isRuleTrue: false,
+      topicList: [],
+      topic: '',
+      modelFileSelected: false,
+      videoSelected: false,
+      stockSelected: false,
+      low: '',
+      high: '',
+      tab: [
+        {
+          id: 0,
+          label: '全部'
+        },
+        {
+          id: 1,
+          label: '好东西'
+        },
+        {
+          id: 2,
+          label: '打印机'
+        },
+        {
+          id: 3,
+          label: '打印材料'
+        }
+      ],
+      tabActive: 0,
+      userId: ''
+    }
+    events = {
+      handleToggleTab (type) {
+        this.types = type
+        if (this.order === 'desc') {
+          this.order = 'asc'
+        } else {
+          this.order = 'desc'
+        }
+        this.getGoodsList()
+      },
+      slideToggle: function () {
+        this.translate()
+      }
+    }
+    handleGetLowPrice (e) {
+      console.log(e)
+      this.low = e.detail.value
+    }
+    handleGetHightPrice (e) {
+      this.high = e.detail.value
+    }
+    translate () {
+      this.isRuleTrue = true
+    }
+    async getGoodsList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { start, limits, types, order, lists, modelFileSelected, videoSelected, stockSelected, low, high, topic, tabActive } = this
+        let opts = {
+          start,
+          limits,
+          types,
+          order,
+          spuType: tabActive,
+          screeningVO: {}
+        }
+        if (modelFileSelected) { // 是否用模型直接打印
+          opts.screeningVO.modelId = 1
+        }
+        if (videoSelected) { // 有制作教程
+          opts.screeningVO.video = 1
+        }
+        if (stockSelected) { // 是否有现货
+          opts.screeningVO.isStock = 1
+        }
+        if (low) {
+          opts.screeningVO.low = low
+        }
+        if (high) {
+          opts.screeningVO.high = high
+        }
+        if (topic) {
+          opts.screeningVO.topic = topic
+        }
+        const { data: goodsData } = await goodsApis.listSpuScreening(opts)
+        let { total, data } = goodsData
+        if (start === 1) {
+          lists = []
+        }
+        this.lists = lists.concat(data)
+        if (total < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start++
+        }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getTopic () {
+      try {
+        const { data } = await goodsApis.queryTopic()
+        this.topicList = data.data
+        let selectIndex
+        if (this.topic) {
+          selectIndex = this.topicList.findIndex((item) => {
+            return item.topic === this.topic
+          })
+        }
+        this.topicList.forEach((element, index) => {
+          element.checked = false
+          if (selectIndex === index) {
+            element.checked = true
+          }
+        })
+        console.log(this.topicList)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    methods = {
+      hanldeToTab (item) {
+        this.tabActive = item.id
+        this.getGoodsList()
+      },
+      handleToConfirm () {
+        this.getGoodsList()
+        this.isRuleTrue = false
+      },
+      handleToServer (type) {
+        switch (type) {
+          case 'modelFile':
+            this.modelFileSelected = !this.modelFileSelected
+            break
+          case 'video':
+            this.videoSelected = !this.videoSelected
+            break
+          case 'stock':
+            this.stockSelected = !this.stockSelected
+            break
+          default:
+            break
+        }
+      },
+      handleSelectTopic (index, item) {
+        this.topicList.forEach((element, index) => {
+          element.checked = false
+        })
+        this.topicList[index].checked = !item.checked
+        if (this.topicList[index].checked) {
+          this.topic = item.topic
+        } else {
+          this.topic = ''
+        }
+      },
+      handleToSearch () {
+        wxUtils.backOrNavigate('/pages/search/index')
+      },
+      handleClosePopup () {
+        this.isRuleTrue = false
+      }
+    }
+    onLoad ({ type, topic }) {
+      this.tabActive = Number(type) || 0
+      this.topic = topic ? decodeURIComponent(topic) : ''
+      this.getGoodsList()
+      this.getTopic()
+    }
+
+    onReachBottom () {
+      if (this.hasMoreData) {
+        this.getGoodsList()
+      }
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/goodsList/common.postcss';
+</style>

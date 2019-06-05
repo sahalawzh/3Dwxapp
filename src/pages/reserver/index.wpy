@@ -1,0 +1,203 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-order">
+    <view class="header">
+      <navigator url="/pages/address/index" wx:if="{{addressVO}}">
+        <view class="header-box font-size--28">
+          <view class="header-box__info">
+            <text>{{addressVO.recipient}}</text>
+            <text class="wow-ml-30">{{addressVO.phone}}</text>
+          </view>
+          <view class="address"><text class="address-default" wx:if="{{addressVO.isDefault === 0}}">默认</text>{{addressVO.address + addressVO.addressDetail}}</view>
+        </view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+      <navigator url="/pages/address/index" class="address-empty" wx:else>
+        <image src="../../images/address/ico_address_empty.png" class="ico_address_empty" mode="aspectFill"></image>
+        <view class="address-empty__info font-size--26">还没有收货地址，<text class="label">去添加</text></view>
+      </navigator>
+    </view>
+
+    <view class="order-lists">
+      <view class="order-lists-items">
+        <view class="order-lists-items__item" wx:for="{{cartDetailList}}" wx:key="{{index}}">
+          <view class="product-info wow-flex">
+            <view class="wow-background-image order-img"
+            style="background-image: url({{item.image}})"></view>
+            <view class="order-info">
+              <wow-elip line="2" class="order-info__title font-size--28">{{item.title}}</wow-elip>
+              <wow-elip line="1" class="order-info__sku font-size--24">{{commonwxs.specStr(item)}}</wow-elip>
+              <view class="order-info__price font-size--28 wow-flex is-justify-space-between">
+                <view class="color-price">￥{{item.price}}</view>
+                <view class="num font-size--26">数量 {{item.num}}</view>
+              </view>
+            </view>
+          </view>
+
+          <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
+            <view>配送方式</view>
+            <view>快递 包邮</view>
+          </view>
+          <block wx:if="{{false}}">
+            <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
+              <view>发票</view>
+              <view class="wow-flex is-align-middle invoice">
+                <view>电子</view>
+                <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+              </view>
+            </view>
+            <view class="order-lists-items__status font-size--26">
+              <view class="sale-tip">定制商品支付订单后客服将与您取得联系</view>
+            </view>
+          </block>
+
+        </view>
+      </view>
+    </view>
+
+    <view class="footer wow-clearfix">
+      <view class="wow-fl-l font-size--30 color-price footer-info">合计: ￥{{price}}</view>
+      <view class="wow-fl-r font-size--30">
+        <view class="pay-btn font-color-white" @tap.stop="hanldeToPay">提交订单</view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+/* eslint-disable */
+  import wepy from 'wepy'
+  import goodsApi from '../../api/goods'
+  import orderApis from '../../api/order'
+  import isEmpty from '../../utils/isEmpty'
+  import wxutils from '../../utils/wxutils'
+  import commonwxs from './wxs/common.wxs'
+  export default class Reserver extends wepy.page {
+    config = {
+      navigationBarTitleText: '下单',
+      usingComponents: {
+        'wow-elip': '../../packages/elip/index'
+      }
+    }
+    data = {
+      cartId: '',
+      addressVO: {},
+      cartDetailList: [],
+      price: '',
+      userId: ''
+    }
+    wxs = {
+      commonwxs: commonwxs
+    }
+    pickedAddress (item) {
+      console.log(item)
+      const {recipient, phone, area, address, isDefault, addressDetail, id} = item
+      this.addressVO = {
+        recipient,
+        phone,
+        address: area + address,
+        isDefault,
+        addressDetail,
+        id
+      }
+    }
+    async settlement () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const opts = {
+          userId: this.userId,
+          ids: this.cartId
+        }
+        const { data } = await goodsApi.settlement(opts)
+        this.addressVO = data.address
+        this.cartDetailList = data.cartDetailListVO
+        this.price = data.price
+        this.checks = data.checks
+        wepy.$instance.globalData.subpub.on('afterPickedAddress', this.pickedAddress, this)
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    onLoad ({cartId}) {
+      this.cartId = cartId
+      this.userId = wx.getStorageSync('wow').userId
+      this.settlement()
+    }
+    methods = {
+      async hanldeToPay () {
+        if (isEmpty(this.addressVO)) {
+          wx.showModal({
+            title: '提示',
+            content: '您还没有选择收货地址',
+            showCancel: false
+          })
+          return
+        }
+        try {
+          wx.showLoading({
+            title: '提交订单',
+            mask: true
+          })
+          const { checks, addressVO, userId, cartId } = this
+          const opts = {
+            userId,
+            checks,
+            addressId: addressVO.id,
+            ids: cartId
+          }
+          const { data } = await orderApis.wxInsertOrder(opts)
+          const { appId, nonceStr, package: packageId, paySign, signType, timeStamp, total_fee, Order } = data
+          const payParam = {
+            appId,
+            nonceStr,
+            package: packageId,
+            paySign,
+            signType,
+            timeStamp,
+            total_fee
+          }
+          wxutils.wxPay(payParam).then(function () {
+            console.log(Order)
+            wx.redirectTo({
+              url: '/pages/success/index?oid=' + Order.orderNum
+            })
+          }).catch(function (e) {
+            console.log(e)
+            wx.redirectTo({
+              url: '/pages/orderDetail/index?oid=' + Order.orderNum
+            })
+          })
+          wx.hideLoading()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+          wx.showModal({
+            title: '提示',
+            showCancel: false,
+            content: error.message || '下单失败',
+            success(res) {
+              if (res.confirm) {
+                wx.navigateBack()
+              }
+            }
+          })
+        }
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/reserver/common.postcss';
+</style>

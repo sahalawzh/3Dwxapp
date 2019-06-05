@@ -1,0 +1,54 @@
+
+.pages-model {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+  .good-list {
+    margin-bottom: 54rpx;
+    .title {
+      margin: 30rpx 0 10rpx 50rpx;
+      color: #000;
+    }
+    .products-layout__body { 
+      padding: 0 40rpx 80rpx;
+    }
+    .products-list {
+      &__item {
+        float: left;
+        width: 50%;
+        box-sizing: border-box;
+        padding: 0 10rpx;
+        margin-top: 40rpx;
+        .product {
+          &-box {
+            position: relative;
+          }
+          &-image {
+            border-radius: 12rpx;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 260rpx;
+            &-cont {
+              position: absolute;
+              top: 0;
+              right: 0;
+              width: 100%;
+              height: 260rpx;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: cover;
+            }
+          }
+          &-info {
+            padding-top: 14rpx;
+            text-align: center;
+            color: #4a4a4a;
+          }
+        }
+      }
+    }
+  }
+}

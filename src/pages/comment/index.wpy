@@ -1,0 +1,36 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-commet">
+    <commet :lastpage.sync="lastpage"></commet>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Commet from '../../components/commet'
+  export default class Comment extends wepy.page {
+    config = {
+      navigationBarTitleText: '评价'
+    }
+    components = {
+      commet: Commet
+    }
+    data = {
+      lastpage: ''
+    }
+    onLoad ({ lastpage }) {
+      console.log(lastpage)
+      this.lastpage = lastpage
+    }
+    methods = {
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

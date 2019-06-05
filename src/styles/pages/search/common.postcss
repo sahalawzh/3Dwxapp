@@ -1,0 +1,142 @@
+@import '../../mixins/common.postcss';
+.pages-search {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  .opertion-box {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    top: 0;
+    z-index: 99;
+    background-color: #f3f3f3;
+  }
+  .search-sign {
+    &__control {
+      position: relative;
+      margin: 20rpx 52rpx 32rpx 66rpx;
+      .control {
+        flex: 1;
+        height: 62rpx;
+        margin-right: 42rpx;
+        padding-left: 26rpx;
+        background-color: #fff;
+        border-radius: 26rpx;
+      }
+    }
+  }
+  .history-box {
+    padding-left: 52rpx;
+    padding-top: 160rpx;
+    .title {
+      position: relative;
+      color: #595959;
+      font-weight: 600;
+      .btn-delete {
+        position: absolute;
+        right: 40rpx;
+        width: 48rpx;
+        height: 48rpx;
+      }
+    }
+    &__empty {
+      padding-right: 66rpx;
+      padding-bottom: 30rpx;
+      text-align: center;
+      color: #373737;
+    }
+    &__info {
+      padding-right: 66rpx;
+      flex-wrap: wrap;
+      .item {
+        padding: 14rpx 30rpx;
+        background-color: #ededed;
+        color: #a9a9a9;
+        border-radius: 30rpx;
+        margin-right: 16rpx;
+        margin-top: 30rpx;
+      }
+    }
+  }
+  .hot-box {
+    margin: 90rpx 40rpx 0 52rpx;
+    &.no-search {
+      margin-top: 50rpx;
+    }
+    .hot-title {
+      color: #595959;
+      font-weight: 600;
+    }
+    .hot-content {
+      flex-wrap: wrap;
+      &__item {
+        margin-top: 52rpx;
+        color: #a9a9a9;
+        width: 50%;
+      }
+    }
+  }
+  .goods-lists {
+    margin-top: 360rpx;
+    &__item {
+      width:100%;
+      padding:0 30rpx;
+      box-sizing: border-box;
+      margin-bottom: 40rpx;
+    }
+    .product-box {
+      position:relative;
+      border-radius:8rpx 8rpx 0 0;
+    }
+    .product-image {
+      border-radius:8rpx 8rpx 0 0;
+      overflow:hidden;
+      position:relative;
+      padding-bottom:100%;
+      image {
+        position:absolute;
+        top:0;
+        right:0;
+        width:100%;
+        height: 100%;
+        background-repeat:no-repeat;
+        background-position:center;
+        background-size:cover;
+      }
+      .collect-box {
+        position: absolute;
+        bottom: 30rpx;
+        right: 30rpx;
+        .icon {
+          width: 40rpx;
+          height: 40rpx;
+          background-color: red;
+          margin-right: 20rpx;
+        }
+      }
+    }
+    .product-info {
+      background:#fff;
+      border-radius:0 0 8rpx 8rpx;
+      overflow:hidden;
+      height:128rpx;
+      padding: 20rpx 30rpx 30rpx;
+      .name, .desc {
+        @mixin elip 2;
+      }
+      .name-elip, .desc {
+        @mixin ellipsis 2;
+      }
+      .desc {
+        margin-top: 14rpx;
+      }
+      .price {
+        margin-top: 10rpx;
+      }
+    }
+  }
+  .goods {
+    padding: 160rpx 52rpx 0;
+  }
+}

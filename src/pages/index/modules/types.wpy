@@ -1,0 +1,37 @@
+
+<template>
+  <view class="wow-flex types-items is-justify-space-around">
+    <navigator url="/pages/goodsList/index?type=3" hover-class="none" class="types-items_item">
+      <image class="icon" src="../../../images/mall/btn_shop_material.png" mode="aspectFill"></image>
+      <view class="label font-size--24">打印材料</view>
+    </navigator>
+    <navigator url="/pages/goodsList/index?type=1" hover-class="none" class="types-items_item">
+      <image class="icon" src="../../../images/mall/btn_shop_goods.png" mode="aspectFill"></image>
+      <view class="label font-size--24">好东西</view>
+    </navigator>
+    <navigator url="/pages/goodsList/index?type=2" hover-class="none" class="types-items_item">
+      <image class="icon" src="../../../images/mall/btn_shop_printer.png" mode="aspectFill"></image>
+      <view class="label font-size--24">打印机</view>
+    </navigator>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Types extends wepy.component {
+    props = {
+    }
+    data = {
+    }
+
+    events = {
+    }
+
+    methods = {
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

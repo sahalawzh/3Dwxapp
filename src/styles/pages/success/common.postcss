@@ -1,0 +1,122 @@
+@import '../../mixins/common.postcss';
+.page-success {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f6f7f7;
+  .success-header {
+    padding: 130rpx 0 98rpx;
+    background: linear-gradient(to bottom, #76b1f4, #f3092f);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    &__sign {
+      .icon {
+        width: 38rpx;
+        height: 38rpx;
+        margin-right: 16rpx;
+      }
+      .text {
+        font-weight: 600;
+      }
+    }
+    &__price {
+      margin-top: 18rpx;
+    }
+    &__btn {
+      margin-top: 52rpx;
+    }
+    .success-btn {
+      width: 220rpx;
+      height: 64;
+      line-height: 64rpx;
+      text-align: center;
+      border-radius: 30rpx;
+      border: 1rpx solid #fff;
+      & + .success-btn {
+        margin-left: 26rpx;
+      }
+    }
+  }
+  .success-content {
+    width: 100%;
+    margin-top: -38rpx;
+    margin-bottom: 100rpx;
+    padding: 0 14rpx;
+    box-sizing: border-box;
+    /* &__wrap {
+      width: 100%;
+      padding: 40rpx 28rpx;
+      border-radius: 14rpx;
+      background-color: #fff;
+    } */
+  }
+  .good-list {
+    .products-layout__body { 
+      width: 100%;
+      padding: 40rpx 28rpx;
+      border-radius: 14rpx;
+      background-color: #fff;
+      box-sizing: border-box;
+    }
+    .products-list {
+      &__item {
+        float: left;
+        width: 50%;
+        box-sizing: border-box;
+        padding: 0 8rpx;
+        /* margin-top: 20rpx; */
+        margin-bottom: 12prx;
+        .product {
+          &-box {
+            position: relative;
+            border-radius: 14rpx;
+          }
+          &-image {
+            border-radius: 14rpx;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 244rpx;
+            &-cont {
+              position: absolute;
+              top: 0;
+              right: 0;
+              width: 100%;
+              height: 244rpx;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: cover;
+            }
+          }
+          &-info {
+            overflow: hidden;
+            padding: 22rpx 30rpx 30rpx 8rpx;
+            box-sizing:border-box; 
+          }
+          &-title, &-desc {
+            font-size: 28rpx;
+            line-height: 36rpx;
+          }
+          &-title, &-desc {
+            @mixin elip 2;
+          }
+          &-title-elip, &-desc-elip {
+            width: 100%;
+            @mixin ellipsis 1;
+          }
+          &-title {
+            color: #737373;
+            margin-bottom: 10rpx;
+          }
+          &-price {
+            padding: 0 20rpx 15rpx;
+          }
+        }
+      }
+    }
+  }
+}

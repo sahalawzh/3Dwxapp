@@ -1,0 +1,62 @@
+
+.page-printer-add {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  .container {
+    padding: 0 50rpx;
+    &-title {
+      color: #484848;
+      font-weight: 600;
+      margin-top: 176rpx;
+      text-align: center;
+    }
+    &-header {
+      color: #484848;
+      padding: 100rpx 18rpx 30rpx 24rpx;
+      border-bottom: 1rpx solid #979797;
+      .printer-icon {
+        width: 48rpx;
+        height: 48rpx;
+      }
+    }
+    &-priner {
+      padding: 30rpx 40rpx 60rpx;
+      &__icon {
+        width: 90rpx;
+        height: 92rpx;
+        background-color:#fff;
+        opacity:0.6;
+        &.active {
+          opacity:1;
+        }
+      }
+    }
+    &-control {
+      padding: 30rpx 0;
+      border-bottom: 1rpx solid #979797;
+      color: #4a4a4a;
+      &__placeholder {
+        color: #b0b0b0;
+        font-size: 28rpx;
+      }
+      &__input {
+        padding-left: 22rpx;
+      }
+    }
+    &-footer {
+      margin-top: 72rpx;
+      &__btn {
+        height: 80rpx;
+        line-height: 80rpx;
+        text-align: center;
+        color: #fff;
+        font-weight: 600;
+        background-color: #1360e1;
+        border-radius: 33rpx;
+      }
+    }
+  }
+}

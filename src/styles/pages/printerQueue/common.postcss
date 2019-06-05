@@ -1,0 +1,268 @@
+
+.page-printer-queue {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f2f7;
+  padding-bottom: 200rpx;
+  .printer-header {
+    height: 90rpx;
+    color: #373737;
+    padding: 0 42rpx;
+    .btn-complete {
+      position: relative;
+      &.has-complete::after {
+        content: '';
+        position: absolute;
+        right: -14rpx;
+        top: 0;
+        width: 14rpx;
+        height: 14rpx;
+        border-radius: 50%;
+        background-color: #e1146c;
+      }
+    }
+    .radio-box {
+      .radio {
+        margin-right: 20rpx;
+      }
+    }
+    .btn-delete {
+      width: 48rpx;
+      height: 48rpx;
+    }
+    &__time {
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      line-height:1;
+      position:relative;
+      .arrow-box {
+        position: relative;
+        width: 28rpx;
+        height: 28rpx;
+        .arrow{
+          position: absolute;
+          right: 0;
+          width: 0;
+          height: 0;
+          font-size: 0;
+          line-height: 0;
+          border-left: 8rpx solid transparent;
+          border-right: 8rpx solid transparent;
+        }
+        &__up {
+          top: 0;
+          border-bottom: 12rpx solid #d8d8d8;
+        }
+        &__down {
+          bottom: 0;
+          border-top: 12rpx solid #d8d8d8;
+        }
+        &__up.active {
+          border-bottom: 12rpx solid #898989;
+        }
+        &__down.active {
+          border-top: 12rpx solid #898989;
+        }
+      }
+    }
+  }
+  .printer-tip {
+    padding: 32rpx 10rpx 34rpx 60rpx;
+    color: #707070;
+  }
+  .printer-list {
+    position: relative;
+    margin-left: 12rpx;
+    margin-right: 12px;
+    border-radius: 8rpx;
+    background-color: #fff;
+    box-shadow: 0 2rpx 0.4 #000 inset;
+    &__card {
+      position: relative;
+      .slice-progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.2);
+        &__info {
+          position: absolute;
+          right: 20%;
+          top: 40%;
+          color: #1360e1;
+        }
+      }
+    }
+    &__search {
+      position: relative;
+      height: 60rpx;
+      line-height: 60rpx;
+      background-color: #ededed;
+      border-radius: 32rpx;
+      color: #9b9b9b;
+      padding-left: 30rpx;
+      width: 540rpx;
+      margin-right: 34rpx;
+      &::after {
+        content: '';
+        position: absolute;
+        right: 28rpx;
+        width: 0;
+        height: 0;
+        top: 23rpx;
+        border-left: 10rpx solid transparent;
+        border-right: 10rpx solid transparent;
+        border-top: 14rpx solid #d8d8d8;
+      }
+    }
+    &__title {
+      padding: 22rpx 30rpx 22rpx 40rpx;
+      color: #707070;
+      border-bottom: 1rpx solid #ccc;
+      .icon {
+        width: 36rpx;
+        height: 48rpx;
+        margin-left: 6rpx;
+      }
+    }
+    &__info {
+      position: relative;
+      padding: 40rpx 40rpx 50rpx ;
+      color: #010101;
+      &.active {
+        color: #1e55bc;
+      }
+      &.has-edit {
+        padding-left: 90rpx;
+        .radio-box {
+          position: absolute;
+          top: 60rpx;
+          left: 30rpx;
+        }
+      }
+      .printer-name {
+        position: relative;
+        .icon {
+          width: 48rpx;
+          height: 48rpx;
+          margin-left: 10rpx;
+        }
+        .btn_set {
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 32rpx;
+          height: 28rpx;
+          padding:8rpx 0 8rpx 16rpx;
+        }
+      }
+      .printer-time {
+        position: absolute;
+        right: 40rpx;
+        top: 46%;
+        color: #707070;
+      }
+      .printer-address {
+        margin-top: 16rpx;
+        .icon {
+          width: 34rpx;
+          height: 26rpx;
+          margin-right: 10rpx;
+        }
+      }
+      .printer-opertion {
+        position: absolute;
+        bottom: 30rpx;
+        right: 40rpx;
+        display: inline-flex;
+        align-items: center;
+        .status-img {
+          width: 62rpx;
+          height: 32rpx;
+          margin-left: 16rpx;
+          &__single {
+            width: 30rpx;
+            height: 30rpx;
+            margin-left: 16rpx;
+          }
+        }
+      }
+    }
+    &__progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 8rpx;
+      border-radius: 22rpx;
+      overflow: hidden;
+      .printer-progress {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .printer-content {
+    padding: 54rpx 52rpx 0;
+    color: #474747;
+    text-align: center;
+    &__module {
+      width: 100%;
+      height: 130rpx;
+      border-radius: 22rpx;
+      background-color: #b7f8f1;
+      color: #010101;
+      .icon {
+        width: 80rpx;
+        height: 50rpx;
+        margin-right: 10rpx;
+      }
+    }
+  }
+  .footer {
+    position: fixed;
+    bottom: 64rpx;
+    left: 52rpx;
+    right: 52rpx;
+    &-btn {
+      height: 72rpx;
+      line-height: 72rpx;
+      width: 100%;
+      border-radius: 30rpx;
+      color: #fff;
+      background-color: #1360e1;
+      text-align: center;
+    }
+  }
+  .queue-footer {
+    position: fixed;
+    bottom: 64rpx;
+    left: 52rpx;
+    right: 52rpx;
+    .queue-btn {
+      height: 72rpx;
+      line-height: 72rpx;
+      width: 100%;
+      border-radius: 30rpx;
+      color: #fff;
+      text-align: center;
+      width: 280rpx;
+    }
+    &__again {
+      background-color: #1360e1;
+    }
+    &__delete {
+      background-color: #e1146c;
+    }
+  }
+  .empty-data {
+    height: 300rpx;
+    text-align: center;
+    padding-top: 100rpx;
+  }
+}

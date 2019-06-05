@@ -1,0 +1,41 @@
+<template>
+  <view class="good-list">
+    <view class="cut-split"></view>
+    <view class="font-size--30 title">相关商品</view>
+    
+    <view class="products-layout">
+      <view class="mall-scroll-content">
+        <scroll-view 
+          class="mall-scroll"
+          scroll-x="true">
+          <navigator class="scroll-view-item" wx:for="{{relatedProducts}}" wx:key="item" url="/pages/detail/index?id={{item.id}}">
+            <view class="product-item">
+              <view class="product-item__img">
+                <image mode="aspectFill" src="{{item.image}}"></image>
+              </view>
+              <view class="product-item__info">
+                <view class="product-name font-size--32">
+                  <view class="elip">{{item.title}}</view>
+                </view>
+                <view class="product-price font-size--24 color-price">￥{{item.recommendedPrice}}</view>
+              </view>
+            </view>
+          </navigator>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+  
+</template>
+<script>
+import wepy from 'wepy'
+export default class Recommend extends wepy.component {
+  props = {
+    relatedProducts: [Array]
+  }
+  data = {
+  }
+  methods = {
+  }
+}
+</script>

@@ -1,0 +1,75 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-success">
+    <view class="success-header">
+      <view class="success-header__sign wow-flex is-align-middle">
+        <view class="font-size--40 text">交易成功</view>
+      </view>
+      <view class="font-size--30 success-header__price">来评价一下你的宝贝吧~</view>
+      <view class="success-header__btn wow-flex">
+        <navigator url="/pages/index/mall" open-type="switchTab" class="success-btn font-size--26">返回首页</navigator>
+        <navigator url="/pages/orderDetail/index?oid={{oid}}" class="success-btn font-size--26">发表评价</navigator>
+      </view>
+    </view>
+    <view class="success-content">
+      <recommend :lists.sync="lists"></recommend>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Recommend from './modules/recommend'
+  import goodsApis from '../../api/goods'
+  export default class Transaction extends wepy.page {
+    config = {
+      navigationBarTitleText: '确认收货'
+    }
+    components = {
+      recommend: Recommend
+    }
+    async getRecommend () {
+      try {
+        let { start, limits, lists } = this
+        const opts = {
+          start,
+          limits
+        }
+        let { data: recommendedData } = await goodsApis.recommended(opts)
+        let data = recommendedData.data
+        if (start === 0) {
+          lists = []
+        }
+        this.lists = lists.concat(data)
+        if (data.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start++
+        }
+        console.log(this.lists)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    onLoad () {
+      this.getRecommend()
+    }
+    data = {
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false,
+      oid: '',
+      totalFee: ''
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/success/common.postcss';
+</style>

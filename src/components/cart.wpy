@@ -1,0 +1,43 @@
+<template>
+  <view>
+    <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-icon open-type-btn">
+      <image src="../../images/common/btn_cart_white.png" mode="aspectFill"></image>
+      <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>    </navigator>
+    <button wx:else data-url="/pages/cart/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="cart-icon open-type-btn">
+      <image src="../../images/common/btn_cart_white.png" mode="aspectFill"></image>
+      <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
+    </button>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '../mixins/common'
+export default class Cart extends wepy.component {
+  props = {
+    userId: [String, Number],
+    cartNum: [String, Number]
+  }
+  mixins = [CommonMixin]
+}
+</script>
+
+<style lang='postcss'>
+  .cart-icon {
+    position: relative;
+    width: 44rpx;
+    height: 44rpx;
+    image {
+      width: 100%;
+      height: 100%;
+    }
+    &__sign {
+      position: absolute;
+      top: 0;
+      left: 32rpx;
+      width: 12rpx;
+      height: 12rpx;
+      border-radius: 50%;
+      background-color: #e1146c;
+    }
+  }
+</style>

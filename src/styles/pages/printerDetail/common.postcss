@@ -1,0 +1,161 @@
+
+.page-printer-detail {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f2f7;
+  padding-bottom: 200rpx;
+  .printer-header {
+    position: relative;
+    padding: 36rpx 0 32rpx 56rpx;
+    background-color: #fff;
+    &__img {
+      width: 126rpx;
+      height: 130rpx;
+      margin-right: 26rpx;
+    }
+    &__info {
+      color: #707070;
+      padding-top: 4rpx;
+      .item {
+        margin-top: 10rpx;
+      }
+      .exponent {
+        color: #010101;
+        margin-left: 16rpx;
+      }
+    }
+    &__status {
+      position: absolute;
+      right: 44rpx;
+      top: 80rpx;
+      width: 58rpx;
+      height: 48rpx;
+    }
+    &__control {
+      position: absolute;
+      right: 54rpx;
+      .status-img__single {
+        width: 30rpx;
+        height: 30rpx;
+        margin-right: 12rpx;
+      }
+      .btn_set {
+        padding: 16rpx 0 16rpx 18rpx;
+        width: 32rpx;
+        height: 8rpx;
+      }
+    }
+  }
+  .printer-tip {
+    padding: 32rpx 10rpx 34rpx 60rpx;
+    color: #707070;
+  }
+  .printer-list {
+    position: relative;
+    margin-left: 16rpx;
+    margin-right: 16rpx;
+    border-radius: 8rpx;
+    background-color: #fff;
+    box-shadow: 0 2rpx 0.4 #000 inset;
+    &__card {
+      position: relative;
+    }
+    &__title {
+      padding: 18rpx 30rpx 16rpx;
+      color: #707070;
+      border-bottom: 1rpx solid #ccc;
+      .icon {
+        width: 36rpx;
+        height: 48rpx;
+        margin-left: 6rpx;
+      }
+    }
+    &__info {
+      position: relative;
+      padding: 40rpx 34rpx 50rpx 40rpx;
+      color: #010101;
+      .printer-name {
+        .icon {
+          width: 48rpx;
+          height: 48rpx;
+          margin-left: 10rpx;
+        }
+      }
+      .printer-address {
+        margin-top: 16rpx;
+        .icon {
+          width: 34rpx;
+          height: 26rpx;
+          margin-right: 10rpx;
+        }
+      }
+      .printer-opertion {
+        position: absolute;
+        top: 60rpx;
+        right: 34rpx;
+        .status-img {
+          width: 62rpx;
+          height: 32rpx;
+          &__single {
+            width: 30rpx;
+            height: 30rpx;
+          }
+        }
+        .btn_set {
+          width: 32rpx;
+          height: 8rpx;
+          padding: 20rpx 0;
+          margin-left: 40rpx;
+        }
+      }
+    }
+    &__progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 8rpx;
+      border-radius: 22rpx;
+      overflow: hidden;
+      .printer-progress {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .printer-content {
+    padding: 54rpx 52rpx 0;
+    color: #acecec;
+    text-align: center;
+    &__module {
+      width: 100%;
+      height: 130rpx;
+      border-radius: 22rpx;
+      background-color: #b7f8f1;
+      color: #010101;
+      .icon {
+        width: 80rpx;
+        height: 50rpx;
+        margin-right: 10rpx;
+      }
+    }
+  }
+  .footer {
+    position: fixed;
+    bottom: 64rpx;
+    left: 52rpx;
+    right: 52rpx;
+    &-btn {
+      height: 72rpx;
+      line-height: 72rpx;
+      width: 100%;
+      border-radius: 30rpx;
+      color: #fff;
+      background-color: #1360e1;
+      text-align: center;
+    }
+  }
+}

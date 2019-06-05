@@ -1,0 +1,49 @@
+<template>
+  <view class="good-list">
+    <view class="products-layout">
+      <view class="products-layout__body">
+        <block wx:for="{{productList}}" wx:key="id">
+          <navigator hover-class="none" class="products-list__item" url="/pages/detail/index?id={{item.id}}">
+            <view class="wow-radio radio-box font-size--26" wx:if="{{isEdit}}" @tap.stop="handleToChecked({{item}}, {{index}})">
+              <lebel class="radio">
+                <image hidden='{{!item.checked}}' class="ico_selected" src='../../../images/common/ico_selected.png'></image>
+              </lebel>
+            </view>
+            <view class="product-box">
+              <view class="product-image">
+                <image mode="aspectFill" lazy-load="{{true}}" class="product-image-cont" src="{{item.image}}"/>
+              </view>
+              <view class="product-info">
+                <view class="product-info__box">
+                  <view class="product-title font-size--32">
+                    <view class="product-title-elip">{{item.title}}</view>
+                  </view>
+                  <view class="font-size--26 product--price color-price">￥{{item.recommendedPrice}}</view>
+                </view>
+              </view>
+            </view>
+          </navigator>
+        </block>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Product extends wepy.component {
+  props = {
+    productList: {
+      type: [Array],
+      twoWay: true
+    },
+    isEdit: Boolean
+  }
+  data = {
+  }
+  methods = {
+    handleToChecked (item, index) {
+      this.$emit('handleCheckedRadio', item, index)
+    }
+  }
+}
+</script>

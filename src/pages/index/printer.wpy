@@ -1,0 +1,364 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printer">
+    <view class="printer-items" wx:if="{{!isDefault}}">
+
+      <view class="wow-flex is-align-middle is-justify-space-between printer-items__header">
+        <view class="font-size--28 title">打印机<text class="title-label">{{playSum}}</text>/{{printerList.length}}台</view>
+        <navigator url="/pages/printerQueue/index" class="wow-flex is-align-middle queue">
+          <view class="font-size--24">打印队列</view>
+          <image class="icon" src="../../images/printer/ico_playlist_default.png" mode="aspectFill"></image>
+          <view class="font-size--24">{{num}}</view>
+        </navigator>
+      </view>
+
+      <view class="printer-items__card" wx:for="{{printerList}}" wx:key="index" @tap="handleToDetail({{item}})">
+        <view class="printer-items__item wow-flex">
+          <image class="printer-img" src="{{item.printerColor.colorImage}}" mode="aspectFill"></image>
+          <view class="printer-info">
+            <view class="wow-flex printer-info__status is-align-middle is-justify-space-between">
+              <view class="wow-flex is-align-middle">
+                <view class="name font-size--32">{{item.printerAlias}}</view>
+                <image class="status-img{{item.printerState === 'Printing' || item.printerState === 'Paused' ? '' : '__single'}}" src="../../images/printer/ico_print_{{printerSate[item.printerState].status}}.png" @tap.stop="handleControlPrinter({{item}}, {{index}})" mode="aspectFill"></image>
+              </view>
+              <image class="btn_set" wx:if="{{item.printerState === 'Operational' || item.printerState === 'Offline'}}" src="../../images/printer/btn_set.png" @tap.stop="handleToSetPrinter({{item.printerId}}, {{item.printerSerialNumber}}, {{item.printerAlias}})" mode="aspectFill"></image>
+            </view>
+            <view class="printer-info__tip font-size--24" style="color: {{item.printerStateDesc.showColor}}">{{item.printerStateDesc.showText}}</view>
+            <view class="printer-info__record wow-flex is-align-middle">
+              <view class="font-size--24">{{item.queueTotal}}</view>
+              <image class="icon" src="../../images/printer/ico_playlist_{{printerSate[item.printerState].record}}.png" mode="aspectFill"></image>
+            </view>
+          </view>
+        </view>
+        <view class="printer-items__progress">
+          <progress
+            class="printer-progress"
+            stroke-width='10'
+            backgroundColor="{{printerSate[item.printerState].color}}"
+            activeColor="{{printerSate[item.printerState].activeColor}}"
+            percent='{{item.printerProcessCompletion || 0}}'
+          ></progress>
+        </view>
+      </view>
+
+    </view>
+
+    <block wx:else>
+      <navigator url="/pages/detail/index?id={{bannerAdv.spuId}}" class="printer-advertising">
+        <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
+      </navigator>
+    </block>
+
+    <view class="printer-content">
+      <navigator hover-class="none" url="/pages/videoList/index?topicId={{topicInfo.id}}&topicName={{topicInfo.topic}}" class="wow-flex is-align-middle title">
+        <image class="icon" src="../../images/printer/ico_Course.png" mode="aspectFill"></image>
+        <view class="font-size--24">{{ topicInfo.topic }}</view>
+      </navigator>
+      
+      <view wx:if="{{userId}}" class="printer-content__add" @tap="handleToScan">
+        <image class="icon-help" src="../../images/printer/btn_help.png" mode="aspectFill"></image>
+        <image class="icon" src="../../images/printer/btn_printlist_add_printer.png" mode="aspectFill"></image>
+        <view class="font-size--28">添加打印机</view>
+      </view>
+
+      <button wx:else data-type="scan" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="printer-content__add open-type-btn">
+        <image class="icon-help" src="../../images/printer/btn_help.png" mode="aspectFill"></image>
+        <image class="icon" src="../../images/printer/btn_printlist_add_printer.png" mode="aspectFill"></image>
+        <view class="font-size--28">添加打印机</view>
+      </button>
+
+      <view wx:if="{{userId}}" class="printer-content__module wow-flex is-align-middle is-justify-center" @tap.stop="handleToModel">
+        <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
+        <view class="font-size--36">模型库</view>
+      </view>
+
+      <button wx:else data-url="/pages/model/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="printer-content__module open-type-btn wow-flex is-align-middle is-justify-center">
+        <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
+        <view class="font-size--36">模型库</view>
+      </button>
+    
+      <view class="printer-content__videos">
+        <view class="title wow-flex is-justify-space-between font-size--26">
+          <view :class="{'active': isShowPrinter}" @tap.stop="handleMoreGoods">以下好东西都可以自己打印的哦</view>
+          <view :class="{'active': !isShowPrinter}" @tap.stop="handleMoreVideo">相关视频</view>
+        </view>
+
+        <recommend wx:if="{{isShowPrinter}}" :printerGoods.sync="printerGoods"></recommend>
+
+        <video wx:else :videoList.sync="videoList"></video>
+      </view>
+    </view>
+
+    <custom-tabbar tabbar="{{tabbar}}"></custom-tabbar>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  import goodsApis from '../../api/goods'
+  import videoApis from '../../api/video'
+  import wxutils from '../../utils/wxutils'
+  import param from '../../utils/param'
+  import CommonMixin from '../../mixins/common'
+  import advertisementApis from '../../api/advertisement'
+  import Recommend from './modules/recommend'
+  import Video from './modules/video'
+  export default class Printer extends wepy.page {
+    config = {
+      navigationBarTitleText: '打印机',
+      enablePullDownRefresh: true,
+      usingComponents: {
+        'custom-tabbar': '../../custom-tab-bar/index'
+      }
+    }
+    mixins = [CommonMixin]
+    components = {
+      recommend: Recommend,
+      video: Video
+    }
+    data = {
+      isFirst: true,
+      tabbar: {},
+      printerList: [],
+      printerSate: {
+        'Operational': {
+          'status': 'default',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Printing': {
+          'status': 'playing',
+          'activeColor': '#1e55bc',
+          'color': '#cbe2ff',
+          'record': 'playing'
+        },
+        'Offline': {
+          'status': 'cannotplay',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Paused': {
+          'status': 'pause',
+          'activeColor': '#D29922',
+          'color': '#f6f9e5',
+          'record': 'default'
+        }
+      },
+      userId: '',
+      bannerAdv: {},
+      printerGoods: [],
+      videoList: [],
+      isShowPrinter: true,
+      topicInfo: '',
+      num: ''
+    }
+    methods = {
+      handleMoreGoods () {
+        this.listPrintSpu()
+      },
+      async handleMoreVideo () {
+        try {
+          const { data } = await videoApis.listVideoPrint()
+          this.videoList = data
+          this.isShowPrinter = false
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+        }
+      },
+      async handleControlPrinter (item, index) {
+        try {
+          const { printerId, printerState } = item
+          if (printerState === 'Operational' || printerState === 'Offline') {
+            return
+          }
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          let opts = {
+            printerId,
+            userId: this.userId,
+            command: 'pause'
+          }
+          await printerApis.controlPrinterWork(opts)
+          this.getPrinterList()
+          this.$apply()
+          wx.hideLoading()
+        } catch (error) {
+          wx.hideLoading()
+          console.log(error)
+        }
+      },
+      handleToSetPrinter (printerId, printerSerialNumber, printerAlias) {
+        wxutils.backOrNavigate('/pages/printerSet/index?printerId=' + printerId + '&printerSerialNumber=' + printerSerialNumber + '&title=' + printerAlias)
+      },
+      handleToModel () {
+        wxutils.backOrNavigate('/pages/model/index')
+      },
+      handleToDetail (item) {
+        const { printerId, printerAlias, printerTypeName } = item
+        const opts = {
+          printerId,
+          printerAlias,
+          printerTypeName
+        }
+        wxutils.backOrNavigate('/pages/printerDetail/index?' + param(opts))
+      },
+      handleToScan () {
+        this.getScanCode()
+      }
+    }
+    async getCountQueue () {
+      try {
+        const { userId } = this
+        const opts = {
+          userId,
+          isDelete: 'N',
+          status: '0,1,2'
+        }
+        const { data } = await printerApis.getCountQueue(opts)
+        this.num = data
+        this.$apply()
+      } catch (error) {
+      }
+    }
+    getScanCode () {
+      // 允许从相机和相册扫码
+      wx.scanCode({
+        success(res) {
+          const { errMsg, result } = res
+          if (errMsg === 'scanCode:ok') {
+            const startIndex = result.indexOf('=') + 1
+            const endIndex = result.length
+            const val = result.substring(startIndex, endIndex)
+            wxutils.backOrNavigate('/pages/printerAdd/index?id=' + val)
+          }
+        },
+        fail (error) {
+          console.log(error)
+        }
+      })
+    }
+    handleScan (e) {
+      this.userId = e
+      wx.nextTick(() => {
+        this.getScanCode()
+      })
+    }
+    computed = {
+      isDefault () {
+        if (!this.userId) {
+          return true
+        }
+        if (this.printerList.length < 1 && this.userId) {
+          return true
+        }
+        return false
+      },
+      playSum () {
+        let sum = 0
+        this.printerList.forEach(item => {
+          if (item.printerState === 'Printing') {
+            sum += 1
+          }
+        })
+        return sum
+      }
+    }
+    async getAdvertisement (type) { // 广告位接口
+      try {
+        const { data: advData } = await advertisementApis.queryAdvertisements()
+        if (type === 'noUserId') {
+          this.isFirst = false
+        }
+        this.bannerAdv = advData.filter(item => item.advertisementType === 0)[0]
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async listPrintSpu () { // 打印机商品
+      try {
+        const { data } = await goodsApis.listPrintSpu()
+        this.printerGoods = data
+        this.isShowPrinter = true
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getPrinterList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let opts = {}
+        if (wepy.$instance.globalData.userId) {
+          opts.userId = wepy.$instance.globalData.userId
+        } else {
+          wx.hideLoading()
+          return this.getAdvertisement('noUserId')
+        }
+        const { data } = await printerApis.listModels(opts)
+        this.isFirst = false
+        this.printerList = data
+        if (data.length < 1) { // 广告位接口
+          this.getAdvertisement()
+        }
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    onPullDownRefresh () {
+      if (!this.userId) {
+        wx.stopPullDownRefresh()
+        return
+      }
+      this.getPrinterList()
+      wx.nextTick(() => {
+        wx.stopPullDownRefresh()
+      })
+    }
+    async getTopic () {
+      try {
+        const { data: topicData } = await goodsApis.queryTopic()
+        this.topicInfo = topicData.data[0]
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async onLoad () {
+      // 隐藏系统tabbar
+      wx.hideTabBar()
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+      wepy.$instance.editTabbar()
+      this.getPrinterList()
+      this.listPrintSpu()
+      this.getTopic()
+      this.getCountQueue()
+      wepy.$instance.globalData.subpub.on('scan', this.handleScan, this)
+      wx.hideShareMenu()
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        if (!this.isFirst) {
+          this.getPrinterList()
+        }
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printer/common.postcss';
+</style>

@@ -1,0 +1,78 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-index">
+
+    <videoList :lists.sync="lists"></videoList>
+
+    <loading wx:if="{{hasMoreData}}"></loading>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import VideoList from '../../components/videoList'
+  import Loading from '../../components/loading'
+  import videoApis from '../../api/video'
+  export default class VideoItem extends wepy.page {
+    components = {
+      videoList: VideoList,
+      loading: Loading
+    }
+    data = {
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false, // 默认不用拉数据
+      bannerAdv: {}
+    }
+    async getVideoList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { start, limits, lists, topicId } = this
+        const opts = {
+          start,
+          limits,
+          id: topicId
+        }
+        let { data: videoData } = await videoApis.listVideoByTopicId(opts)
+        if (start === 1) {
+          lists = []
+        }
+        this.lists = lists.concat(videoData)
+        if (videoData.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start ++
+        }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async onLoad ({topicId, topicName}) {
+      this.topicId = topicId
+      wx.setNavigationBarTitle({
+        title: decodeURIComponent(topicName)
+      })
+      this.getVideoList()
+    }
+    methods = {
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/index/common.postcss';
+</style>

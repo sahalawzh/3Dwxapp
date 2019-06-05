@@ -1,0 +1,229 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printer-queue">
+    
+    <block wx:if="{{queueList.length}}">
+      <view class="printer-header font-size--28 wow-flex is-align-middle is-justify-space-between">
+        <view class="wow-flex is-align-middle" @tap.stop="handleCheckAll" wx:if="{{editStatus}}">
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image hidden='{{!isCheckAll}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>全选
+          </view>
+        </view>
+        <view class="printer-header__time" wx:else>
+          <text class="label">{{status === '4' ? '打印时间' : '删除时间'}}</text>
+          <text class="arrow-box">
+            <text class="arrow-box__up arrow"></text>
+            <text class="arrow-box__down arrow"></text>
+          </text>
+        </view>
+        <view @tap.stop="handleToEdit">{{ editStatus ? '完成' : '管理' }}</view>
+      </view>
+
+      <view class="printer-list">
+
+        <view class="printer-list__card" wx:for="{{queueList}}" wx:key="index">
+          <view class="printer-list__item">
+            <view class="printer-list__info" :class="{'has-edit': editStatus}">
+
+              <view class="wow-radio radio-box font-size--26" wx:if="{{editStatus}}" @tap.stop="handleCheckSingle({{item}}, {{index}})">
+                <lebel class="radio">
+                  <image hidden='{{!item.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                </lebel>
+              </view>
+
+              <view class="printer-name wow-flex is-align-middle">
+                <view class="font-size--28">{{item.fileInfo.name}}</view>
+                <image class="icon" src="../../images/printer/btn_preview.png" mode="aspectFill"></image>
+              </view>
+              <view class="printer-address wow-flex is-align-middle">
+                <image class="icon" src="../../images/printer/ico_File.png" mode="aspectFill"></image>
+                <view class="font-size--24">{{item.fileInfo.origin}}</view>
+              </view>
+              <view class="printer-time font-size--28">{{item.updateTime}}</view>
+            </view>
+            <view class="printer-list__progress">
+              <progress
+                class="printer-progress"
+                stroke-width='10'
+                backgroundColor="{{printerAllSate[printerState].color}}"
+                activeColor="{{printerAllSate[printerState].activeColor}}"
+                percent='{{item.processInfo.completion}}'></progress>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="queue-footer wow-flex is-align-middle is-justify-space-between" wx:if="{{editStatus}}">
+        <view class="queue-btn queue-footer__again font-size--28" wx:if="{{false}}" @tap.stop="handleAgainPrinter">再次打印</view>
+        <view class="queue-btn queue-footer__delete font-size--28" @tap.stop="handleDelQueue">删除</view>
+      </view>
+    </block>
+
+    <div class="font-size--28 empty-data" wx:else>{{status === '4' ? '已完成队列暂无数据' : '回收站暂无数据'}}</div>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  export default class PrinterQueueComplete extends wepy.page {
+    config = {
+      navigationBarTitleText: ''
+    }
+    data = {
+      printerId: '',
+      queueList: [],
+      printerAllSate: {
+        'Operational': {
+          'status': 'default',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'slicing': {
+          'status': 'playing',
+          'activeColor': '#D29922',
+          'color': '#f6f9e5',
+          'record': 'playing'
+        },
+        'Printing': {
+          'status': 'playing',
+          'activeColor': '#1e55bc',
+          'color': '#cbe2ff',
+          'record': 'playing'
+        },
+        'Offline': {
+          'status': 'cannotplay',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Paused': {
+          'status': 'pause',
+          'activeColor': '#D29922',
+          'color': '#f6f9e5',
+          'record': 'default'
+        }
+      },
+      printerState: 'Offline',
+      userId: '',
+      editStatus: false,
+      isCheckAll: false,
+      status: '',
+      queueIds: []
+    }
+    computed = {
+      isCheckRadio () {
+        return this.queueList.some(item => item.checked)
+      }
+    }
+    methods = {
+      handleAgainPrinter () {
+        wx.showToast({
+          title: '功能还未开发',
+          icon: 'none'
+        })
+      },
+      handleDelQueue () {
+        if (!this.isCheckRadio) {
+          wx.showToast({
+            title: '还没勾选打印模型',
+            icon: 'none'
+          })
+          return
+        }
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '是否确定删除？',
+          success(res) {
+            if (res.confirm) {
+              that.handleDelModal()
+            }
+          }
+        })
+      },
+      handleToEdit () {
+        this.editStatus = !this.editStatus
+      },
+      handleCheckSingle (item, index) {
+        this.queueList[index].checked = !item.checked
+        this.isCheckAll = this.queueList.every(item => item.checked)
+        let queueIds = []
+        this.queueList.forEach(item => {
+          if (item.checked) {
+            queueIds.push(item.id)
+          }
+        })
+        this.queueIds = [...new Set(queueIds)]
+      },
+      handleCheckAll () {
+        this.isCheckAll = !this.isCheckAll
+        let queueIds = []
+        for (let i = 0; i < this.queueList.length; i++) {
+          this.queueList[i].checked = this.isCheckAll
+          if (this.isCheckAll) {
+            queueIds.push(this.queueList[i].id)
+          }
+        }
+        this.queueIds = [...new Set(queueIds)]
+        console.log(this.queueIds.join(','))
+      }
+    }
+    async handleDelModal () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { userId, queueIds } = this
+        const opts = {
+          userId,
+          ids: queueIds.join(','),
+          isSoft: 'N'
+        }
+        await printerApis.deleteQueue(opts)
+        this.printerQueueComplete()
+        this.apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    async printerQueueComplete () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { userId, status } = this
+        const opts = {
+          userId,
+          status
+        }
+        const { data } = await printerApis.listMyQueues(opts)
+        data.forEach(element => {
+          element.checked = false
+        })
+        this.queueList = data
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    onLoad ({status}) {
+      wx.setNavigationBarTitle({
+        title: status === '4' ? '已完成打印' : '回收站'
+      })
+      this.userId = wepy.$instance.globalData.userId
+      this.status = status
+      this.printerQueueComplete()
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerQueue/common.postcss';
+</style>

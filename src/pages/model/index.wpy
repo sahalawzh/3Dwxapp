@@ -1,0 +1,102 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-model">
+    <view class="scroll-wrapper">
+      <scroll-view 
+        class="scroll-content"
+        scroll-into-view="{{toView}}"
+        scroll-x="true">
+        <view class="scroll-view-item" @tap.stop="handleToList({{0}}, {{0}})" >
+          <view class="scroll-view-text font-size--28" :class="{'scroll-view-active': activeIndex === 0}">全部</view>
+        </view>
+        <view class="scroll-view-item" wx:for="{{list}}" wx:key="item" @tap.stop="handleToList({{item}}, {{index + 1}})">
+          <view class="scroll-view-text font-size--28" :class="{'scroll-view-active': activeIndex === index + 1}">{{item.name}}</view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="good-list">
+      <view class="products-layout">
+        <view class="products-layout__body">
+          <block wx:for="{{list}}" wx:key="index">
+            <view class="products-list__item" @tap.stop="handleToList({{item}}, {{index + 1}})">
+              <view class="product-box">
+                <view class="product-image">
+                  <image mode="aspectFill" lazy-load="{{true}}" class="product-image-cont" src="{{item.smallImage}}"/>
+                </view>
+                <view class="product-info">
+                  <view class="product-info__box">
+                    <view class="product-title font-size--28">
+                      {{item.name}}
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import modelApis from '../../api/model'
+  import wxutils from '../../utils/wxutils'
+  import param from '../../utils/param'
+  export default class VideoDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: '模型库'
+    }
+    data = {
+      isFist: true,
+      activeIndex: 0,
+      toView: '',
+      list: [],
+      firstModelTypeId: '',
+      secondModelTypeId: ''
+    }
+    methods = {
+      handleToList (item, index) {
+        if (index === 0) { // 全部
+          this.getModelList()
+          return
+        }
+        if (!item.children.length) { // 第三级
+          const data = {
+            firstModelTypeId: this.firstModelTypeId,
+            secondModelTypeId: item.id,
+            name: item.name
+          }
+          wxutils.backOrNavigate('/pages/modelList/index?' + param(data))
+        }
+        if (item.id === this.list[index - 1].id) { // 第二级
+          this.firstModelTypeId = item.id
+          this.list = this.list[index - 1].children
+          this.activeIndex = 0
+        }
+      }
+    }
+    async getModelList () {
+      const res = await modelApis.listModelTypes()
+      this.list = res
+      this.isFist = false
+      this.$apply()
+    }
+    onLoad () {
+      this.getModelList()
+    }
+
+    onHide () {
+    }
+    onShow () {
+      if (!this.isFist) {
+        this.getModelList()
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/model/common.postcss';
+</style>

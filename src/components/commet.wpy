@@ -1,0 +1,213 @@
+<template>
+  <!-- 评论 -->
+  <view class="commet-wrap">
+    <view class="commet-box" wx:if="{{commetList.length}}">
+      <view class="title">{{commetTotal}}条评论</view>
+      <view class="commet-items">
+        <view class="wow-flex commet-items_item" wx:for="{{commetList}}" wx:key="item">
+          <image class="head" src="{{item.smallAvator}}" mode="aspectFill"></image>
+          <view class="content">
+            <view class="name">{{item.nickname}}</view>
+            <view class="time">{{item.createTime}}</view>
+            <view class="message">{{item.content}}</view>
+          </view>
+        </view>
+        <!-- <view class="wow-flex commet-items_item">
+          <image class="head" src="../images/common/ico_Userhead_small.png" mode="aspectFill"></image>
+          <view class="content">
+            <view class="name">测试</view>
+            <view class="time">2天前</view>
+            <view class="message">测试内容测试内容测试内容测试内容测试内容测试内容测试内容测试内容测试内容测试内容</view>
+            <view class="reply-message">
+              <view class="reply-message__info">测试回复内容测试回复内容测试回复内容测试回复内容</view>
+            </view>
+          </view>
+        </view> -->
+      </view>
+    </view>
+
+    <view class="commet-empty" wx:else>
+      <image class="icon" src="../images/common/ico_comment_empty.png" mode="aspectFill"></image>
+      <view class="tip font-size--30">暂时还没有评价，快来做第一个吧~</view>
+    </view>
+
+    <view class="wow-flex commet-wrap__apply is-align-middle" wx:if="{{lastpage !== 'detail' && userId}}">
+      <view class="commet-wrap__apply_input">
+        <input
+          bindblur="handleGetInfo"
+          class="font-size--28"
+          placeholder-class="font-size--28"
+          value="{{sendVal}}"
+          placeholder="写评论..."/>
+      </view>
+      <button wx:if="{{userInfo}}" class="open-type-btn send-btn" @tap.stop="handleToSend">
+        发送
+      </button>
+      <button wx:else class="open-type-btn send-btn" data-target="commet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">
+        发送
+      </button>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '../mixins/common'
+export default class Commet extends wepy.component {
+  props={
+    lastpage: String,
+    userId: {
+      type: [String, Number],
+      twoWay: true
+    },
+    commetList: [Array],
+    commetTotal: [String, Number]
+  }
+  data = {
+    sendVal: null
+  }
+  mixins = [CommonMixin]
+  events = {
+    handleClearInput (val) {
+      this.sendVal = ''
+      this.$apply()
+    }
+  }
+  methods = {
+    handleToSend () {
+      this.$emit('handleSendInfo')
+    },
+    handleGetInfo (e) {
+      const { value } = e.detail
+      this.$emit('handleGetInfo', value)
+    }
+  }
+}
+</script>
+
+<style lang='postcss'>
+  .commet-wrap {
+    padding-top: 12rpx;
+    .title {
+      color: #737373;
+      font-size: 32rpx;
+      height: 100rpx;
+      line-height: 100rpx;
+      padding-left: 46rpx;
+    }
+    .commet-items {
+      padding-left: 46rpx;
+      padding-right: 42rpx;
+      &_item {
+        position: relative;
+        padding-top: 32rpx;
+        padding-bottom: 48rpx;
+        &::after{
+          position: absolute;
+          content: "";
+          height: 1rpx;
+          width: 100%;
+          left: 0;
+          top: 0;
+          transform: scaleY(0.5);
+          background-color: #979797;
+        }
+        .head {
+          width: 84rpx;
+          height: 84rpx;
+          border-radius: 50%;
+          background-color: royalblue;
+          margin-right: 24rpx;
+        }
+        .content {
+          position: relative;
+          font-size: 28rpx;
+          flex: 1;
+          .name {
+            font-size: 32rpx;
+            color: #4a4a4a;
+          }
+          .time {
+            font-size: 24rpx;
+            color: #9e9e9e;
+            margin-top: 10rpx;
+          }
+          .message {
+            color: #727272;
+            margin-top: 28rpx;
+          }
+          .reply-message {
+            position: relative;
+            background-color: #f4f4f4;
+            border-radius: 14rpx;
+            padding: 40rpx 30rpx;
+            margin-top: 24rpx;
+            &__info {
+              &::before{
+                position: absolute;
+                content: "";
+                width: 0;
+                height: 0;
+                left: 30rpx;
+                top: 0;
+                border-width: 0 20rpx 20rpx;
+                border-style: solid;
+                border-color: transparent transparent #f4f4f4;/*透明 透明  灰*/
+              }
+              &:after{
+                position: absolute;
+                content: "";
+                width: 0;
+                height: 0;
+                left: 30rpx;
+                top: -14rpx;
+                border-width: 0 14rpx 14rpx;
+                border-style: solid;
+                border-color: transparent transparent #f4f4f4;/*透明 透明  灰*/
+              }
+            }
+          }
+        }
+      }
+    }
+    &__apply {
+      position:fixed;
+      left:0;
+      bottom:0;
+      width:100%;
+      box-sizing:border-box;
+      padding: 36rpx 42rpx 36rpx 46rpx;
+      background-color: #e0e0e0; 
+      &_input {
+        flex: 1;
+        input {
+          background-color: #fff;
+          border-radius: 6rpx;
+          padding: 4rpx 10rpx 4rpx 20rpx;
+          height: 100%;
+        }
+      }
+      .send-btn {
+        width: 128rpx;
+        height: 60rpx;
+        line-height: 60rpx;
+        margin-left: 30rpx;
+        background-color: #145ee1;
+        color: #fff;
+        font-size: 30rpx;
+      }
+    }
+    .commet-empty {
+      padding-top: 122rpx;
+      padding-bottom: 100rpx;
+      text-align: center;
+      .icon {
+        width: 196rpx;
+        height: 196rpx;
+      }
+      .tip {
+        color: #9a9a9a;
+        margin-top: 54rpx;
+      }
+    }
+  }
+</style>

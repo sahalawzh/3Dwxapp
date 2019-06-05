@@ -1,0 +1,97 @@
+<template lang="wxml" miniapp="wepy">
+  <view>
+    <view style="width:0px;height:0px;overflow:hidden;opacity:0;position:relative">
+      <canvas canvas-id="posterCanvas" style="width: 750px; height: 720px;"></canvas>
+    </view> 
+    <view class="defaultPoster">
+      <image src="{{poster}}" mode="widthFix"  class="posterimg"/>
+      <view class="jfk-flex is-justify-space-between buttonwrap">
+        <button type="primary" class="font-size--32 savePoster" @tap="handleSavePhoto" wx:if="{{!refuseAuthorize}}">保存图片</button>        
+        <button type="primary" class="font-size--32 savePoster" @tap="handleSavePhoto" open-type="openSetting" wx:else>保存图片</button>        
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import handleCanvasPoster from '../../../utils/canvas.js'
+  export default class Poster extends wepy.component {
+    props = {
+      posterInfo: Object,
+      id: [Number, String]
+    }
+
+    data = {
+      canSavePhoto: false,
+      refuseAuthorize: false,
+      poster: ''
+    }
+    // 保存相册到本地
+    savePhoto () {
+      wx.saveImageToPhotosAlbum({
+        filePath: this.poster,
+        success: (res) => {
+          console.log(res)
+          wx.showToast({
+            title: '保存成功',
+            icon: 'success',
+            duration: 2000
+          })
+        }
+      })
+    }
+    methods = {
+      handleSavePhoto () {
+        let that = this
+        if (!this.canSavePhoto) {
+          wx.authorize({
+            scope: 'scope.writePhotosAlbum',
+            success: function () {
+              that.savePhoto()
+            },
+            fail: function () {
+              that.refuseAuthorize = true
+              that.$apply()
+            }
+          })
+        } else {
+          that.savePhoto()
+        }
+      }
+    }
+    events = {
+      'canvasStart': () => {
+        wx.showLoading({
+          title: '生成中',
+          mask: true
+        })
+        let ctx = wx.createCanvasContext('posterCanvas')
+        let that = this
+        this.posterInfo.price = '22'
+        handleCanvasPoster(ctx, this.posterInfo, function (res) {
+          wx.getImageInfo({
+            src: res,
+            success: function (success) {
+              console.log(success)
+              let ctx = wx.createCanvasContext('posterCanvas')
+              ctx.clearRect(0, 0, 482, 855)
+              ctx.draw()
+              that.poster = success.path
+              wepy.$instance.globalData.posterProduct = that.good
+              wepy.$instance.globalData.miniCode = that.miniCode
+              that.$apply()
+              wx.hideLoading()
+            }
+          })
+        }, this.posterInfo.picture)
+      }
+    }
+    onLoad () {
+    }
+  }
+</script>
+<style lang="postcss">
+.posterimg {
+  width: 100%;
+}
+</style>

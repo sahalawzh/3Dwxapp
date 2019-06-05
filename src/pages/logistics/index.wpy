@@ -1,0 +1,104 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-logistics">
+    <view class="logistics-header wow-flex is-align-middle is-justify-space-between">
+      <view class="logistics-product wow-flex is-align-middle">
+        
+        <view class="font-size--32 logistics-product__status" wx:if="{{state === '2'}}">运输中</view>
+        <view class="font-size--32 logistics-product__status" wx:elif="{{state === '3'}}">已签收</view>
+        <view class="font-size--32 logistics-product__status" wx:elif="{{state === '4'}}">问题件</view>
+
+      </view>
+      <view class="logistics-company wow-flex is-align-middle">
+        <view class="logistics-company__info">
+          <view class="font-size--26 label">{{ company }}</view>
+          <view class="font-size--24" wx:if="{{expPhone}}">官方电话 {{expPhone}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="logistics-content">
+      <view class="logistics-content__detail">
+        <view class="logistics-content__item wow-flex" :class="{'active': index === 0}" wx:for="{{traces}}" wx:key="index">
+
+          <view class="time">
+            <view class="font-size--24 time-day">{{ item.date }}</view>
+            <view class="time-detail">{{ item.time }}</view>
+          </view>
+          
+          <view class="logo">
+            <view class="logo-circle">
+              <view class="logo-circle__default"></view>
+            </view>
+            <image class="logo-circle__active" wx:if="{{ index === 0 }}" src="../../images/common/ico_logistics.png" mode="aspectFill"></image>
+          </view>
+
+          <view class="info font-size--26 wow-pl-30">{{ item.AcceptStation }}</view>
+        </view>
+        
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import orderApis from '../../api/order'
+  export default class Logistics extends wepy.page {
+    config = {
+      navigationBarTitleText: '物流详情'
+    }
+    data = {
+      expCode: '',
+      expNo: '',
+      state: '',
+      traces: [],
+      company: '',
+      expPhone: ''
+    }
+    async getLogistics () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const {expCode, expNo} = this
+        const opts = {
+          expCode,
+          expNo
+        }
+        const { State, Traces, company, expPhone } = await orderApis.getLogisticsMessage(opts)
+        Traces.forEach(element => {
+          let deteTime = element.AcceptTime.split(' ')
+          element.date = deteTime[0]
+          element.time = deteTime[1]
+        })
+        this.state = State
+        this.traces = Traces.reverse()
+        this.company = company
+        this.expPhone = expPhone
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onLoad ({ expCode, expNo }) {
+      this.expCode = expCode
+      this.expNo = expNo
+      this.getLogistics()
+    }
+    methods = {
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/logistics/common.postcss';
+</style>

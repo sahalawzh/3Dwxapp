@@ -1,0 +1,135 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-modelDetail">
+    <view class="banner">
+      <swiper autoplay="{true}}" interval="3000" circular="{{true}}">
+        <block wx:for="{{modelInfo.modelImages}}" wx:key="index">
+          <swiper-item>
+            <image src="{{item.smallPath}}" mode="aspectFill"/>
+          </swiper-item>
+        </block>
+      </swiper>
+    </view>
+
+    <view class="items">
+
+      <view class="wow-flex is-align-middle is-justify-space-between items-model">
+        <view class="model-btn font-size--24" @tap.stop="handleAddQueue({{''}})">全部加入队列</view>
+
+        <navigator url="/pages/printerQueue/index" hover-class="none" class="model-num wow-flex is-align-middle">
+          <view class="font-size--24">{{num}}</view>
+          <image class="icon" src="../../images/printer/ico_playlist_default.png" mode="aspectFill"></image>
+        </navigator>
+      </view>
+      <view class="items-box font-size--26">
+        <view class="items-box__item wow-flex is-align-middle is-justify-space-between" wx:for="{{modelInfo.modelFiles}}" wx:key="index">
+          <view class="wow-flex is-align-middle">
+            <view>{{item.fileName}}</view>
+            <image src="../../images/printer/btn_preview.png" class="icon-preview" mode="aspectFill"/>
+          </view>
+          <image src="../../images/printer/btn_modeldetail_addfile.png" @tap.stop="handleAddQueue({{item.id}})" class="icon" mode="aspectFill"/>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import modelApis from '../../api/model'
+  import printerApis from '../../api/printer'
+  export default class ModelDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: ''
+    }
+    methods = {
+      async handleAddQueue (modelFileId) {
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { modelId, userId } = this
+          const opts = {
+            userId,
+            modelId,
+            fileOrigin: 'remote'
+          }
+          if (modelFileId) {
+            opts.modelFileId = modelFileId
+          }
+          await printerApis.pushQueue(opts)
+          wx.hideLoading()
+          wx.nextTick(() => {
+            wx.showToast({
+              title: '成功加入该文件',
+              success: function () {
+                setTimeout(() => {
+                  wx.hideToast()
+                }, 2000)
+              }
+            })
+          })
+          this.$apply()
+        } catch (error) {
+          wx.hideLoading()
+        }
+      }
+    }
+    async getModel () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { modelId, userId } = this
+        const opts = {
+          userId,
+          modelId
+        }
+        const res = await modelApis.getModel(opts)
+        wx.hideLoading()
+        this.modelInfo = res
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    async getCountQueue () {
+      try {
+        const { userId } = this
+        const opts = {
+          userId,
+          isDelete: 'N',
+          status: '0,1,2'
+        }
+        const { data } = await printerApis.getCountQueue(opts)
+        this.num = data
+        this.$apply()
+      } catch (error) {
+      }
+    }
+    onLoad ({ id, name }) {
+      this.modelId = id
+      this.userId = wepy.$instance.globalData.userId
+      wx.setNavigationBarTitle({
+        title: decodeURIComponent(name)
+      })
+      this.getModel()
+      this.getCountQueue()
+    }
+    data = {
+      modelId: '',
+      modelInfo: {},
+      userId: '',
+      num: ''
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/modelDetail/common.postcss';
+</style>

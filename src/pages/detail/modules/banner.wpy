@@ -1,0 +1,48 @@
+<template>
+  <view class="good-banner">
+    <view class="detail-top">
+      <view class="banner">
+        <swiper autoplay="{true}}" interval="3000" indicator-dots="{{true}}" circular="{{true}}" bindchange="swiperChange">
+          <block>
+            <swiper-item>
+              <image src="{{good.image}}" mode="aspectFill"/>
+            </swiper-item>
+          </block>
+        </swiper>
+        <navigator url="/pages/index/mall" hover-class="none" open-type="switchTab" class="icon-mall">
+          <image class="icon" src="../../../images/detail/icon-mall.png" mode="aspectFill"></image>
+        </navigator>
+        <navigator wx:if="{{userId}}" url="/pages/cart/index" class="open-type-btn tools is-justify-center">
+          <view class="tools-cart wow-flex is-align-middle is-justify-center">
+            <image class="icon" src="../../../images/common/btn_cart_white.png" mode="aspectFill"></image>
+            <view class="tools-cart__sign" wx:if="{{cartNum}}"></view>
+          </view>
+        </navigator>
+        <button wx:else data-url="/pages/cart/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="open-type-btn tools is-justify-center">
+          <view class="tools-cart wow-flex is-align-middle is-justify-center">
+            <image class="icon" src="../../../images/common/btn_cart_white.png" mode="aspectFill"></image>
+            <view class="tools-cart__sign" wx:if="{{cartNum}}"></view>
+          </view>
+        </button>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '../../../mixins/common'
+export default class Banner extends wepy.component {
+  props = {
+    good: [Object],
+    cartNum: [Number, String],
+    userId: [String, Number]
+  }
+  mixins = [CommonMixin]
+  data = {
+  }
+  methods = {
+    swiperChange () {
+    }
+  }
+}
+</script>

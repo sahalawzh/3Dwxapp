@@ -1,0 +1,270 @@
+{
+	"description": "项目配置文件。",
+	"packOptions": {
+		"ignore": []
+	},
+	"setting": {
+		"urlCheck": false,
+		"es6": false,
+		"postcss": true,
+		"minified": true,
+		"newFeature": true,
+		"autoAudits": false,
+		"checkInvalidKey": true,
+		"checkSiteMap": true,
+		"uploadWithSourceMap": true,
+		"babelSetting": {
+			"ignore": [],
+			"disablePlugins": [],
+			"outputPath": ""
+		}
+	},
+	"compileType": "miniprogram",
+	"libVersion": "2.7.1",
+	"appid": "wx5819d1f1540598a5",
+	"projectname": "3Dwxapp",
+	"miniprogramRoot": "dist/",
+	"scripts": {},
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"currentL": -1,
+			"list": []
+		},
+		"miniprogram": {
+			"current": 28,
+			"list": [
+				{
+					"id": 0,
+					"name": "首页",
+					"pathName": "pages/index/index",
+					"query": "",
+					"scene": ""
+				},
+				{
+					"id": 1,
+					"name": "添加打印机",
+					"pathName": "pages/printerAdd/index",
+					"query": "id=HJNLA000146b9c72ad5a",
+					"scene": null
+				},
+				{
+					"id": 2,
+					"name": "高级",
+					"pathName": "pages/printerAdvanced/index",
+					"query": "printerId=fd31f9b1-6bbf-463f-bc68-5d725adb8dd3",
+					"scene": null
+				},
+				{
+					"id": 3,
+					"name": "物流详情",
+					"pathName": "pages/logistics/index",
+					"query": "expCode=HHTT&&expNo=669892347518",
+					"scene": null
+				},
+				{
+					"id": 2,
+					"name": "订单列表",
+					"pathName": "pages/order/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 3,
+					"name": "成功页面",
+					"pathName": "pages/success/index",
+					"query": "oid=10000981212019042321315932002192",
+					"scene": null
+				},
+				{
+					"id": 6,
+					"name": "订单详情",
+					"pathName": "pages/orderDetail/index",
+					"query": "oid=10000705282019050923172052586444",
+					"scene": null
+				},
+				{
+					"id": 6,
+					"name": "发表评论",
+					"pathName": "pages/publishCommet/index",
+					"query": "oid=10000705282019050923172052586444",
+					"scene": null
+				},
+				{
+					"id": 7,
+					"name": "设置",
+					"pathName": "pages/printerSet/index",
+					"query": "printerId=fd31f9b1-6bbf-463f-bc68-5d725adb8dd3",
+					"scene": null
+				},
+				{
+					"id": 8,
+					"name": "调试打印机",
+					"pathName": "pages/printerDebug/index",
+					"query": "printerId=68725bfb-0550-4167-bbec-80571e3e63ad",
+					"scene": null
+				},
+				{
+					"id": 9,
+					"name": "打印机列表勾选",
+					"pathName": "pages/printerList/index",
+					"query": "queueId=2",
+					"scene": null
+				},
+				{
+					"id": 10,
+					"name": "打印列表",
+					"pathName": "pages/index/printer",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 10,
+					"name": "打印队列",
+					"pathName": "pages/printerQueue/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 12,
+					"name": "已完成打印",
+					"pathName": "pages/printerQueueComplete/index",
+					"query": "userId=3&status=4",
+					"scene": null
+				},
+				{
+					"id": 13,
+					"name": "打印详情",
+					"pathName": "pages/printerDetail/index",
+					"query": "printerId=68725bfb-0550-4167-bbec-80571e3e63ad&printerAlias=0422%E6%89%93%E5%8D%B0%E6%9C%BA&printerTypeName=Makesome",
+					"scene": null
+				},
+				{
+					"id": 0,
+					"name": "模型列表",
+					"pathName": "pages/model/index",
+					"query": "",
+					"scene": ""
+				},
+				{
+					"id": 0,
+					"name": "续租/买断",
+					"pathName": "pages/printerBuy/index",
+					"query": "",
+					"scene": ""
+				},
+				{
+					"id": 0,
+					"name": "申请售后",
+					"pathName": "pages/saleAfter/index",
+					"query": "",
+					"scene": ""
+				},
+				{
+					"id": 0,
+					"name": "模型细览",
+					"pathName": "pages/modelDetail/index",
+					"query": "id=6d187700-4c30-4bdb-9b04-156f2a955eaa&name=测试",
+					"scene": ""
+				},
+				{
+					"id": 1,
+					"name": "购物车",
+					"pathName": "pages/cart/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "搜索",
+					"pathName": "pages/search/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "收货地址",
+					"pathName": "pages/address/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 3,
+					"name": "我的收藏",
+					"pathName": "pages/collect/index",
+					"query": "id=3",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "商城",
+					"pathName": "pages/index/mall",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "个人中心",
+					"pathName": "pages/person/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 20,
+					"name": "下单",
+					"pathName": "pages/reserver/index",
+					"query": "cartId=1",
+					"scene": null
+				},
+				{
+					"id": 25,
+					"name": "视频详情",
+					"pathName": "pages/videoDetail/index",
+					"query": "id=75",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "我要吐槽",
+					"pathName": "pages/suggestion/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 7,
+					"name": "订单",
+					"pathName": "pages/order/index",
+					"query": "id=3",
+					"scene": null
+				},
+				{
+					"id": 28,
+					"name": "详情",
+					"pathName": "pages/detail/index",
+					"query": "id=19",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "商品列表",
+					"pathName": "pages/goodsList/index",
+					"query": "",
+					"scene": null
+				}
+			]
+		}
+	}
+}

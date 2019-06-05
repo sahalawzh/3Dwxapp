@@ -1,0 +1,100 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-success">
+    <view class="success-header">
+      <view class="success-header__sign wow-flex is-align-middle">
+        <image class="icon" src="../../images/common/ico_Successfulpayment.png" mode="aspectFill"></image>
+        <view class="font-size--40 text">支付成功</view>
+      </view>
+      <view class="font-size--30 success-header__price">实付 ￥{{totalFee}}</view>
+      <view class="success-header__btn wow-flex">
+        <navigator url="/pages/index/mall" open-type="switchTab" class="success-btn font-size--26">返回首页</navigator>
+        <navigator url="/pages/orderDetail/index?oid={{oid}}" class="success-btn font-size--26">查看订单</navigator>
+      </view>
+    </view>
+    <view class="success-content">
+      <recommend :lists.sync="lists"></recommend>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Recommend from './modules/recommend'
+  import goodsApis from '../../api/goods'
+  import orderApis from '../../api/order'
+  export default class Success extends wepy.page {
+    config = {
+      navigationBarTitleText: '成功页面'
+    }
+    components = {
+      recommend: Recommend
+    }
+    async getRecommend () {
+      try {
+        let { start, limits, lists } = this
+        const opts = {
+          start,
+          limits
+        }
+        let { data: recommendedData } = await goodsApis.recommended(opts)
+        let data = recommendedData.data
+        if (start === 0) {
+          lists = []
+        }
+        this.lists = lists.concat(data)
+        if (data.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start++
+        }
+        console.log(this.lists)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getPayMsg () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const opts = {
+          orderNo: this.oid
+        }
+        const { data } = await orderApis.getPayMsg(opts)
+        this.oid = data.oid
+        this.totalFee = data.totalFee
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    methods = {
+    }
+    onLoad ({oid}) {
+      this.oid = oid
+      this.getRecommend()
+      this.getPayMsg()
+    }
+    data = {
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false,
+      oid: '',
+      totalFee: ''
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/success/common.postcss';
+</style>

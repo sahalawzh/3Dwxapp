@@ -1,0 +1,15 @@
+{
+    "extEnable": true,
+    "extAppid": "wxa3cc462c15ab01c7",
+    "window": {
+        "navigationBarBackgroundColor": "#0a0a0a",
+        "navigationBarTextStyle": "white",
+        "backgroundTextStyle": "white",
+        "backgroundColor": "#0e0e0e",
+        "navigationBarTitleText": "测试"
+    },
+    "ext": {
+        "appid": "wxa3cc462c15ab01c7",
+        "theme": "dark"
+    }
+}

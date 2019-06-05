@@ -1,0 +1,131 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-index">
+
+    <navigator wx:if="{{bannerAdv}}" url="/pages/detail/index?id={{bannerAdv.spuId}}" class="page-index__advertising">
+      <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
+    </navigator>
+
+    <view class="page-index__position">
+      <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-icon open-type-btn">
+        <image src="../../images/common/btn_cart_default.png" mode="aspectFill"></image>
+        <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
+      </navigator>
+      <button wx:else data-url="/pages/cart/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="cart-icon open-type-btn">
+        <image src="../../images/common/btn_cart_default.png" mode="aspectFill"></image>
+        <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
+      </button>
+      
+      <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon wow-mt-30 open-type-btn">
+        <image src="../../images/common/btn_user_normal.png" mode="aspectFill"></image>
+      </navigator>
+      <button wx:else data-url="/pages/person/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="person-icon wow-mt-30 open-type-btn">
+        <image src="../../images/common/btn_user_normal.png" mode="aspectFill"></image>
+      </button>
+    </view>
+
+    <videoList :lists.sync="lists"></videoList>
+
+    <loading wx:if="{{hasMoreData}}"></loading>
+
+    <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}"></custom-tabbar>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import VideoList from '../../components/videoList'
+  import Loading from '../../components/loading'
+  import videoApis from '../../api/video'
+  import advertisementApis from '../../api/advertisement'
+  import CommonMixin from '../../mixins/common'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      usingComponents: {
+        'custom-tabbar': '../../custom-tab-bar/index'
+      }
+    }
+    components = {
+      videoList: VideoList,
+      loading: Loading
+    }
+    mixins = [CommonMixin]
+    data = {
+      tabbar: '',
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false, // 默认不用拉数据
+      cartNum: '',
+      userId: '',
+      bannerAdv: ''
+    }
+    async getVideoList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { start, limits, lists } = this
+        const opts = {
+          start,
+          limits
+        }
+        let { data: videoData } = await videoApis.list(opts)
+        if (start === 1) {
+          lists = []
+        }
+        this.lists = lists.concat(videoData.data)
+        if (videoData.data.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start ++
+        }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getAdvertisement () { // 广告位接口
+      try {
+        const { data: advData } = await advertisementApis.queryAdvertisements()
+        this.bannerAdv = advData.filter(item => item.advertisementType === 4)[0]
+        console.log(this.bannerAdv)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async onLoad () {
+      // 隐藏系统tabbar
+      wx.hideTabBar()
+      wepy.$instance.editTabbar()
+      this.getVideoList()
+      this.getAdvertisement()
+      this.$apply()
+    }
+    methods = {
+    }
+    onReachBottom () {
+      if (this.hasMoreData) {
+        this.getVideoList()
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/index/common.postcss';
+</style>

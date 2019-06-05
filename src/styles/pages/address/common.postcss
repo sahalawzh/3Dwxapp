@@ -1,0 +1,184 @@
+
+.page-address {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  .address-list {
+    position: relative;
+    &__item {
+      position: relative;
+      margin-bottom: 20rpx;
+      background-color: #fff;
+      &::after {
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #d7d7d7;
+      }
+      .item-info {
+        position: relative;
+        padding: 42rpx 44rpx 38rpx 50rpx;
+        .message {
+          margin-bottom: 22rpx;
+          color: #333;
+          font-weight: 600;
+          &-name {
+            margin-right: 40rpx;
+          }
+          .sign-box {
+            background-color: #145ee1;
+            color: #fff;
+            border-radius: 22rpx;
+            width: 100rpx;
+            line-height: 40rpx;
+            height: 40rpx;
+            text-align: center;
+            margin-left: 34rpx;
+          }
+        }
+        &__address {
+          font-weight: normal;
+          color: #474747;
+        }
+      }
+      .item-control {
+        position: absolute;
+        right: 44rpx;
+        top: 76rpx;
+        display: flex;
+        align-items: center;
+        .icon {
+          width: 48rpx;
+          height: 48rpx;
+          margin-right: 30rpx;
+        }
+      }
+    }
+  }
+  .address-list__btn, .btn-area {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 20rpx 50rpx 50rpx;
+      z-index: 98;
+      .add-btn, .save-btn{
+        width: 100%;
+        text-align: center;
+        height: 86rpx;
+        line-height: 86rpx;
+        background-color: #145ee1;
+        color: #fff;
+        border-radius: 44rpx;
+      }
+      .default-btn {
+        border-radius: 44rpx;
+        height: 86rpx;
+        line-height: 86rpx;
+        margin-bottom: 20rpx;
+        color: #474747;
+      }
+    }
+  .address-form {
+    position: relative;
+    &::after {
+      position: absolute;
+      content: "";
+      height: 1rpx;
+      width: 100%;
+      left: 0;
+      bottom: 0;
+      transform: scaleY(0.5);
+      background-color: #d7d7d7;
+    }
+    .form-item {
+      position: relative;
+      height: 100rpx;
+      border-top: 1rpx solid #ebebeb;
+      padding-right: 50rpx;
+      padding-left: 210rpx;
+      &__label {
+        padding-right: 20rpx;
+        color: #474747;
+        position: absolute;
+        left: 50rpx;
+      }
+      &__body {
+        position: relative;
+        flex: 1;
+        .area {
+          height: 100%;
+        }
+        .arrow {
+          position: absolute;
+          right: 0;
+          top: 4rpx;
+          width: 28rpx;
+          height: 30rpx;
+          margin-left: 10rpx;
+        }
+      }
+      &__status {
+        position: absolute;
+        top: -12rpx;
+        left: 0;
+        padding: 20rpx;
+        z-index: 3;
+        background-color: #d84d59;
+        border-radius: 8rpx;
+        color: #fff;
+      }
+    }
+    .del-wrap {
+      position: relative;
+      .btn {
+        color: #1360e1;
+      }
+      &::after {
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #d7d7d7;
+      }
+    }
+    .radio-box {
+      position: absolute;
+      right: 50rpx;
+    }
+    .split-bar {
+      width: 100%;
+      height: 16rpx;
+      background-color: #f0f2f7;
+    }
+  }
+  .default-placeholder {
+    color: #d0d0d0;
+  }
+  .address-picker {
+    &__toolbar {
+      height: 80rpx;
+      line-height: 80rpx;
+      text {
+        padding: 0 17rpx;
+      }
+    }
+    &__item {
+      line-height: 72rpx;
+      padding: 0 20rpx;
+      text-align: center;
+    }
+    &__view {
+      color: #4a4a4a;
+    }
+  }
+}

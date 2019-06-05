@@ -1,0 +1,273 @@
+
+@import '../../mixins/common.postcss';
+.page-printer {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 200rpx;
+  position: relative;
+  .printer-items {
+    padding: 0 16rpx 20rpx;
+    background-color: #f0f2f7;
+    &__header {
+      padding: 18rpx 22rpx 0 28rpx;
+      .title {
+        color: #9d9d9d;
+        &-label {
+          color: #49494c;
+        }
+      }
+      .queue {
+        position: relative;
+        height: 56rpx;
+        background-color: #fff;
+        border: 1rpx solid #fbfbfb;
+        border-radius: 30rpx;
+        padding:  0 40rpx;
+        color: #49494c;
+        .icon {
+          width: 28rpx;
+          height: 28rpx;
+          margin: 0 8rpx 0 16rpx;
+        }
+      }
+    }
+    &__card{
+      position: relative;
+      border-radius: 8rpx;
+      background-color: #fff;
+      margin-top: 16rpx;
+    }
+    &__item {
+      padding: 20rpx 30rpx 28rpx 34rpx;
+      .printer-img {
+        width: 126rpx;
+        height: 130rpx;
+        margin-right: 28rpx;
+      }
+      .printer-info {
+        position: relative;
+        flex: 1;
+        padding-top: 20rpx;
+        &__status {
+          color: #010101;
+          .name {
+            margin-right: 14rpx;
+          }
+          .status-img {
+            width: 62rpx;
+            height: 32rpx;
+            &__single {
+              width: 30rpx;
+              height: 30rpx;
+            }
+          }
+          .btn_set {
+            position: absolute;
+            top: 20rpx;
+            right: 0;
+            padding: 8rpx 0;
+            width: 32rpx;
+            height: 18rpx;
+          }
+        }
+        &__tip {
+          color: #6993e2;
+          margin-top: 12rpx;
+          &.print-invalid {
+            color: #9d9d9d;
+            .print-invalid__day {
+              color: #deb66b;
+              margin-right: 12rpx;
+            }
+          }
+          &.print-limit {
+            color: #99efbd;
+          }
+        }
+        &__set {
+          position: absolute;
+          right: 0;
+          top: 0;
+          .icon {
+            width: 30rpx;
+            height: 8rpx;
+          }
+        }
+        &__record {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          color: #d5eaff;
+          .icon {
+            width: 36rpx;
+            height: 48rpx;
+            margin-left: 8rpx;
+          }
+        }
+      }
+    }
+    &__progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 12rpx;
+      border-radius: 22rpx;
+      overflow: hidden;
+      .printer-progress {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .printer-advertising {
+    margin: 26rpx 52rpx 0;
+    height: 152rpx;
+    border-radius: 84rpx;
+    overflow: hidden;
+    .ad-banner {
+      height: 100%;
+      width: 100%;
+    }
+  }
+  .printer-content {
+    padding: 54rpx 52rpx 30rpx;
+    .title {
+      color: #777;
+      margin-bottom: 32rpx;
+      .icon {
+        width: 36rpx;
+        height: 36rpx;
+        margin-right: 12rpx;
+      }
+    }
+    &__add {
+      position: relative;
+      width: 100%;
+      padding: 40rpx 0 34rpx;
+      box-sizing: border-box;
+      background-color: #f3faff;
+      border-radius: 22rpx;
+      text-align: center;
+      color: #aeaeae;
+      margin-bottom: 50rpx;
+      .icon-help {
+        position: absolute;
+        right: 34rpx;
+        top: 14rpx;
+        width: 48rpx;
+        height: 48rpx;
+      }
+      .icon {
+        width: 116rpx;
+        height: 116rpx;
+        margin-bottom: 22rpx;
+      }
+    }
+    &__module {
+      width: 100%;
+      height: 130rpx;
+      border-radius: 22rpx;
+      margin-bottom: 56rpx;
+      background-color: #b7f8f1;
+      color: #010101;
+      .icon {
+        width: 80rpx;
+        height: 50rpx;
+        margin-right: 10rpx;
+      }
+    }
+    &__videos {
+      .title {
+        margin-bottom: 32rpx;
+        color: #777;
+        .active {
+          color: #6993e2;
+        }
+      }
+    }
+  }
+  .good-list {
+    .products-layout__body { 
+      width: 100%;
+      padding: 20rpx 0;
+      border-radius: 14rpx;
+      background-color: #fff;
+      box-sizing: border-box;
+    }
+    .products-list {
+      &__item {
+        float: left;
+        width: 50%;
+        box-sizing: border-box;
+        padding: 0 8rpx;
+        /* margin-top: 20rpx; */
+        margin-bottom: 12prx;
+        .product {
+          &-box {
+            position: relative;
+            border-radius: 14rpx;
+          }
+          &-image {
+            border-radius: 14rpx;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 244rpx;
+            &-cont {
+              position: absolute;
+              top: 0;
+              right: 0;
+              width: 100%;
+              height: 244rpx;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: cover;
+            }
+            &_bottom {
+              position: absolute;
+              bottom: 10rpx;
+              left: 14rpx;
+              right: 14rpx;
+              margin-top: 10rpx;
+              color: #fff;
+              .icon {
+                width: 36rpx;
+                height: 36rpx;
+                margin-right: 8rpx;
+              }
+              .duration {
+                margin-left: 12rpx;
+              }
+            }
+          }
+          &-info {
+            overflow: hidden;
+            padding: 22rpx 30rpx 30rpx 8rpx;
+            box-sizing:border-box; 
+          }
+          &-title, &-desc {
+            font-size: 28rpx;
+            line-height: 36rpx;
+          }
+          &-title, &-desc {
+            @mixin elip 2;
+          }
+          &-title-elip, &-desc-elip {
+            width: 100%;
+            @mixin ellipsis 1;
+          }
+          &-title {
+            color: #737373;
+            margin-bottom: 10rpx;
+          }
+          &-price {
+            padding: 0 20rpx 15rpx;
+          }
+        }
+      }
+    }
+  }
+}

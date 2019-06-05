@@ -1,0 +1,69 @@
+<template>
+  <view class="goods-list-tabbar wow-flex is-align-middle">
+    <view class="goods-list-tabbar-items">
+      <view 
+        wx:for="{{tabbarItems}}" 
+        wx:key="item"
+        @tap.stop="handleTabChange({{item.type}})"
+        class="goods-list-tabbar__item font-size--28">
+        <view class="tabbar__cont">
+          <text class="tabbar__label">{{item.label}}</text>
+          <text class="arrow-box">
+            <text class="arrow-box__up arrow {{order === 'asc' && type === item.type ? 'active' : ''}}"></text>
+            <text class="arrow-box__down arrow {{order === 'desc' && type === item.type ? 'active' : ''}}"></text>
+          </text>
+        </view>
+      </view>
+      <view
+        @tap.stop="handleTabChange()"
+        class="goods-list-tabbar__item font-size--28">
+        <view class="tabbar__cont">
+          <text class="tabbar__label">筛选</text>
+          <image mode="aspectFill" src="../../../images/common/ico_filter.png" class="filter-icon"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Tab extends wepy.component {
+  props = {
+    order: {
+      type: String,
+      twoWay: true
+    },
+    type: {
+      type: String,
+      twoWay: true
+    }
+  }
+  data = {
+    tabbarItems: [
+      {
+        label: '销量最高',
+        type: 'buy_number'
+      },
+      {
+        label: '上架时间',
+        type: 'create_time'
+      },
+      {
+        label: '价格',
+        type: 'recommended_price'
+      }
+    ]
+  }
+  methods = {
+    handleTabChange (type) {
+      if (type) {
+        this.$emit('handleToggleTab', type)
+      } else {
+        this.$emit('slideToggle')
+      }
+    }
+  }
+}
+</script>
+<style lang="postcss">
+</style>

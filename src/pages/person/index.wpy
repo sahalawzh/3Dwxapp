@@ -1,0 +1,80 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-person">
+    <view class="person-header">
+      <image class="bg_mine" src="../../images/person/bg_mine.png" mode="aspectFill"></image>
+      <view class="person-header__box wow-flex">
+        <view class="person-header__box_head">
+          <block wx:if="{{userInfo}}">
+            <open-data type="userAvatarUrl"></open-data>
+          </block>
+          <image class="default-img" src="../../images/person/default-head.png" mode="aspectFill"></image>
+        </view>
+        <view class="person-header__box_info wow-flex is-align-middle">
+          <view class="font-size--36 name">
+            <block wx:if="{{userInfo}}">
+              <open-data type="userNickName" lang="zh_CN"></open-data>
+            </block>
+            <button wx:else class="open-type-btn" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">
+              点击授权微信头像
+            </button>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="person-items font-size--28">
+      <navigator url="/pages/order/index" class="person-items__item wow-flex is-align-middle">
+        <image class="icon" src="../../images/person/ico_mine_order.png" mode="aspectFill"></image>
+        <view class="font-size--30">我的订单</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+      <navigator url="/pages/cart/index" class="person-items__item wow-flex is-align-middle">
+        <image class="icon" src="../../images/person/ico_mine_cart.png" mode="aspectFill"></image>
+        <view class="font-size--30">购物车</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+      <navigator url="/pages/address/index" class="person-items__item wow-flex is-align-middle">
+        <image class="icon" src="../../images/person/btn_mine_address.png" mode="aspectFill"></image>
+        <view class="font-size--30">收货地址</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+      <navigator url="/pages/collect/index" class="person-items__item wow-flex is-align-middle">
+        <image class="icon" src="../../images/person/ico_mine_Collection.png" mode="aspectFill"></image>
+        <view class="font-size--30">我的收藏夹</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+      <navigator url="/pages/suggestion/index" class="person-items__item wow-flex is-align-middle">
+        <image class="icon" src="../../images/person/ico_mine_suggest.png" mode="aspectFill"></image>
+        <view class="font-size--30">我要吐槽</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import CommonMixin from '../../mixins/common'
+  export default class Person extends wepy.page {
+    config = {
+      navigationBarTitleText: '个人中心'
+    }
+    mixins = [CommonMixin]
+    data = {
+    }
+    onLoad () {
+      this.userInfo = wepy.$instance.globalData.userInfo
+    }
+    methods = {
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/person/common.postcss';
+</style>

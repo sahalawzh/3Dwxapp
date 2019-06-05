@@ -1,0 +1,78 @@
+
+<template>
+  <view class="search-sign wow-flex is-align-middle">
+    <person class="icon" :userId.sync="userId"></person>
+    <navigator url="/pages/search/index" class="search-sign__control open-type-btn">
+      <image class="search-icon" src="../images/common/btn_bar_search_white.png" mode="aspectFill"></image>
+      <view class="control font-size--28"></view>
+    </navigator>
+    <cart class="icon" :userId.sync="userId"  :cartNum.sync="cartNum"></cart>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import Person from './person'
+  import Cart from './cart'
+  export default class Search extends wepy.component {
+    components = {
+      person: Person,
+      cart: Cart
+    }
+    props = {
+      userId: [String, Number],
+      cartNum: [String, Number]
+    }
+    data = {
+      key: ''
+    }
+    methods = {
+      handleToSearch (e) {
+        const { value } = e.detail
+        this.$emit('handleToSearch', value)
+      }
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+.search-sign {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  padding: 30rpx 46rpx 0;
+  box-sizing: border-box;
+  .icon {
+    width: 48rpx;
+    height: 48rpx;
+  }
+  &__control {
+    position: relative;
+    margin: 0 30rpx;
+    flex: 1;
+    height: 48rpx;
+    border-left: 2rpx solid #fff;
+    .control {
+      padding-left: 80rpx;
+      color: #fff;
+    }
+    .search-icon {
+      position: absolute;
+      left: 38rpx;
+      top: 4rpx;
+      width: 48rpx;
+      height: 48rpx;
+    }
+  }
+  .person-icon {
+    width: 48rpx;
+    height: 48rpx;
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+</style>

@@ -1,0 +1,152 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-commet">
+    <form bindsubmit="handleCreatCommet">
+      <view class="commet-wrap">
+        <view class="wow-flex is-align-middle satisfaction-row">
+          <view class="icon-header">
+            <open-data type="userAvatarUrl"></open-data>
+          </view>
+          <image class="icon-star" wx:for="{{stars.total}}" wx:key="index" @tap.stop="handleToStar({{'total'}}, {{index}})" src="../../images/common/btn_evaluate_{{item}}.png" mode="aspectFill"></image>
+          <view class="font-size--28 satisfaction-row__label">满意度</view>
+        </view>
+        <view class="commet-content">
+          <textarea class="font-size--28 commet-content__area" name="commet" maxlength="200" placeholder="宝贝喜欢吗？来跟大家分享一下吧~"/>
+          <view class="commet-content__upload">
+            <view class="upload-imgs wow-flex" wx:if="{{uploadImgs.length}}">
+              <view class="upload-imgs__item" wx:for="{{uploadImgs}}" wx:key="index">
+                <icon type="clear" size="20" class="upload-clear" @tap.stop="handleRemoveImg({{index}})"/>
+                <image class="upload-img" @tap.stop="handleImagePreview({{index}})" src="{{item}}" mode="aspectFill"></image>
+              </view>
+            </view>
+            <image class="icon-upload" @tap.stop="handleToUpload" src="../../images/common/btn_evaluate_addimg.png" mode="aspectFill"></image>
+          </view>
+        </view>
+
+        <view class="commet-options">
+          <view class="wow-flex is-align-middle option-row">
+            <view class="font-size--28 label">物流信息</view>
+            <image class="icon-star" wx:for="{{stars.logistics}}" wx:key="index" @tap.stop="handleToStar({{'logistics'}}, {{index}})" src="../../images/common/btn_evaluate_{{item}}.png" mode="aspectFill"></image>
+          </view>
+          <view class="wow-flex is-align-middle option-row">
+            <view class="font-size--28 label">服务态度</view>
+            <image class="icon-star" wx:for="{{stars.service}}" wx:key="index" @tap.stop="handleToStar({{'service'}}, {{index}})" src="../../images/common/btn_evaluate_{{item}}.png" mode="aspectFill"></image>
+          </view> 
+        </view>
+        <view class="footer">
+          <button class="footer-btn font-size--28" form-type="submit">发布</button>
+        </view>
+      </view>
+
+    </form>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  // import commetApis from '../../api/commet'
+  export default class PublishCommet extends wepy.page {
+    config = {
+      navigationBarTitleText: '发表评论'
+    }
+    data = {
+      stars: {
+        total: ['star_empty', 'star_empty', 'star_empty', 'star_empty', 'star_empty'],
+        logistics: ['star_empty', 'star_empty', 'star_empty', 'star_empty', 'star_empty'],
+        service: ['star_empty', 'star_empty', 'star_empty', 'star_empty', 'star_empty']
+      },
+      uploadImgs: []
+    }
+    onLoad () {
+    }
+    methods = {
+      handleImagePreview (idx) {
+        wx.previewImage({
+          current: this.uploadImgs[idx],  //当前预览的图片
+          urls: this.uploadImgs,  //所有要预览的图片
+        })
+      },
+      handleCreatCommet (e) {
+        let { commet } = e.detail.value
+        let { total, logistics, service } = this.stars
+        commet = commet.trim()
+        let i = 0
+        let errorMsg = ''
+        let hasService = service.some(item => item === 'star')
+        if (!hasService) {
+          errorMsg = '还未选服务态度'
+          i++
+        }
+        let hasLogistics = logistics.some(item => item === 'star')
+        if (!hasLogistics) {
+          errorMsg = '还未选物流信息'
+          i++
+        }
+        let hasTotal = total.some(item => item === 'star')
+        if (!hasTotal) {
+          errorMsg = '还未选满意度'
+          i++
+        }
+        if (!commet) {
+          errorMsg = '评论信息不能为空'
+          i++
+        }
+        if (i > 0) {
+          wx.showToast({
+            title: errorMsg,
+            icon: 'none'
+          })
+          return
+        }
+        if (this.uploadImgs.length) {
+          const arr = this.uploadImgs.map(path => {
+            return wxUploadFile({
+              url: config.urls.question + '/image/upload',
+              filePath: path,
+              fileType: 'comment',
+            })
+          })
+          console.log(arr)
+        }
+        wx.uploadFile({
+
+        })
+        // await commetApis.insertSpuComment()
+      },
+      handleRemoveImg (index) {
+        this.uploadImgs.splice(index, 1)
+      },
+      handleToStar (type, idx) {
+        if (this.stars[type].length) {
+          this.stars[type].forEach((item, index) => {
+            idx >= index ? this.stars[type][index] = 'star' : this.stars[type][index] = 'star_empty'
+          })
+        }
+      },
+      handleToUpload () {
+        const that = this
+        wx.chooseImage({
+          count: 5,
+          success: function(res) {
+            const { errMsg, tempFilePaths } = res
+            if (errMsg === 'chooseImage:ok') {
+              const MAX = 5
+              const images = that.uploadImgs.concat(tempFilePaths)
+              that.uploadImgs = images.length <= MAX ? images : images.slice(0, MAX)
+              that.$apply()
+            }
+          }
+        })
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/publishCommet/common.postcss';
+</style>

@@ -1,0 +1,116 @@
+
+.page-order {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f2f7;
+  .order-lists {
+    padding-top: 20rpx;
+    .section {
+      margin-bottom: 18rpx;
+      background-color:#fff;
+    }
+    &-items__item {
+      position: relative;
+      margin-left: 14rpx;
+      margin-right: 14rpx;
+      padding: 34rpx 36rpx 20rpx 36rpx;
+      &::after {
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #f2f2f2;
+      }
+      .order-img {
+        width:190rpx;
+        height:156rpx;
+        margin-right:40rpx;
+        overflow:hidden;
+        border-radius:14rpx;
+        position:relative;
+        background-repeat:no-repeat;
+        background-position:center;
+        background-size:cover;
+      }
+      .order-info {
+        position: relative;
+        flex: 1;
+        overflow:hidden;
+        padding-top: 8rpx;
+        &__title {
+          color: #474747;
+        }
+        &__sku {
+          padding-top: 18rpx;
+          color: #9b9b9b;
+        }
+        &__bootom {
+          position: absolute;
+          bottom: 12rpx;
+          left: 0;
+          right: 0;
+          .color-price {
+            font-weight: 600;
+          }
+          .num {
+            color: #9b9b9b;
+          }
+        }
+      }
+    }
+    &-items__status {
+      border-radius: 0 0 14rpx 14rpx;
+      padding: 16rpx 30rpx 16rpx 40rpx;
+      .pay-tips {
+        color: #e1146c;
+      }
+      .icon-status {
+        width: 150rpx;
+        height: 50rpx;
+      }
+      .logistics-tips {
+        color: #e19913;
+      }
+      .order-btn {
+        position: relative;
+        padding: 10rpx 34rpx;
+        border-radius: 32rpx;
+        &:not(:last-child) {
+          margin-right: 20rpx;
+        }
+        &__pay {
+          background-color: #fce7ef;
+          border: 2rpx solid #e1146c;
+          color: #e1146c;
+        }
+        &__affirm {
+          background-color: #e7f0ff;
+          border: 2rpx solid #8eb0ec;
+          color: #135ee1;
+        }
+        &__logistics {
+          border: 2rpx solid #9b9b9b;
+          color: #4a4a4a;
+        }
+      }
+    }
+  }
+  .order-empty {
+    min-height: 100vh;
+    background-color: #fff;
+    color: #4a4a4a;
+    text-align: center;
+    .icon {
+      width: 136rpx;
+      height: 136rpx;
+      margin-top: 52rpx;
+      margin-bottom: 56rpx;
+    }
+  }
+}

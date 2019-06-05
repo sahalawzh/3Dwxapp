@@ -1,0 +1,7 @@
+
+  @import '../package_help/icon.wxss';
+  @import '../package_help/common.wxss';
+  @import '../package_help/dark.wxss';
+  @import '../package_help/light.wxss';
+  @import '../package_help/loading.wxss';
+.jfk-toast{display:flex;align-items:center;justify-content:center;text-align:center}.jfk-toast.no-loading{padding:46rpx 50rpx;box-sizing:border-box}.jfk-toast.no-loading .jfk-toast__icon{line-height:1;display:inline-block;height:140rpx}.jfk-toast.no-loading.is-icon{min-height:390rpx;width:690rpx}.jfk-toast__text{line-height:2}.jfk-toast.no-icon{min-width:332rpx;max-width:452rpx;min-height:148rpx}.jfk-toast.is-loading{min-width:180rpx;min-height:180rpx;overflow:hidden}.jfk-toast.is-loading.is-msg{display:block}.jfk-toast.is-loading.is-msg .jfk-toast__text{padding:46rpx 30rpx 26rpx}.jfk-toast.is-loading.is-msg .jfk-toast__icon{padding-top:60rpx}

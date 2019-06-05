@@ -1,0 +1,173 @@
+@import '../../mixins/common.postcss';
+.page-collect {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 180rpx;
+  .good-list {
+    margin-bottom: 54rpx;
+    .title {
+      margin: 30rpx 0 10rpx 10rpx;
+      color: #000;
+    }
+    .products-layout__body { 
+      padding: 0 42rpx;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .products-list {
+      &__item {
+        width: 50%;
+        box-sizing: border-box;
+        padding: 0 9rpx 0 10rpx;
+        margin-bottom: 12prx;
+        .radio-box {
+          margin-bottom: 20rpx;
+        }
+        &_bottom {
+          position: absolute;
+          bottom: 10rpx;
+          left: 14rpx;
+          right: 14rpx;
+          margin-top: 10rpx;
+          color: #fff;
+          .icon {
+            width: 36rpx;
+            height: 36rpx;
+            margin-right: 8rpx;
+          }
+          .duration {
+            margin-left: 12rpx;
+          }
+        }
+        .product {
+          &-box {
+            position: relative;
+            border-radius: 8rpx;
+          }
+          &-image {
+            border-radius: 8rpx;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 244rpx;
+            &-cont {
+              position: absolute;
+              top: 0;
+              right: 0;
+              width: 100%;
+              height: 244rpx;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: cover;
+            }
+          }
+          &-info {
+            overflow: hidden;
+            padding: 22rpx 30rpx 30rpx 10rpx;
+            box-sizing:border-box; 
+          }
+          &-title, &-desc {
+            font-size: 28rpx;
+            line-height: 36rpx;
+          }
+          &-title, &-desc {
+            @mixin elip 2;
+          }
+          &-title-elip, &-desc-elip {
+            width: 100%;
+            @mixin ellipsis 2;
+          }
+          &-title {
+            color: #737373;
+            margin-bottom: 20rpx;
+          }
+          &-price {
+            padding: 0 20rpx 15rpx;
+          }
+        }
+      }
+    }
+    &.video-list {
+
+    }
+  }
+  .collect-tabs {
+    position: relative;
+    color: #4b4b4b;
+    height: 80rpx;
+    padding-bottom: 12rpx;
+    &::after{
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -4rpx;
+      width: 100%;
+      background-color: #eee;
+      height: 16rpx;
+    }
+    &__panle {
+      padding: 24rpx 0 16rpx;
+    }
+    &__panle.active {
+      font-size: 32rpx;
+      color: #464646;
+      font-weight: 600;
+      border-bottom: 4rpx solid #085ffd;
+      border-radius: 4rpx;
+    }
+  }
+  .collect-tabs__panle + .collect-tabs__panle {
+    margin-left: 30rpx;
+  }
+  .opertion-row {
+    margin: 30rpx 52rpx;
+    .manager {
+      float: right;
+    }
+  }
+  .collect-empty {
+    &__split{
+      height: 14rpx;
+      background-color: #f6f7f7;
+    }
+    &__icon {
+      width: 140rpx;
+      height: 108rpx;
+      margin-top: 42rpx;
+    }
+    &__tip {
+      color: #4a4a4a;
+      margin-top: 36rpx;
+    }
+  }
+  .collect-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    height: 154rpx;
+    padding-top: 18rpx;
+    box-sizing: border-box;
+    border-top: 1rpx solid #b4b4b4;
+    .radio-box {
+      padding: 18rpx 0 0 44rpx;
+      .radio {
+        margin-right: 20rpx;
+      }
+    }
+    .collect-btn {
+      height: 72rpx;
+      line-height: 72rpx;
+      border-radius: 32rpx;
+      color: #fff;
+      text-align: center;
+      width: 276rpx;
+      float: right;
+      margin-right: 52rpx;
+      background-color: #1360e1;
+    }
+  }
+}

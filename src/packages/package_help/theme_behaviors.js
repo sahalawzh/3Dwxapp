@@ -1,0 +1,1 @@
+"use strict";module.exports=Behavior({properties:{componentTheme:{type:String}},data:{theme:""},attached:function(){var t=this.data.componentTheme;t||(t=getApp().globalData&&getApp().globalData.theme||wx.jfkTheme||"light"),this.setData({theme:t})},methods:{noopFunc:function(){}}});

@@ -1,0 +1,477 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-address">
+    <view class="address-list" wx:if="{{!showAdd}}">
+      <view class="address-list__item font-size--28" wx:for="{{list}}" wx:key="{{index}}" @tap.stop="hanldeSelectAddress({{item}}, {{index}})">
+        <view class="item-info">
+          <view class="message wow-flex">
+            <view class="font-size--32 message-name">{{item.recipient}}</view>
+            <view class="font-size--30">{{item.phone}}</view>
+            <view class="sign-box font-size--24" hidden="{{item.isDefault === 1}}">默认</view>
+          </view>
+          <view class="font-size--26 item-info__address">
+            <wow-elip line="2">{{item.address + item.addressDetail}}</wow-elip>
+          </view>
+        </view>
+        <view class="item-control">
+          <image class="icon" @tap.stop="handleToEdite({{item}}, {{index}})" src="../../images/set/ico_set_Change.png" mode="aspectFill"></image>
+          <view class="wow-radio radio-box" @tap.stop="handleSelectDefault({{item}}, {{index}})">
+            <lebel class="radio">
+              <image class="ico_selected" src='../../images/common/ico_selected.png' hidden='{{item.isDefault !== 0}}'></image>
+            </lebel>
+          </view>
+        </view>
+      </view>
+
+      <view class="address-list__btn">
+        <view class="font-size--30 add-btn" @tap.stop="handleToEdite()">新建收货地址</view>
+      </view>
+    </view>
+
+    <view class="address-form" wx:else>
+      <form class="font-size--28" bindsubmit="formSubmit">
+        <view class="wow-flex form-item is-align-middle">
+          <view class="form-item__label">收货人</view>
+          <view class="form-item__body">
+            <input name="name" type="text" placeholder="请输入收件人名称" placeholder-class="default-placeholder" @blur="handleInputBlur('recipient')" value="{{singleInfo.recipient}}" />
+            <view class="form-item__status is-error" hidden="{{!validResult.name}}" @tap.stop="handleHiddenError('name')">
+              <text class="form-item__status-tip">
+                <text class="form-item__status-cont">{{validResult.name}}</text>
+                <text class="form-item__status-trigger">重新输入</text>
+              </text>
+            </view>
+          </view>
+        </view>
+        <view class="wow-flex form-item is-align-middle">
+          <view class="form-item__label">手机号码</view>
+          <view class="form-item__body">
+            <input name="phone" type="number" placeholder="请输入手机号码" placeholder-class="default-placeholder" @blur="handleInputBlur('phone')" value="{{singleInfo.phone}}" />
+            <view class="form-item__status is-error" hidden="{{!validResult.phone}}" @tap.stop="handleHiddenError('phone')">
+              <text class="form-item__status-tip">
+                <text class="form-item__status-cont">{{validResult.phone}}</text>
+                <text class="form-item__status-trigger">重新输入</text>
+              </text>
+            </view>
+          </view>
+        </view>
+        <view class="wow-flex form-item is-align-middle">
+          <view class="form-item__label">所在地区</view>
+          <view class="form-item__body" @tap.stop="bindRegionChange">
+            <view name="address" class="area" :class="{'default-placeholder': !singleInfo.address}">{{singleInfo.address ? singleInfo.address : '请选择地区'}}</view>
+            <view class="form-item__status is-error" hidden="{{!validResult.address}}" @tap.stop="handleHiddenError('address')">
+              <text class="form-item__status-tip">
+                <text class="form-item__status-cont">{{validResult.address}}</text>
+                <text class="form-item__status-trigger">重新输入</text>
+              </text>
+            </view>
+            <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+          </view>
+        </view>
+        <view class="wow-flex form-item is-align-middle">
+          <view class="form-item__label">详细地址</view>
+          <view class="form-item__body">
+            <input name="addressDetail" type="text" placeholder="如道路、门牌、小区、单元等" @blur="handleInputBlur('addressDetail')"  placeholder-class="default-placeholder" value="{{singleInfo.addressDetail}}" />
+            <view class="form-item__status is-error" hidden="{{!validResult.addressDetail}}" @tap.stop="handleHiddenError('addressDetail')">
+              <text class="form-item__status-tip">
+                <text class="form-item__status-cont">{{validResult.addressDetail}}</text>
+                <text class="form-item__status-trigger">重新输入</text>
+              </text>
+            </view>
+          </view>
+          </view>
+        </view>
+        <view class="wow-flex form-item is-align-middle" @tap.stop="handleSetDefault">
+          <view class="form-item__label">设置为默认地址</view>
+
+          <view class="wow-radio radio-box">
+            <lebel class="radio">
+              <image class="ico_selected" src='../../images/common/ico_selected.png' hidden='{{singleInfo.isDefault === 1}}'></image>
+            </lebel>
+          </view>
+          </view>
+        </view>
+        <view class="split-bar" hidden="{{!singleInfo.id}}"></view>
+        <view class="wow-flex form-item is-align-middle del-wrap" hidden="{{!singleInfo.id}}" @tap.stop="handleToDelete({{singleInfo.id}}, '')">
+          <view class="form-item__label btn">删除收货地址</view>
+        </view>
+
+        <view class="btn-area">
+          <button class="default-btn open-type-btn font-size--30" hover-class="none" wx:if="{{list.length > 0}}" @tap.stop="handleToPrev">返回上一页</button>
+          <button class="save-btn font-size--30" form-type="submit">保存</button>
+        </view>
+      </form>
+    </view>
+    <wow-popup class="j_address address-picker" border-radius="false" full="false" gaps="{{[0]}}" status="{{addressStatus}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
+      <view style="width: 750rpx" class="address-picker__box" @tap.stop="noop">
+        <view class="address-picker__toolbar jfk-flex is-justify-space-between font-size--32">
+          <text class="font-color-extra-light-gray" @tap.stop="handleCancelArea">取消</text>
+          <text @tap.stop="handleSaveArea">完成</text>
+        </view>
+        <picker-view indicator-style="height: 50px" style="height: 180px; width: 100%;" mask-class="address-picker__mask" indicator-class="address-picker__indicator" @change="handleChangeArea" class="font-size--28 address-picker__view" value="{{indexs}}">
+          <picker-view-column>
+            <view class="address-picker__item" wx:for="{{province}}" wx:key="{{id}}" style="line-height: 50px">{{item.name}}</view>
+          </picker-view-column>
+          <picker-view-column wx:if="{{city.length}}">
+            <view class="address-picker__item" wx:for="{{city}}" wx:key="{{id}}" style="line-height: 50px">{{item.name}}</view>
+          </picker-view-column>
+          <picker-view-column wx:if="{{area.length}}">
+            <view class="address-picker__item" wx:for="{{area}}" wx:key="{{id}}" style="line-height: 50px">{{item.name}}</view>
+          </picker-view-column>
+        </picker-view>
+      </view>
+    </wow-popup>
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import addressApis from '../../api/address'
+  export default class Address extends wepy.page {
+    config = {
+      navigationBarTitleText: '收货地址',
+      usingComponents: {
+        'wow-elip': '../../packages/elip/index',
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    data = {
+      indexs: [0, 0, 0],
+      list: [],
+      showAdd: false,
+      singleInfo: {
+        value: ['', '', ''],
+        recipient: '',
+        phone: '',
+        area: '',
+        address: '',
+        addressDetail: '',
+        isDefault: 1,
+        id: ''
+      },
+      validResult: {},
+      province: [],
+      city: [],
+      area: [],
+      districtId: '',
+      addressStatus: 'hide',
+      editIndex: '',
+      userId: ''
+    }
+    async getAddressList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { data } = await addressApis.getAddress({id: this.userId})
+        this.showAdd = data.length === 0
+        this.list = data
+        console.log(this.list)
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async handleChangeArea (e) {
+      const [ni1, ni2] = e.detail.value
+      const [i1, i2] = this.indexs
+      let i = 0
+      if (ni1 !== i1) { // 变更省
+        this.indexs = [ni1, 0, 0]
+        i = 1
+      } else if (ni2 !== i2) {
+        this.indexs = [ni1, ni2, 0]
+        i = 2
+      } else {
+        this.indexs = e.detail.value
+      }
+      const {c, cy} = await this.getAddressData(...this.indexs)
+      if (i) {
+        this.area = cy
+      }
+      if (i === 1) {
+        this.city = c
+      }
+      this.addressStatus = 'show'
+      this.$apply()
+    }
+    async getAddressData (pindex, cindex, cyindex, pid, cid, cyid) {
+      let addressData = wepy.$instance.globalData.addressData
+      let {province, city, area} = addressData
+      if (!province.length) {
+        let { data } = await addressApis.getProvince()
+        province = data
+        addressData.province = province
+      }
+      if (pid) {
+        pindex = province.findIndex(function (p) {
+          return p.id === pid
+        }) || 0
+      }
+      pid = pid || province[pindex].id
+      let _city = city[pid]
+      if (!_city) {
+        let { data } = await addressApis.getCity({
+          id: pid
+        })
+        _city = data
+        addressData.city[pid] = _city
+      }
+      if (cid) {
+        cindex = _city.findIndex(function (c) {
+          return c.id === cid
+        }) || 0
+      }
+      let _area = []
+      if (_city.length) {
+        cid = cid || _city[cindex].id
+        _area = area[cid]
+        if (!_area) {
+          let { data } = await addressApis.getArea({
+            id: cid
+          })
+          _area = data
+          addressData.area[cid] = _area || []
+        }
+        if (cyid && _area.length) {
+          cyindex = _area.findIndex(function (cy) {
+            return cy.id === cyid
+          }) || 0
+        } else {
+          cyindex = 0
+        }
+      } else {
+        addressData.area[cid] = []
+      }
+      return {
+        p: province,
+        c: _city,
+        cy: _area,
+        pid,
+        cid,
+        cyid,
+        pindex,
+        cindex,
+        cyindex
+      }
+    }
+    goNextPage () {
+      wepy.$instance.globalData.subpub.emit('afterPickedAddress', this.singleInfo)
+      wx.navigateBack()
+    }
+    onLoad () {
+      this.userId = wx.getStorageSync('wow').userId
+      this.getAddressList()
+    }
+    methods = {
+      async handleSelectDefault (item, index) {
+        try {
+          if (item.isDefault === 0) return
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { areaId, recipient, id, phone, address, addressDetail } = item
+          const opts = {
+            districtId: areaId,
+            recipient,
+            phone,
+            address,
+            addressDetail,
+            isDefault: 0,
+            userId: this.userId,
+            id
+          }
+          await addressApis.updateAddress(opts)
+          wx.hideLoading()
+          this.getAddressList()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      hanldeSelectAddress (item, index) {
+        this.singleInfo = item
+        this.goNextPage()
+      },
+      handleToPrev () {
+        this.showAdd = false
+      },
+      handleInputBlur (name, e) { // 对输入框进行动态赋值
+        let val = e.detail.value
+        this.singleInfo[name] = val
+      },
+      handleSaveArea () { // 保存地址
+        const {indexs, province, city, area} = this
+        const [p, c, a] = indexs
+        const _province = province[p]
+        const _city = city[c]
+        const _area = area[a]
+        this.districtId = area[a].id
+        this.singleInfo.address = _province.name + _city.name + _area.name
+        this.singleInfo.value = [_province.id, _city.id, _area.id]
+        this.addressStatus = 'hide'
+        this.$apply()
+      },
+      handleCancelArea () {
+        this.addressStatus = 'hide'
+        this.$apply()
+      },
+      async bindRegionChange () {
+        const {singleInfo, indexs, province} = this
+        const {p, c, cy, pindex, cindex, cyindex} = await this.getAddressData(...indexs, ...singleInfo.value)
+        if (!province.length) {
+          this.province = p
+        }
+        this.indexs = [pindex, cindex, cyindex]
+        this.city = c
+        this.area = cy
+        this.addressStatus = 'show'
+        this.$apply()
+      },
+      handleSetDefault () { // 是否选择默认地址
+        this.singleInfo.isDefault = this.singleInfo.isDefault === 0 ? 1 : 0
+      },
+      handleHiddenError (type) {
+        this.validResult[type] = ''
+      },
+      async formSubmit (e) { // 提交
+        let {name = '', phone = '', addressDetail = ''} = e.detail.value
+        name = name.trim()
+        phone = phone.trim()
+        addressDetail = addressDetail.trim()
+        let validResult = {}
+        let i = 0
+        if (!name) {
+          validResult.name = '收件人为空'
+          i++
+        } else if (name.length > 10) {
+          validResult.name = '最多可输10个字'
+          i++
+        }
+        if (!phone) {
+          validResult.phone = '联系电话为空'
+          i++
+        } else if (!/^1\d{10}$/.test(phone)) {
+          validResult.phone = '手机号码错误'
+          i++
+        }
+        if (!addressDetail) {
+          validResult.addressDetail = '详细地址为空'
+          i++
+        }
+        const {singleInfo, districtId, list, editIndex, userId} = this
+        const { isDefault, address } = singleInfo
+        if (!address) {
+          validResult.address = '收件地址为空'
+          i++
+        }
+        this.validResult = validResult
+        if (!i) {
+          try {
+            wepy.showLoading({
+              title: '保存中',
+              mask: true
+            })
+            let isFirstAdd = !list.length
+            let opts = {
+              districtId,
+              recipient: name,
+              phone,
+              address,
+              addressDetail,
+              isDefault,
+              userId
+            }
+            if (singleInfo.id) {
+              opts.id = singleInfo.id
+              await addressApis.updateAddress(opts)
+              this.showAdd = false
+              wepy.hideLoading()
+              if (singleInfo.isDefault === 0) {
+                list.forEach(element => {
+                  element.isDefault = 1
+                })
+              }
+              list[editIndex] = {...list[editIndex], ...singleInfo}
+              wepy.$instance.globalData.subpub.emit('afterPickedAddress', list[editIndex])
+              this.$apply()
+            } else {
+              const { data } = await addressApis.addAddress(opts)
+              singleInfo.id = data.id
+              singleInfo.isDefault = data.isDefault
+              this.showAdd = false
+              list.unshift(singleInfo)
+              wepy.hideLoading()
+              if (isFirstAdd) { // 第一次添加
+                this.goNextPage()
+              }
+              this.$apply()
+            }
+          } catch (error) {
+            wepy.hideLoading()
+            console.log(error)
+          }
+        }
+      },
+      handleToDelete (id, index) { // 进行地址删除
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '您确定删除地址',
+          success(res) {
+            if (res.confirm) {
+              addressApis.deleteAddress({id}).then(res => {
+                wx.showToast({title: '删除成功'})
+                let isEditDel = index === ''
+                if (isEditDel) {
+                  index = that.list.findIndex(item => {
+                    return item.id === id
+                  })
+                }
+                that.list.splice(index, 1)
+                if (that.list.length === 1) {
+                  that.list[0].isDefault = 0
+                }
+                that.showAdd = false
+                that.$apply()
+              }).catch(e => {
+                console.log(e)
+                wx.showToast({title: '删除失败'})
+              })
+            }
+          }
+        })
+      },
+      handleToEdite (item, index) { // 进行编辑地址
+        const { addressDetail, id, isDefault, phone, recipient, pca, provinceId, cityId, areaId } = item
+        this.singleInfo = {
+          address: pca || '',
+          addressDetail: addressDetail || '',
+          id: id || '',
+          isDefault,
+          phone: phone || '',
+          recipient: recipient || '',
+          value: [provinceId, cityId, areaId]
+        }
+        this.editIndex = index
+        this.districtId = areaId
+        if (item) {
+          this.indexs = [undefined, undefined, undefined]
+        } else {
+          this.indexs = [0, 0, 0]
+        }
+        this.showAdd = true
+        this.$apply()
+      }
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/address/common.postcss';
+</style>

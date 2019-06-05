@@ -1,0 +1,373 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-detail">
+    <banner :good.sync="detail" :cartNum.sync="cartNum" :userId.sync="userId"></banner>
+
+    <info :good.sync="detail"></info>
+
+    <print wx:if="{{detail.spuType === 1}}" :userId.sync="userId" :printerInfo.sync="printerInfo" :good.sync="detail"></print>
+
+    <service :good.sync="detail"></service>
+
+    <recommend wx:if="{{relatedProducts.length}}" :relatedProducts.sync="relatedProducts"></recommend>
+    
+    <tabLabel :good.sync="detail" :defaultSelectTab.sync="defaultSelectTab"></tabLabel>
+
+    <footer :good.sync="detail" :userId.sync="userId" :collectionNum.sync="collectionNum"></footer>
+
+    <view class="float-box {{isRuleTrue ? 'isRuleShow' : 'isRuleHide'}}" catchtouchmove="true">
+      <view class="float-box-mask" @tap.stop="handleClosePopup"></view>
+      <view class="float-box-wrap float-box-right">
+        <view class="animation-element">
+
+          <scroll-view scroll-y="true" class="float-box-scroll" style="height: {{slideHeight}}px">
+            <view class="wow-flex product">
+              <image mode="aspectFill" class="product-img" src="{{detail.image}}"></image>
+              <view class="product-info">
+                <view class="color-price font-size--36">￥{{price}}</view>
+                <view class="font-size--24 product-info__number">编号<text class="num">{{detail.productNumber}}</text></view>
+              </view>
+            </view>
+
+            <view class="product-spec" wx:for="{{spec}}" wx:for-index="idx" wx:for-item="itemName" wx:key="idx">
+              <view class="title font-size--24">{{itemName.styles}}</view>
+              <view class="items font-size--24 wow-flex">
+                <view class="item" :class="{'active': select[idx] === index}" wx:for="{{itemName.particular}}" wx:key="index" @tap.stop="handleToSelect({{idx}}, {{index}})">{{item}}</view>
+              </view>
+            </view>
+
+            <view class="wow-flex product-step is-align-middle is-justify-space-between">
+              <view class="font-size--26 title">数量</view>
+              <wow-stepper class="font-size--24" width="24rpx" height="48rpx" value="{{num}}" @changenumber.stop="changeQty"></wow-stepper>
+            </view>
+
+            <view class="wow-radio radio-box font-size--26 product-select" @tap.stop="handleToCheck('wrapp')">
+              <lebel class="radio">
+                <image hidden="{{!isCheckWrapping}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+              </lebel>礼盒包装
+            </view>
+            <view class="wow-radio radio-box font-size--26 product-select" @tap.stop="handleToCheck('card')">
+              <lebel class="radio">
+                <image hidden="{{!isCheckCardServer}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+              </lebel>卡片服务
+            </view>
+
+            <view class="product-card">
+              <input bindinput="handleCardText" maxlength="20" placeholder="可输入20字以内的卡片留言" placeholder-class="placeholder" class="input font-size--26"/>
+            </view>
+          </scroll-view>
+
+          <view class="btn-wrap">
+            <view class="product-tip font-size--24" wx:if="{{detail.isCustomized === 1}}">定制商品付款后客服将与您取得联系</view>
+            <button class="btn font-size--26" @tap.stop="handleToConfirm">确定</button>
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Banner from './modules/banner'
+  import Info from './modules/info'
+  import Print from './modules/print'
+  import Service from './modules/service'
+  import TabLabel from './modules/tabLabel'
+  import Footer from './modules/footer'
+  import Recommend from './modules/recommend'
+  import goodsApis from '../../api/goods'
+  import cartApis from '../../api/cart'
+  import collectApis from '../../api/collect'
+  import printerApis from '../../api/printer'
+  import CommonMixin from '../../mixins/common'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index',
+        'wow-stepper': '../../packages/stepper/index'
+      }
+    }
+    components = {
+      banner: Banner,
+      info: Info,
+      print: Print,
+      service: Service,
+      tabLabel: TabLabel,
+      footer: Footer,
+      recommend: Recommend
+    }
+    mixins = [CommonMixin]
+    async getProductDetail () {
+      try {
+        let opts = {
+          id: this.pid
+        }
+        const { data } = await goodsApis.getSpuById(opts)
+        this.detail = data
+        wx.setNavigationBarTitle({
+          title: data.title
+        })
+        wepy.$instance.globalData.subpub.on('collect', this.handleCollect, this)
+        // 处理多规格
+        if (data.isSpec === 1) {
+          this.getQuerySku()
+          this.getQuerySpec()
+        }
+        // 打印机商品
+        if (data.spuType === 1) {
+          this.getPrintSpu()
+        }
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getPrintSpu () {
+      try {
+        const { data: printerData } = await printerApis.getPrintSpu({id: this.pid}, {REJECTERRORCONFIG: true})
+        this.printerInfo = printerData
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    changeQty (e) {
+      const { value } = e.detail
+      this.num = value
+    }
+    async getQuerySku () {
+      try {
+        const { data: skuData } = await goodsApis.querySku({id: this.pid}, {REJECTERRORCONFIG: true})
+        this.sku = skuData.data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getQuerySpec () {
+      try {
+        const { data } = await goodsApis.querySpu({id: this.pid}, {REJECTERRORCONFIG: true})
+        this.spec = data
+        const result = []
+        data.forEach((element, index) => {
+          result.push(0)
+        })
+        this.indexs = result.join('_')
+        this.select = {...result}
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getRelatedProducts () {
+      try {
+        let opts = {
+          start: 1,
+          limits: 100,
+          id: this.pid
+        }
+        const { data: relatedData } = await goodsApis.relatedProducts(opts, {REJECTERRORCONFIG: true})
+        this.relatedProducts = relatedData.data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    handleCardText (e) {
+      const { value } = e.detail
+      this.cardText = value
+    }
+    async getSpuCollectionNum () {
+      try {
+        const { pid } = this
+        const opts = {
+          spuId: pid
+        }
+        const { data } = await collectApis.getSpuCollectionNum(opts)
+        this.collectionNum = data.num
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async handleCollect (e) {
+      try {
+        const { pid, userId } = this
+        this.userId = e || userId
+        const opts = {
+          spuId: pid,
+          userId: this.userId
+        }
+        const { data, msg } = await collectApis.insertSpuCollection(opts)
+        this.collectionNum = data.num
+        wx.showToast({
+          title: msg,
+          icon: 'success',
+          duration: 2000
+        })
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    methods = {
+      // 添加购物车
+      async handleToConfirm () {
+        try {
+          const { num, cardText, detail, isCheckCardServer, isCheckWrapping, indexs, pid } = this
+          const opts = {
+            num,
+            spuId: pid,
+            indexes: indexs,
+            isPackage: isCheckWrapping ? 1 : 0,
+            isHasCard: isCheckCardServer ? 1 : 0,
+            card_text: cardText,
+            userId: wx.getStorageSync('wow').userId,
+            specs: detail.isSpec
+          }
+          await cartApis.addToCart(opts)
+          this.isRuleTrue = false
+          this.cartNum = 2
+          wx.showToast({
+            title: '添加购物车成功',
+            icon: 'success',
+            duration: 2000
+          })
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.showToast({
+            title: '添加购物车失败',
+            icon: 'success',
+            duration: 2000
+          })
+        }
+      },
+      // 礼品包装和卡片服务
+      handleToCheck (type) {
+        switch (type) {
+          case 'wrapp':
+            this.isCheckWrapping = !this.isCheckWrapping
+            break
+          case 'card':
+            this.isCheckCardServer = !this.isCheckCardServer
+            break
+          default:
+            break
+        }
+      },
+      // 规格选择
+      handleToSelect (idx, index) {
+        this.select[idx] = index
+        const result = []
+        for (let i in this.select) {
+          result.push(this.select[i])
+        }
+        this.indexs = result.join('_')
+      },
+      handleClosePopup () {
+        this.isRuleTrue = false
+      }
+    }
+    events = {
+      handleToCart () {
+        this.isRuleTrue = true
+      },
+      handleToCollect () {
+        this.handleCollect()
+      }
+    }
+    onLoad ({id}) {
+      this.pid = id
+      this.getProductDetail()
+      this.getRelatedProducts()
+      this.getSpuCollectionNum()
+    }
+    computed = {
+      slideHeight () {
+        let maxHeight = ''
+        wx.getSystemInfo({
+          success: function (res) {
+            let windowHeight = res.windowHeight
+            maxHeight = windowHeight - 90
+          }
+        })
+        return maxHeight
+      },
+      price () {
+        let price = ''
+        if (this.detail.isSpec === 0) {
+          return this.detail.price
+        } else {
+          this.sku.forEach(item => {
+            if (item.indexes === this.indexs) {
+              price = item.price
+            }
+          })
+          return price
+        }
+      },
+      specificationNumber () {
+        let num = ''
+        this.sku.forEach(item => {
+          if (item.indexs === this.indexs) {
+            num = item.specificationNumber
+          }
+        })
+        return num
+      }
+    }
+    data = {
+      isRuleTrue: false,
+      pid: '',
+      detail: {},
+      relatedProducts: [],
+      sku: [],
+      spec: [],
+      select: {},
+      indexs: '',
+      isCheckWrapping: false, // 礼品包装
+      isCheckCardServer: false, // 卡片服务
+      cardText: '',
+      num: 1,
+      defaultSelectTab: 'product',
+      userId: '',
+      collectionNum: '', // 收藏数量
+      printerInfo: ''
+    }
+
+    async getShareNum () {
+      try {
+        const { data } = await goodsApis.updateShareSpu({spuId: this.pid})
+        console.log(this.detail)
+        this.detail.share = data.num
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    onShareAppMessage () {
+      const { pid, detail } = this
+      this.getShareNum()
+      return {
+        title: detail.name,
+        imageUrl: detail.picture,
+        path: 'pages/detail/index?id=' + pid
+      }
+    }
+    onHide () {
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/detail/common.postcss';
+</style>

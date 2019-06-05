@@ -1,0 +1,39 @@
+<template>
+  <view class="good-line">
+    <view class="good-line-items" wx:if="{{printerInfo}}">
+      <navigator url="/pages/detail/index?id={{printerInfo.printerId}}" class="wow-flex is-align-middle font-size--24 good-line-item">
+        <view class="good-line-item__label">打印设备</view>
+        <view class="good-line-item__value">{{printerInfo.printName}}</view>
+        <view></view>
+      </navigator>
+    </view>
+    <view class="good-line-items" wx:if="{{good.modelId}}">
+      <navigator wx:if="{{userId}}" url="/pages/modelDetail/index?id={{good.modelId}}&name={{good.modelName}}" class="wow-flex is-align-middle font-size--24 good-line-item">
+        <view class="good-line-item__label">打印</view>
+        <image class="good-line-item__icon" src="../../../images/detail/ico_goodsdetail_printer.png" mode="aspectFill"></image>
+        <view class="good-line-item__info">用本商品模型打印</view>
+      </navigator>
+      <button wx:else data-url="/pages/modelDetail/index?id={{good.modelId}}&name={{good.modelName}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="wow-flex is-align-middle font-size--24 good-line-item open-type-btn">
+        <view class="good-line-item__label">打印</view>
+        <image class="good-line-item__icon" src="../../../images/detail/ico_goodsdetail_printer.png" mode="aspectFill"></image>
+        <view class="good-line-item__info">用本商品模型打印</view>
+      </button>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '../../../mixins/common'
+export default class Print extends wepy.component {
+  props = {
+    good: [Object],
+    printerInfo: [Object],
+    userId: [String, Number]
+  }
+  mixins = [CommonMixin]
+  data = {
+  }
+  methods = {
+  }
+}
+</script>

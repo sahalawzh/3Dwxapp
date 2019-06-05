@@ -1,0 +1,48 @@
+<template>
+  <view class="video-lists">
+    <view class="video-lists__item wow-background-image font-color-white"
+      wx:for="{{lists}}"
+      wx:key="item"
+      style="background-image: url({{item.image}})"
+      @tap.stop="handleToDetail({{item.id}})">
+      <image class="bg-mask" src="../images/common/bg_homevideolist_top.png" mode="aspectFill"></image>
+      <view class="item">
+        <view class="content">
+          <view class="title font-size--34">{{item.title}}</view>
+          <view class="wow-flex video-lists__item_bottom">
+            <view class="wow-flex">
+              <image class="icon" lazy-load="true" src="../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
+              <text class="font-size--28">{{item.hot}}</text>
+            </view>
+            <view class="wow-flex duration">
+              <image class="icon" src="../images/index/ico_homevideolist_Duration.png" mode="aspectFill"></image>
+              <text class="font-size--28">{{item.duration}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import wxUtils from '../utils/wxutils'
+export default class VideoList extends wepy.component {
+  props = {
+    lists: {
+      type: Array,
+      default: []
+    }
+  }
+  data = {
+  }
+  methods = {
+    handleToDetail (id) {
+      wxUtils.backOrNavigate('/pages/videoDetail/index?id=' + id)
+    }
+  }
+}
+</script>
+<style lang="postcss">
+  @import 'src/styles/modules/videoList.postcss';
+</style>

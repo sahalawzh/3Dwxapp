@@ -1,0 +1,88 @@
+
+.page-saleAfter {
+  .saleAfter-product {
+    position: relative;
+    padding: 38rpx 50rpx;
+    &::after {
+      position: absolute;
+      content: "";
+      height: 16rpx;
+      width: 100%;
+      left: 0;
+      top: 0;
+      background-color: #f6f7f7;
+    }
+    &__img {
+      width: 150rpx;
+      height: 124rpx;
+      border-radius: 8rpx;
+    }
+    &__info {
+      position: relative;
+      margin-left: 26rpx;
+      padding-top: 10rpx;
+      .title {
+        color: #4a4a4a;
+        font-weight: 600;
+      }
+      .sku {
+        position: absolute;
+        bottom: 14rpx;
+        padding-top: 10rpx;
+        color: #9b9b9b;
+        font-weight: 600;
+      }
+    }
+  }
+  .saleAfter-items {
+    position: relative;
+    &::before {
+      position: absolute;
+      content: "";
+      height: 16rpx;
+      width: 100%;
+      left: 0;
+      top: -16rpx;
+      background-color: #f6f7f7;
+    }
+    &::after {
+      position: absolute;
+      content: "";
+      height: 16rpx;
+      width: 100%;
+      left: 0;
+      bottom: -16rpx;
+      background-color: #f6f7f7;
+    }
+    &__item {
+      position: relative;
+      padding: 30rpx 50rpx;
+      &:not(:last-child)::after {
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #DEDEE4;
+      }
+      .status-icon {
+        width: 48rpx;
+        height: 48rpx;
+        margin-right: 14rpx;
+      }
+      .status-content {
+        flex: 1;
+        &__title {
+          color: #4a4a4a;
+          font-weight: 600;
+        }
+        &__label {
+          color: #9b9b9b;
+          margin-top: 10rpx;
+        }
+      }
+    }
+  }
+}

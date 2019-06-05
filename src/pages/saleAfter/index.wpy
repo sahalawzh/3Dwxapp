@@ -1,0 +1,56 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-saleAfter">
+    <view class="saleAfter-product wow-flex">
+      <view class="wow-background-image saleAfter-product__img"
+        style="background-image: url({{'https://wxsw.oss-cn-hangzhou.aliyuncs.com/video/model/pic/ad0a2217-5dd5-4482-b5a8-d63f36834e1b.jpg'}})"></view>
+      <view class="saleAfter-product__info">
+        <wow-elip line="2" class="title font-size--28">测试测试</wow-elip>
+        <view class="sku font-size--24">1111</view>
+      </view>
+    </view>
+    <view class="saleAfter-items">
+      <view class="saleAfter-items__item wow-flex is-align-middle">
+        <image class="status-icon" src="../../images/person/ico_mine_order.png" mode="aspectFill"></image>
+        <view class="status-content">
+          <view class="status-content__title font-size--28">待退款</view>
+          <view class="status-content__label font-size--24">未收到货（包含未签收）或与客服协商同意的前提下</view>
+        </view>
+      </view>
+      <view class="saleAfter-items__item wow-flex is-align-middle">
+        <image class="status-icon" src="../../images/person/ico_mine_order.png" mode="aspectFill"></image>
+        <view class="status-content">
+          <view class="status-content__title font-size--28">仅退款</view>
+          <view class="status-content__label font-size--24">未收到货（包含未签收）或与客服协商同意的前提下</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Set extends wepy.page {
+    config = {
+      navigationBarTitleText: '申请售后',
+      usingComponents: {
+        'wow-elip': '../../packages/elip/index'
+      }
+    }
+    data = {
+    }
+    onLoad () {
+    }
+    methods = {
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/saleAfter/common.postcss';
+</style>

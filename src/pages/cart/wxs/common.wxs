@@ -1,0 +1,8 @@
+module.exports = {
+  specStr: function (item) {
+    return item.spec + (item.isPackage === 1 ? '，礼盒包装' : '') + (item.isHasCard === 1 ? '，卡片服务' : '')
+  },
+  intVal: function (val) {
+    return Number(val)
+  }
+}

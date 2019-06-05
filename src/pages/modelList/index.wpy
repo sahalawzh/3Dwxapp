@@ -1,0 +1,110 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-model">
+
+    <view class="good-list">
+      <view class="products-layout">
+        <view class="products-layout__body">
+          <block wx:for="{{lists}}" wx:key="index">
+            <navigator url="/pages/modelDetail/index?id={{item.id}}&name={{item.name}}" class="products-list__item" @tap.stop="handleToList({{item}})">
+              <view class="product-box">
+                <view class="product-image">
+                  <image mode="aspectFill" class="product-image-cont" src="{{item.smallImagePath}}"/>
+                </view>
+                <view class="product-info">
+                  <view class="product-info__box">
+                    <view class="product-title font-size--28">
+                      {{item.name}}
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </navigator>
+          </block>
+        </view>
+
+        <loading wx:if="{{hasMoreData}}"></loading>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import modelApis from '../../api/model'
+  import Loading from '../../components/loading'
+  export default class VideoDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: ''
+    }
+    components = {
+      loading: Loading
+    }
+    data = {
+      lists: [],
+      firstModelTypeId: '',
+      secondModelTypeId: '',
+      start: 1,
+      limits: 20,
+      hasMoreData: false
+    }
+    methods = {
+      handleToList (item, index) {
+      }
+    }
+    async getListModels () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { firstModelTypeId, secondModelTypeId, start, limits, lists } = this
+        const opts = {
+          firstModelTypeId,
+          secondModelTypeId,
+          start,
+          limits
+        }
+        const { data } = await modelApis.listModels(opts)
+        wx.hideLoading()
+        if (start === 0) {
+          lists = []
+        }
+        this.lists = lists.concat(data)
+        if (data.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start ++
+        }
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onLoad (options) {
+      const { name, firstModelTypeId, secondModelTypeId } = options
+      this.firstModelTypeId = firstModelTypeId
+      this.secondModelTypeId = secondModelTypeId
+      wx.setNavigationBarTitle({
+        title: decodeURIComponent(name)
+      })
+      this.getListModels()
+    }
+    onReachBottom () {
+      if (this.hasMoreData) {
+        this.getListModels()
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/modelList/common.postcss';
+</style>

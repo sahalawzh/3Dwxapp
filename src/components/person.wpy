@@ -1,0 +1,31 @@
+<template>
+  <view>
+    <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon open-type-btn">
+      <image src="../../images/common/btn_user_white.png" mode="aspectFill"></image>
+    </navigator>
+    <button wx:else data-url="/pages/person/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="person-icon open-type-btn">
+      <image src="../../images/common/btn_user_white.png" mode="aspectFill"></image>
+    </button>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '../mixins/common'
+export default class Person extends wepy.component {
+  props = {
+    userId: [String, Number]
+  }
+  mixins = [CommonMixin]
+}
+</script>
+
+<style lang='postcss'>
+  .person-icon {
+    width: 48rpx;
+    height: 48rpx;
+    image {
+      width: 100%;
+      height: 100%;
+    }
+  }
+</style>

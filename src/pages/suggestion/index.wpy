@@ -1,0 +1,132 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-suggestion">
+    <form bindsubmit="handleToSuggestion">
+      <view class="page-suggestion__items wow-flex is-justify-space-between">
+        <view class="item font-size--26 active" wx:for="{{items}}" wx:key="index" :class="{'active': checked === index}" @tap.stop="hanldeSelectItem({{index}})">{{item}}</view>
+      </view>
+
+      <view class="page-suggestion__section">
+        <textarea
+          class="section-textarea font-size--28"
+          maxlength="120"
+          placeholder-class="section-textarea__placeholder"
+          name="content"
+          placeholder="请在这里输入您对无限三维的建议，感谢您对无限三维的支持~"/>
+        <view class="form-item__status is-error" hidden="{{!validResult.content}}" @tap.stop="handleHiddenError('content')">
+          <text class="form-item__status-tip">
+            <text class="form-item__status-cont">{{validResult.content}}</text>
+            <text class="form-item__status-trigger">重新输入</text>
+          </text>
+        </view>
+      </view>
+
+      <view class="page-suggestion__way font-size--28">
+        留下您的联系方式，会有客服联系您
+      </view>
+
+      <view class="page-suggestion__control font-size--28">
+        <input type="number" value="{{phone}}" class="control" name="phone" maxlength="11">
+        <view class="form-item__status is-error" hidden="{{!validResult.phone}}" @tap.stop="handleHiddenError('phone')">
+          <text class="form-item__status-tip">
+            <text class="form-item__status-cont">{{validResult.phone}}</text>
+            <text class="form-item__status-trigger">重新输入</text>
+          </text>
+        </view>
+      </view>
+      <view class="footer">
+        <button hover-class="none" class="footer-btn font-size--28" form-type="submit">我要吐槽</button>
+      </view>
+    </form>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import suggestionApis from '../../api/suggestion'
+  import wxutils from '../../utils/wxutils'
+  export default class Set extends wepy.page {
+    config = {
+      navigationBarTitleText: '我要吐槽'
+    }
+    data = {
+      items: ['使用体验', '商品购买', '内容质量', '其他建议'],
+      checked: 0,
+      content: '',
+      userId: '',
+      validResult: {},
+      phone: ''
+    }
+    onLoad () {
+      this.userId = wepy.$instance.globalData.userId
+      this.phone = wepy.$instance.globalData.userDO.phone
+    }
+    methods = {
+      handleHiddenError (type) {
+        this.validResult[type] = ''
+      },
+      hanldeSelectItem (index) {
+        this.checked = index
+      },
+      async handleToSuggestion (e) {
+        let { content = '', phone = '' } = e.detail.value
+        content = content.trim()
+        phone = phone.trim()
+        let validResult = {}
+        let i = 0
+        if (!content) {
+          validResult.content = '反馈内容为空'
+          i++
+        }
+        if (!phone) {
+          validResult.phone = '联系电话为空'
+          i++
+        } else if (!/^1\d{10}$/.test(phone)) {
+          validResult.phone = '手机号码错误'
+          i++
+        }
+        this.validResult = validResult
+        if (!i) {
+          try {
+            wx.showLoading({
+              title: '提交中...',
+              mask: true
+            })
+            const { checked, userId } = this
+            const opts = {
+              content,
+              phone,
+              type: checked,
+              userId
+            }
+            await suggestionApis.insertFeedBack(opts)
+            wx.hideLoading()
+            wx.nextTick(() => {
+              wx.showToast({
+                title: '您的吐槽我们已经收到',
+                icon: 'none',
+                success: function () {
+                  setTimeout(() => {
+                    wx.hideToast()
+                    wxutils.backOrNavigate('/pages/person/index')
+                  }, 2000)
+                }
+              })
+            })
+          } catch (error) {
+            wx.hideLoading()
+          }
+        }
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/suggestion/common.postcss';
+</style>

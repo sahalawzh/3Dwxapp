@@ -1,0 +1,55 @@
+<template>
+  <view class="fooer">
+    <view class="footer-box wow-flex is-align-middle">
+      <view class="controls wow-flex is-align-middle font-color-white">
+        
+        <button class="controls-item open-type-btn" open-type="contact">
+          <image mode="aspectFill" class="controls-box controls-wechat" src="../../../images/common/ico_Detailspage_viewtimes.png"></image>
+        </button>
+        <button open-type="share" class="controls-item open-type-btn">
+          <image mode="aspectFill" class="controls-box controls-share" src="../../../images/common/btn_share.png"></image>
+          <view class="controls-item__sign font-size--24">{{good.share}}</view>
+        </button>
+        <view wx:if="{{userId}}" @tap.stop="handleToCollect" class="controls-item">
+          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_Collection.png"></image>
+          <view class="controls-item__sign font-size--24">{{collectionNum}}</view>
+        </view>
+        <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="controls-item open-type-btn">
+          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_Collection.png"></image>
+          <view class="controls-item__sign font-size--24">{{collectionNum}}</view>
+        </button>
+        <!-- <view class="controls-box controls-share">{{good.share}}</view>
+        <view class="controls-box controls-commet"></view> -->
+      </view>
+      <view class="link">
+        <view class="font-color-white font-size--32 link-btn" @tap.stop="handleToCart">加入购物车</view>
+      </view>
+    </view>
+    
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '../../../mixins/common'
+export default class Footer extends wepy.component {
+  props = {
+    good: {
+      type: [Object],
+      twoWay: true
+    },
+    userId: [String, Number],
+    collectionNum: [String, Number]
+  }
+  data = {
+  }
+  mixins = [CommonMixin]
+  methods = {
+    handleToCart () {
+      this.$emit('handleToCart')
+    },
+    handleToCollect () {
+      this.$emit('handleToCollect')
+    }
+  }
+}
+</script>

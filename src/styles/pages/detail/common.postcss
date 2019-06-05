@@ -1,0 +1,382 @@
+@import '../../mixins/common.postcss';
+.page-detail {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 174rpx;
+  .banner {
+    position: relative;
+    /*轮播图遮罩层*/
+    &-mask {
+      position: absolute;
+      width: 100%;
+      left: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+    .swiper-pagination {
+      position: absolute;
+      right: 30rpx;
+      color: #fff;
+      z-index: 10;
+      &-current {
+        font-size: 38rpx;
+      }
+      &-total {
+        font-size: 24rpx;
+      }
+    }
+    .icon-mall {
+      position: absolute;
+      top: 24rpx;
+      right: 138rpx;
+      width: 54rpx;
+      height: 54rpx;
+      .icon {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .tools {
+      position: absolute;
+      top: 24rpx;
+      right: 54rpx;
+      width: 54rpx;
+      height: 54rpx;
+      border-radius: 50%;
+      background-color: rgba(37,38,30,0.5) !important;
+      z-index: 11;
+      .icon {
+        width: 36rpx;
+        height: 36rpx;
+      }
+      &-cart {
+        position: relative;
+        height: 100%;
+        &__sign {
+          position: absolute;
+          top: 4rpx;
+          left: 27rpx;
+          min-width: 12rpx;
+          height: 12rpx;
+          border-radius: 50%;
+          background-color: #e1146c;
+        }
+      }
+    }
+  }
+  swiper{
+    height: 632rpx;
+    &-item {
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .good-info {
+    padding: 32rpx 30rpx 32rpx 50rpx;
+    &__price {
+      margin-left: -10rpx;
+    }
+    .price-maket {
+      color: #9b9b9b;
+    }
+    &__name {
+      padding-top: 10rpx;
+      color: #737373;
+      font-weight: 600;
+    }
+    &__postage {
+      padding-top: 20rpx;
+      color: #b0b0b0;
+      .freeShipping {
+        margin-left: 24rpx;
+        color: #4a4a4a;
+      }
+    }
+    &__name {
+      @mixin elip 2;
+    }
+    .name-elip {
+      @mixin ellipsis 2;
+    }
+  }
+  .good-line {
+    &-items {
+      background-color: #eee;
+      position: relative;
+      width: 100%;
+      padding-top: 16rpx;
+    }
+    &-item {
+      height: 88rpx;
+      padding-left: 50rpx;
+      padding-right: 50rpx;
+      background-color: #fff;
+      &__label {
+        padding-right: 30rpx;
+        color: #b0b0b0;
+      }
+      &__value {
+        padding: 2rpx 20rpx;
+        background-color: #145ee1;
+        border-radius: 22rpx;
+        color: #fff;
+        line-height: 24rpx;
+      }
+      &__icon {
+        width: 30rpx;
+        height: 30rpx;
+        margin-right: 12rpx;
+      }
+    }
+  }
+  .tab-label {
+    padding-top: 16rpx;
+    background-color: #eee;
+    .collect-tabs {
+      background-color: #fff;
+      color: #4b4b4b;
+      height: 80rpx;
+      padding-bottom: 12rpx;
+      &__panle {
+        padding: 24rpx 0 16rpx;
+      }
+      &__panle.active {
+        font-size: 32rpx;
+        color: #373737;
+        font-weight: 600;
+        border-bottom: 4rpx solid #085ffd;
+        border-radius: 4rpx;
+      }
+    }
+    .collect-tabs__panle + .collect-tabs__panle {
+      margin-left: 34rpx;
+    }
+    /* &-box {
+      background-color: #fff;
+    }
+    &-plan {
+      height: 90rpx;
+      .label {
+        width: 50%;
+        text-align:center;
+        line-height:90rpx;
+        position:relative;
+      }
+    } */
+    &-detail {
+      width: 100%;
+      height: auto;
+      background-color: #fff;
+      image {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .fooer {
+    position: fixed;
+    bottom: 56rpx;
+    z-index: 98;
+    left: 0;
+    right: 0;
+    &-box {
+      width: 100%;
+    }
+    .controls {
+      width: 50%;
+      padding-left: 50rpx;
+      &-item {
+        position: relative;
+        overflow: visible;
+        &__sign {
+          position: absolute;
+          top: -14rpx;
+          left: 36rpx;
+          padding: 2rpx 8rpx;
+          min-width: 22rpx;
+          background-color: #e1146c;
+          color: #fff;
+          border-radius: 22rpx;
+          text-align: center;
+        }
+      }
+      &-box {
+        width: 72rpx;
+        height: 72rpx;
+        margin-right: 34rpx;
+      }
+    }
+    .link {
+      width: 50%;
+      margin: 0 auto;
+      &-btn {
+        width: 282rpx;
+        height: 80rpx;
+        text-align: center;
+        line-height: 80rpx;
+        background-color: #145ee1;
+        border-radius: 46rpx;
+      }
+    }
+  }
+  .good-list {
+    .cut-split {
+      background-color: #eee;
+      height: 16rpx;
+    }
+    .title {
+      margin: 36rpx 0 10rpx 52rpx;
+      color: #000;
+    }
+    .products-layout {
+      position:relative;
+      margin-bottom: 58rpx;
+    }
+    .mall-scroll-content {
+      margin-right:52rpx;
+      overflow:hidden;
+      position:relative;
+    }
+    .mall-scroll {
+      display:flex;
+      padding-left: 52rpx;
+      white-space:nowrap;
+    }
+    .scroll-view-item {
+      width: 312rpx;
+      margin-top:24rpx;
+      margin-bottom:12prx;
+      display:inline-block;
+    }
+    .scroll-view-item + .scroll-view-item {
+      padding-left: 20rpx;
+    }
+    .product-item {
+      &__img {
+        border-radius:14rpx 14rpx 0 0;
+        overflow:hidden;
+        position:relative;
+        padding-bottom:100%;
+        image {
+          position:absolute;
+          top:0;
+          right:0;
+          width:100%;
+          background-repeat:no-repeat;
+          background-position:center;
+          background-size:cover;
+          height: 100%;
+        }
+        .box {
+          position:absolute;
+          top:0;
+          right:0;
+          width:100%;
+          height: 100%;
+          background-color: #4884DC;
+        }
+      }
+      &__info {
+        border-radius:0 0 14rpx 14rpx;
+        padding: 22rpx 28rpx;
+        overflow:hidden;
+        height:110rpx;
+        background-color: #ececec;
+      }
+      .product-name {
+        height: 78rpx;
+        @mixin elip 2;
+      }
+      .elip {
+        @mixin ellipsis 2;
+      }
+    }
+  }
+  .product {
+    position: relative;
+    padding: 66rpx 46rpx 30rpx;
+    &-img {
+      width: 212rpx;
+      height: 174rpx;
+      border-radius: 8rpx;
+      margin-right: 26rpx;
+    }
+    &-info {
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      &__number {
+        color: #9b9b9b;
+        margin-top: 14rpx;
+        .num {
+          color: #4a4a4a;
+          margin-left: 12rpx;
+        }
+      }
+    }
+    &-spec {
+      padding: 24rpx 12rpx 18rpx 46rpx;
+      .title {
+        color: #9b9b9b;
+        padding-bottom: 6rpx;
+      }
+      .items {
+        flex-wrap: wrap;
+        .item {
+          padding: 12rpx 50rpx;
+          margin-top: 24rpx;
+          background-color: #ededed;
+          color: #4b4b4b;
+          border-radius: 30rpx;
+          margin-right: 40rpx;
+          &.active {
+            background-color: #dde8f5;
+            color: #6594e9;
+            border: 1rpx solid #8bb2f0;
+          }
+        }
+      }
+    }
+    &-step {
+      padding: 18rpx 54rpx 6rpx 46rpx;
+      .title {
+        color: #9b9b9b;
+      }
+    }
+    &-select {
+      padding: 38rpx 54rpx 0 46rpx;
+      color: #4b4b4b;
+      width: 100%;
+      display: flex;
+      .radio {
+        margin-right: 20rpx;
+      }
+    }
+    &-card {
+      padding: 44rpx 54rpx 30rpx 46rpx;
+      .input {
+        height: 70rpx;
+        padding-left: 26rpx;
+        color: #484848;
+        background-color: #ededed;
+        border-radius: 8rpx;
+      }
+      .placeholder {
+        color: #9b9b9b;
+      }
+    }
+    &-tip {
+      text-align: center;
+      color: #6594e9;
+      margin-bottom: 24rpx;
+    }
+  }
+  .float-box-scroll {
+    height: 950rpx;
+  }
+}

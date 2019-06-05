@@ -1,0 +1,27 @@
+module.exports = {
+  specStr: function (item) {
+    return item.spec + (item.isPackage === 1 ? '，礼盒包装' : '') + (item.card_text ? '，item.card_text' : '')
+  },
+  payType: function (val) {
+    var tag = '';
+    switch (val) {
+      case 1:
+        tag = '安卓微信支付'
+        break
+      case 2:
+        tag = '安卓支付宝支付'
+        break
+      case 3:
+        tag = 'IOS微信支付'
+        break
+      case 4:
+        tag = 'IOS支付宝支付'
+        break
+      case 5:
+        tag = '微信小程序支付'
+        break
+
+    }
+    return tag
+  }
+}

@@ -1,0 +1,255 @@
+<style>
+  @import './packages/package_help/common.wxss';
+</style>
+<style lang="postcss">
+  @import 'src/styles/common/common.postcss';
+  .page-contain {
+    background-color: #fff;
+  }
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+import Event from './utils/Event'
+import http from './utils/http'
+const networkTypeImageTypes = {
+  'wifi': 80,
+  '4g': 80,
+  '3g': 70,
+  '2g': 50
+}
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index/index',
+      'pages/index/mall',
+      'pages/index/printer',
+      'pages/videoDetail/index',
+      'pages/goodsList/index',
+      'pages/detail/index',
+      'pages/comment/index',
+      'pages/order/index',
+      'pages/cart/index',
+      'pages/reserver/index',
+      'pages/person/index',
+      'pages/address/index',
+      'pages/collect/index',
+      'pages/search/index',
+      'pages/printerDetail/index',
+      'pages/model/index',
+      'pages/suggestion/index',
+      'pages/printerAdd/index',
+      'pages/success/index',
+      'pages/modelList/index',
+      'pages/modelDetail/index',
+      'pages/printerDebug/index',
+      'pages/orderDetail/index',
+      'pages/printerSet/index',
+      'pages/printerAdvanced/index',
+      'pages/printerBuy/index',
+      'pages/saleAfter/index',
+      'pages/logistics/index',
+      'pages/printerQueue/index',
+      'pages/transaction/index',
+      'pages/printerQueueComplete/index',
+      'pages/printerList/index',
+      'pages/videoList/index',
+      'pages/publishCommet/index'
+    ],
+    tabBar: {
+      backgroundColor: '#ffffff',
+      color: '#9b9b9b',
+      selectedColor: '#292929',
+      list: [
+        {
+          'pagePath': 'pages/index/index',
+          'iconPath': 'custom-tab-bar/icon/nav_button_home_default.png',
+          'selectedIconPath': 'custom-tab-bar/icon/nav_button_home_selected.png',
+          'text': '首页'
+        },
+        {
+          'pagePath': 'pages/index/mall',
+          'iconPath': 'custom-tab-bar/icon/nav_button_shop_default.png',
+          'selectedIconPath': 'custom-tab-bar/icon/nav_button_shop_selected.png',
+          'text': '商城'
+        },
+        {
+          'pagePath': 'pages/index/printer',
+          'iconPath': 'custom-tab-bar/icon/nav_btn_printer_default.png',
+          'selectedIconPath': 'custom-tab-bar/icon/nav_btn_printer_selected.png',
+          'text': '打印机'
+        }
+      ]
+    },
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: '无限三维',
+      navigationBarTextStyle: 'black'
+    },
+    permission: {
+      'scope.userLocation': {
+        'desc': '你的位置信息将用于地理位置导航'
+      }
+    }
+  }
+  globalData = {
+    subpub: new Event(),
+    networkFailConf: {},
+    userInfo: wx.getStorageSync('userInfo') || null,
+    baseUrl: '',
+    addressData: {
+      province: [],
+      city: {},
+      area: {}
+    }, // 地址选择器缓存
+    tabBar: {
+      backgroundColor: '#ffffff',
+      color: '#9b9b9b',
+      selectedColor: '#292929',
+      list: [
+        {
+          'pagePath': '/pages/index/index',
+          'iconPath': 'icon/nav_button_home_default.png',
+          'selectedIconPath': 'icon/nav_button_home_selected.png',
+          'text': '首页'
+        },
+        {
+          'pagePath': '/pages/index/mall',
+          'iconPath': 'icon/nav_button_shop_default.png',
+          'selectedIconPath': 'icon/nav_button_shop_selected.png',
+          'text': '商城'
+        },
+        {
+          'pagePath': '/pages/index/printer',
+          'iconPath': 'icon/nav_btn_printer_default.png',
+          'selectedIconPath': 'icon/nav_btn_printer_selected.png',
+          'text': '打印机'
+        }
+      ]
+    }
+  }
+
+  constructor () {
+    super()
+    this.use('promisify')
+    this.use('requestfix')
+    wx.windowWidth = 375
+    wx.imageQuality = 50
+    wx.pixelRatio = 2
+    wx.rpx2px = wx.windowWidth / 750
+    wx.isSupportWebp = false
+    wx.getSystemInfo({
+      success({windowWidth, windowHeight, pixelRatio, system}) {
+        let systemInfo = system.split(/\s/) || []
+        if (systemInfo[0] === 'Android' && systemInfo[1] > '4.2.1') {
+          wx.isSupportWebp = true
+        }
+        wx.windowWidth = windowWidth
+        wx.windowHeight = windowHeight
+        wx.pixelRatio = pixelRatio
+        wx.rpx2px = windowWidth / 750
+      }
+    })
+    // 根据网络变化加载不同质量的图片
+    wx.onNetworkStatusChange(function (res) {
+      if (res.isConnected) {
+        wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
+      }
+    })
+    wx.getNetworkType({
+      success (res) {
+        wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
+        console.log('app', wx.imageQuality)
+      }
+    })
+    if (process.env.NODE_ENV === 'development') {
+      this.globalData.baseUrl = 'http://testapi.gdlwzn.com'
+    } else {
+      if (process.env.TARGET_APP === 'proapp') {
+        this.globalData.baseUrl = ''
+      } else {
+        this.globalData.baseUrl = 'https://api.gdlwzn.com'
+      }
+    }
+    let cacheWowInfo = wx.getStorageSync('wow')
+    if (cacheWowInfo) {
+      this.globalData.Token = cacheWowInfo.token
+      this.globalData.userId = cacheWowInfo.userId
+      this.globalData.userDO = cacheWowInfo.userDO
+    }
+    this.globalData.loginUrl = `${this.globalData.baseUrl}/api/user/wxLogin`
+    // 拦截request请求进行操作
+    this.intercept('request', {
+      config (payload) {
+        let _payload = payload
+        if (typeof payload === 'string') {
+          _payload = {
+            url: payload
+          }
+        }
+        if (_payload.url === `${wepy.$instance.globalData.loginUrl}`) {
+          return _payload
+        } else {
+          _payload.header = this.createAuthHeader()
+          // 组装请求连接
+          const d = _payload.data
+          // 组装请求连接
+          if (d && d._no_prefix) {
+            console.log('_no_prefix')
+          } else if (d && d.is_diy) {
+          } else {
+            _payload.url = this.globalData.baseUrl + '/' + _payload.url
+          }
+          return _payload
+        }
+      }
+    })
+    if (process.env.NODE_ENV === 'development') {
+      if (!wx.showLoading) {
+        wx.showLoading = function () {}
+        wx.hideLoading = function () {}
+      }
+    }
+  }
+  onShow () {
+    // 隐藏系统tabbar
+    wx.hideTabBar()
+  }
+
+  editTabbar () {
+    let tabbar = this.globalData.tabBar
+    let currentPages = getCurrentPages()
+    let _this = currentPages[currentPages.length - 1]
+    let pagePath = _this.route
+    if (pagePath.indexOf('/') !== 0) {
+      pagePath = '/' + pagePath
+    }
+    for (let i in tabbar.list) {
+      tabbar.list[i].selected = false
+      if (tabbar.list[i].pagePath === pagePath) {
+        tabbar.list[i].selected = true
+      }
+    }
+    _this.setData({
+      tabbar: tabbar
+    })
+  }
+
+  createAuthHeader () {
+    const token = wepy.$instance.globalData.Token
+    let header = {
+      token,
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+    return header
+  }
+  onLaunch () {
+    wx.hideTabBar()
+    if (!this.globalData.userId) {
+      http.login()
+    }
+  }
+}
+</script>

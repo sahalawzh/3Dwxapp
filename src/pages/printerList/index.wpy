@@ -1,0 +1,164 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printer">
+    <view class="printer-items" wx:if="{{!isDefault}}">
+
+      <view class="printer-items__card" wx:for="{{printerList}}" wx:key="index">
+        <view class="printer-items__item wow-flex is-align-middle">
+          <view class="wow-radio radio-box font-size--26" @tap.stop="handleCheckedPrinter({{item}}, {{index}})">
+            <lebel class="radio">
+              <image hidden='{{!item.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>
+          </view>
+          <image class="printer-img" src="{{item.printerColor.colorImage}}" mode="aspectFill"></image>
+          <view class="printer-info">
+            <view class="wow-flex printer-info__status is-align-middle is-justify-space-between">
+              <view class="wow-flex is-align-middle">
+                <view class="name font-size--32">{{item.printerAlias}}</view>
+                <image class="status-img{{item.printerState === 'Printing' || item.printerState === 'Paused' ? '' : '__single'}}" src="../../images/printer/ico_print_{{printerSate[item.printerState].status}}.png" mode="aspectFill"></image>
+              </view>
+              <image class="btn_set" wx:if="{{item.printerState === 'Operational'}}" src="../../images/printer/btn_set.png" mode="aspectFill"></image>
+            </view>
+            <view class="printer-info__tip font-size--24" style="color: {{item.printerStateDesc.showColor}}">{{item.printerStateDesc.showText}}</view>
+            <view class="printer-info__record wow-flex is-align-middle">
+              <view class="font-size--24">{{item.queueTotal}}</view>
+              <image class="icon" src="../../images/printer/ico_playlist_{{printerSate[item.printerState].record}}.png" mode="aspectFill"></image>
+            </view>
+          </view>
+        </view>
+        <view class="printer-items__progress">
+          <progress
+            class="printer-progress"
+            stroke-width='10'
+            backgroundColor="{{printerSate[item.printerState].color}}"
+            activeColor="{{printerSate[item.printerState].activeColor}}"
+            percent='{{item.printerProcessCompletion || 0}}'
+          ></progress>
+        </view>
+      </view>
+
+    </view>
+
+    <view class="queue-footer">
+      <view class="queue-btn font-size--28" @tap.stop="hanldeSelectPrinter">确认</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  import wxutils from '../../utils/wxutils'
+  export default class PrinterList extends wepy.page {
+    config = {
+      navigationBarTitleText: '打印机'
+    }
+    data = {
+      isFirst: false,
+      printerList: [],
+      printerSate: {
+        'Operational': {
+          'status': 'default',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Printing': {
+          'status': 'playing',
+          'activeColor': '#1e55bc',
+          'color': '#cbe2ff',
+          'record': 'playing'
+        },
+        'Offline': {
+          'status': 'cannotplay',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Paused': {
+          'status': 'pause',
+          'activeColor': '#D29922',
+          'color': '#f6f9e5',
+          'record': 'default'
+        }
+      },
+      userId: '',
+      queueId: '',
+      printerId: ''
+    }
+    methods = {
+      handleCheckedPrinter (item, index) {
+        this.printerList.forEach(item => {
+          item.checked = false
+        })
+        this.printerList[index].checked = !item.checked
+        this.printerId = item.printerId
+      }
+    }
+    async hanldeSelectPrinter () {
+      try {
+        const isChecked = this.printerList.some(item => item.checked)
+        if (!isChecked) {
+          wx.showToast({
+            title: '还没勾选打印机',
+            icon: 'none'
+          })
+          return
+        }
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { userId, queueId, printerId } = this
+        const opts = {
+          userId,
+          queueId,
+          printerId
+        }
+        await printerApis.chooseQueuePrinter(opts)
+        wx.hideLoading()
+        var pages = getCurrentPages()
+        if (pages.length > 1) {
+          var prePage = pages[pages.length - 2]
+          prePage.onLoad()
+        }
+        wxutils.backOrNavigate('/pages/printerQueue/index')
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    async getPrinterList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let opts = {
+          userId: this.userId
+        }
+        const { data } = await printerApis.listModels(opts)
+        data.forEach(element => {
+          element.checked = false
+        })
+        this.printerList = data
+        this.isFirst = true
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    async onLoad ({queueId}) {
+      this.userId = wepy.$instance.globalData.userId
+      this.queueId = queueId
+      this.getPrinterList()
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerList/common.postcss';
+</style>

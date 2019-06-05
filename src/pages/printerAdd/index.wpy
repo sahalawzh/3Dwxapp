@@ -1,0 +1,142 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printer-add">
+    <view class="container">
+      <form bindsubmit="handleToAddPrinter">
+        <view class="font-size--30 container-title">{{typeName}}</view>
+        <view class="wow-flex is-justify-space-between is-align-center container-header">
+          <view class="font-size--28">选择您的打印机颜色</view>
+          <image class="printer-icon" @tap="handleToggle" src="../../images/printer/btn_select_color_printer_{{isShow ? 'open' : 'default'}}.png" mode="aspectFill"></image>
+        </view>
+        <view class="container-priner wow-flex is-justify-space-between" wx:if="{{isShow}}">
+          <image class="container-priner__icon"
+            wx:for="{{prinerColorList}}"
+            wx:key="index"
+            lazy-load="true"
+            :class="{'active': activeIndex === index}" src="{{item.colorImage}}" @tap.stop="handleSelectColor({{item}}, {{index}})" mode="aspectFill"></image>
+        </view>
+
+        <view class="container-control">
+          <input maxlength="6" name="printerAlias" class="container-control__input" placeholder="给我起个名字吧（6个汉字那么长）" placeholder-class="container-control__placeholder" />
+        </view>
+
+        <view class="container-footer">
+          <button class="container-footer__btn font-size--28" form-type="submit">尽情体验3D打印的乐趣吧~</button>
+        </view>
+      </form>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  export default class printerAdd extends wepy.page {
+    config = {
+      navigationBarTitleText: '添加打印机'
+    }
+    data = {
+      isShow: true,
+      activeIndex: 0,
+      prinerColorList: [],
+      serialNumber: '',
+      typeName: '',
+      printerColorId: '',
+      printerAlias: '',
+      userId: ''
+    }
+    onLoad ({ id }) {
+      this.serialNumber = id
+      this.userId = wepy.$instance.globalData.userId
+      this.getPrinterBrand()
+    }
+    async getPrinterBrand () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { serialNumber, userId } = this
+        const opts = {
+          printerSerialNumber: serialNumber,
+          userId
+        }
+        const { colorList, typeName } = await printerApis.getPrinterBrand(opts)
+        this.prinerColorList = colorList
+        this.typeName = typeName
+        this.printerColorId = colorList[this.activeIndex].colorId
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    methods = {
+      async handleToAddPrinter (e) {
+        try {
+          const { printerAlias } = e.detail.value
+          const { printerColorId, serialNumber, userId } = this
+          if (!printerAlias) {
+            wx.showToast({
+              title: '您还未给打印机取名',
+              icon: 'none',
+              mask: true
+            })
+            return
+          }
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const opts = {
+            printerColorId,
+            printerAlias,
+            printerSerialNumber: serialNumber,
+            userId
+          }
+          await printerApis.bindPrinter(opts)
+          wx.hideLoading()
+          wx.nextTick(() => {
+            wx.showToast({
+              title: '成功绑定打印机',
+              icon: 'none',
+              success: function () {
+                setTimeout(() => {
+                  wx.hideToast()
+                  wx.switchTab({
+                    url: '/pages/index/printer',
+                    success: function (e) {
+                      let page = getCurrentPages().pop()
+                      if (page === undefined || page === null) return
+                      page.onLoad()
+                    }
+                  })
+                }, 2000)
+              }
+            })
+          })
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      handleToggle () {
+        this.isShow = !this.isShow
+      },
+      handleSelectColor (item, index) {
+        this.printerColorId = item.colorId
+        this.activeIndex = index
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerAdd/common.postcss';
+</style>

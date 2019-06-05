@@ -1,0 +1,177 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printer-set">
+    <view class="printer-header wow-flex">
+      <image class="printer-header__img" src="../../images/printer/ico_printer_blue.png" mode="aspectFill"></image>
+      <view class="printer-header__info font-size--26">
+        <view class="font-size--24">Makesome5.0</view>
+        <view class="item">热床温度<text class="exponent">{{bedtemperaturer}}℃</text></view>
+        <view class="item">喷头温度<text class="exponent">{{printtemperaturer}}℃</text></view>
+        <view class="font-size--30 printer-action" @tap.stop="hanldeUnBindPrinterModal">解绑</view>
+      </view>
+    </view>
+
+    <view class="set-list">
+      <view class="set-list__item wow-flex is-align-middle is-justify-space-between" @tap.stop="handleToggleMode({{0}})">
+        <view class="font-size--28">均衡模式</view>
+        <view class="wow-radio radio-box font-size--26">
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image wx:if="{{printMode === 0}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>
+          </view>
+        </view>
+      </view>
+      <view class="set-list__item wow-flex is-align-middle is-justify-space-between" @tap.stop="handleToggleMode({{1}})">
+        <view class="font-size--28">快速模式</view>
+        <view class="wow-radio radio-box font-size--26">
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image wx:if="{{printMode === 1}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>
+          </view>
+        </view>
+      </view>
+      <view class="set-list__item wow-flex is-align-middle is-justify-space-between" @tap.stop="handleToggleMode({{2}})">
+        <view class="font-size--28">精细模式</view>
+        <view class="wow-radio radio-box font-size--26">
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image wx:if="{{printMode === 2}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>
+          </view>
+        </view>
+      </view>
+
+      <navigator url="/pages/printerAdvanced/index?printerId={{printerId}}" class="set-list__item wow-flex is-align-middle is-justify-space-between">
+        <view class="font-size--28">高级</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
+
+      <view class="set-debug">
+        <navigator url="/pages/printerDebug/index?printerId={{printerId}}" class="set-list__item wow-flex is-align-middle is-justify-space-between">
+          <view class="font-size--28">调试打印机</view>
+          <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+        </navigator>
+      </view>
+    </view>
+
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  export default class PrinterSet extends wepy.page {
+    config = {
+      navigationBarTitleText: '设置'
+    }
+    data = {
+      printerId: '',
+      printerSerialNumber: '',
+      printMode: '',
+      userId: '',
+      bedtemperaturer: '',
+      printtemperaturer: ''
+    }
+    async hanldeUnBindPrinter () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerSerialNumber, userId } = this
+        const opts = {
+          printerSerialNumber,
+          userId
+        }
+        await printerApis.unbindPrinter(opts)
+        wx.switchTab({
+          url: '/pages/index/printer',
+          success: function (e) {
+            let page = getCurrentPages().pop()
+            if (page === undefined || page === null) return
+            page.onLoad()
+          }
+        })
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getPrintMode () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerId, userId } = this
+        const opts = {
+          printerId,
+          userId
+        }
+        const { data } = await printerApis.getPrintMode(opts)
+        const { printMode, bedtemperaturer, printtemperaturer } = data
+        this.printMode = printMode
+        this.bedtemperaturer = bedtemperaturer
+        this.printtemperaturer = printtemperaturer
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    methods = {
+      async handleToggleMode (printMode) {
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { printerId, userId } = this
+          const opts = {
+            printerId,
+            userId,
+            printMode
+          }
+          await printerApis.choosePrintMode(opts)
+          this.printMode = printMode
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      hanldeUnBindPrinterModal () {
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '确定解绑该打印机？',
+          success(res) {
+            if (res.confirm) {
+              that.hanldeUnBindPrinter()
+            }
+          }
+        })
+      }
+    }
+    onLoad ({ printerId, printerSerialNumber, title }) {
+      this.printerId = printerId
+      this.printerSerialNumber = printerSerialNumber
+      this.userId = wepy.$instance.globalData.userId
+      console.log(decodeURIComponent(title))
+      this.getPrintMode()
+      wx.setNavigationBarTitle({
+        title: decodeURIComponent(title)
+      })
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerSet/common.postcss';
+</style>

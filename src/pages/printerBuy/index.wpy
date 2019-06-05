@@ -1,0 +1,52 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printerBuy">
+    <view class="printer-buy">
+      <view class="printer-buy__btn">
+        <view class="font-size--32 discount">5折买断</view>
+        <view class="font-size--28 tip">再也不用为续租烦心啦~</view>
+      </view>
+      <view class="printer-buy__desc font-size--24">买断=原价￥7800/2-押金￥2990-已租90天*￥4</view>
+    </view>
+
+    <view class="printer-rent">
+      <view class="printer-rent__wrap">
+        <view class="printer-rent__title font-size--32">续租费用￥4/天</view>
+        <view class="printer-rent__desc font-size--26">已为达达付费90天，再续费630天，达达就将永久属于您~</view>
+        <view class="printer-rent__items wow-flex is-justify-space-between">
+          <view class="item wow-flex is-align-middle is-justify-center active">30天</view>
+          <view class="item wow-flex is-align-middle is-justify-center">90天</view>
+          <view class="item wow-flex is-align-middle is-justify-center">240天</view>
+          <view class="item wow-flex is-align-middle is-justify-center">360天</view>
+        </view>
+      </view>
+      <view class="printer-rent__btn">
+        <button hover-class="none" class="btn font-size--28" form-type="submit">共计￥120，提交订单</button>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Set extends wepy.page {
+    config = {
+      navigationBarTitleText: '续租/买断'
+    }
+    data = {
+    }
+    onLoad () {
+    }
+    methods = {
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerBuy/common.postcss';
+</style>

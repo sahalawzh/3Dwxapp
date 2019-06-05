@@ -1,0 +1,257 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-printer-detail">
+    <view class="printer-header wow-flex is-align-middle">
+      <image class="printer-header__img" src="../../images/printer/ico_printer_blue.png" mode="aspectFill"></image>
+      <view class="printer-header__info font-size--26">
+        <view class="font-size--24">{{printerTypeName}}</view>
+        <view class="item">热床温度<text class="exponent">{{bedTemperature.actual}}℃</text></view>
+        <view class="item">喷头温度<text class="exponent">{{toolTemperature.actual}}℃</text></view>
+      </view>
+      <view class="wow-flex is-align-middle printer-header__control" wx:if="{{printerState === 'Operational'}}">
+        <image class="status-img__single" src="../../images/printer/ico_print_default.png" mode="aspectFill"></image>
+        <image class="btn_set" src="../../images/printer/btn_set.png" @tap.stop="handleToSetPrinter" mode="aspectFill"></image>
+      </view>
+    </view>
+
+    <!-- <view class="font-size--26 printer-tip">还有23天到期，为了不影响您的使用请及时续费</view> -->
+
+    <view class="printer-list" wx:if="{{queueList.length > 0}}">
+      <view class="printer-list__title wow-flex is-justify-end is-align-middle">
+        <view class="font-size--24">{{queueTotal}}</view>
+        <image class="icon" src="../../images/printer/ico_playlist_default.png" mode="aspectFill"></image>
+      </view>
+
+      <view class="printer-list__card" wx:for="{{queueList}}" wx:key="index">
+        <view class="printer-list__item">
+          <view class="printer-list__info">
+            <view class="printer-name wow-flex is-align-middle">
+              <view class="font-size--28">{{item.fileInfo.name}}</view>
+              <image class="icon" src="../../images/printer/btn_preview.png" mode="aspectFill"></image>
+            </view>
+            <view class="printer-address wow-flex is-align-middle">
+              <image class="icon" src="../../images/printer/ico_File.png" mode="aspectFill"></image>
+              <view class="font-size--24">{{item.fileInfo.path}}</view>
+            </view>
+            <view class="wow-flex is-align-middle printer-opertion">
+              <image class="status-img{{printerState === 'Printing' || printerState === 'Paused' ? '' : '__single'}}" src="../../images/printer/ico_print_{{printerAllSate[printerState].status}}.png" @tap.stop="handleControlPrinter" mode="aspectFill"></image>
+              <image class="btn_set" @tap.stop="hanldeToSet({{printerState}}, {{item}}, {{index}})" src="../../images/printer/btn_set.png" mode="aspectFill"></image>
+            </view>
+          </view>
+          <view class="printer-list__progress">
+            <progress
+              class="printer-progress"
+              stroke-width='10'
+              backgroundColor="{{printerAllSate[printerState || 'Offline'].color}}"
+              activeColor="{{printerAllSate[printerState ||'Offline'].activeColor}}"
+              percent='{{item.processInfo.completion || 100}}'></progress>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="printer-content" wx:else>
+      <view class="printer-content__module wow-flex is-align-middle is-justify-center" @tap.stop="handleToModel">
+        <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
+        <view class="font-size--36">模型库</view>
+      </view>
+      <view class="font-size--26 wow-pt-30">还没有打印任务，适度工作有益身心健康哦~</view>
+    </view>
+
+    <navigator url="/pages/printerBuy/index" class="footer">
+      <view class="footer-btn font-size--28">续费/5折买断</view>
+    </navigator>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  import wxutils from '../../utils/wxutils'
+  const link = {
+    1: '/pages/printerAdvanced/index',
+    2: '/pages/printerList/index'
+  }
+  export default class PrinterDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: '打印机'
+    }
+    data = {
+      printerId: '',
+      printerTypeName: '',
+      queueList: [],
+      queueTotal: '',
+      bedTemperature: {},
+      toolTemperature: {},
+      printerAllSate: {
+        'Operational': {
+          'status': 'default',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Printing': {
+          'status': 'playing',
+          'activeColor': '#1e55bc',
+          'color': '#cbe2ff',
+          'record': 'playing'
+        },
+        'Offline': {
+          'status': 'cannotplay',
+          'activeColor': '#dedede',
+          'color': '#dedede',
+          'record': 'default'
+        },
+        'Paused': {
+          'status': 'pause',
+          'activeColor': '#D29922',
+          'color': '#f6f9e5',
+          'record': 'default'
+        }
+      },
+      printerState: '',
+      userId: '',
+      title: ''
+    }
+    methods = {
+      hanldeToSet (printerState, item, index) {
+        if (printerState === 'Printing' || printerState === 'slicing') {
+          // wx.showModal({
+          //   title: item.fileInfo.name,
+          //   content: '请完成或删除当前任务，并确认取下模板后，才可以开始新的任务',
+          //   showCancel: false
+          // })
+          wx.showToast({
+            title: '队列任务已进行',
+            icon: 'none'
+          })
+          return
+        }
+        const that = this
+        wx.showActionSheet({
+          itemList: ['设置文件尺寸', '设置打印模式', '选择打印机', '删除任务'],
+          success(res) {
+            if (res.tapIndex === 3) {
+              wx.showModal({
+                title: '提示',
+                content: '是否删除该队列',
+                success(res) {
+                  if (res.confirm) {
+                    that.handleDelQueue(item.id, index)
+                  }
+                }
+              })
+              return
+            }
+            if (printerState === 'Paused') {
+              wx.showToast({
+                title: '文件暂停中不可操作',
+                icon: 'none'
+              })
+              return
+            }
+            if (res.tapIndex === 0) {
+              wx.showToast({
+                title: '功能还未开发',
+                icon: 'none'
+              })
+              return
+            }
+            that.handleToLink(link[res.tapIndex], item.id)
+          },
+          fail(res) {
+            console.log(res.errMsg)
+          }
+        })
+      },
+      async handleControlPrinter () {
+        try {
+          const { printerId } = this
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          let opts = {
+            printerId,
+            userId: this.userId,
+            command: 'pause'
+          }
+          await printerApis.controlPrinterWork(opts)
+          this.getMyPrinter()
+          this.$apply()
+          wx.hideLoading()
+        } catch (error) {
+          wx.hideLoading()
+          console.log(error)
+        }
+      },
+      handleToModel () {
+        wxutils.backOrNavigate('/pages/model/index')
+      },
+      handleToSetPrinter () {
+        wxutils.backOrNavigate('/pages/printerSet/index?printerId=' + this.printerId + '&title=' + this.title)
+      }
+    }
+    handleToLink (url, queueId) {
+      wx.navigateTo({
+        url: `${url}?queueId=${queueId}`
+      })
+    }
+    async handleDelQueue (queueId, index) {
+      try {
+        wx.showLoading({
+          title: '删除中',
+          mask: true
+        })
+        const { userId } = this
+        const opts = {
+          userId,
+          ids: queueId,
+          isSoft: 'Y'
+        }
+        await printerApis.deleteQueue(opts)
+        this.queueList.splice(index, 1)
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    async getMyPrinter () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerId, userId } = this
+        const opts = {
+          printerId,
+          userId
+        }
+        const { bedTemperature, printerState, queueList, queueTotal, toolTemperature } = await printerApis.getMyPrinter(opts)
+        this.queueList = queueList
+        this.queueTotal = queueTotal
+        this.bedTemperature = bedTemperature
+        this.toolTemperature = toolTemperature
+        this.printerState = printerState
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    onLoad (options) {
+      this.printerId = decodeURIComponent(options.printerId)
+      this.title = decodeURIComponent(options.printerAlias)
+      this.printerTypeName = decodeURIComponent(options.printerTypeName)
+      this.userId = wepy.$instance.globalData.userId || wx.getStorageSync('wow').userId
+      wx.setNavigationBarTitle({
+        title: this.title
+      })
+      this.getMyPrinter()
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerDetail/common.postcss';
+</style>

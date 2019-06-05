@@ -1,0 +1,2 @@
+
+  <view class="jfk-elip {{line > 1 ? 'elip--multiple' : ''}}" style="{{line > 1 ? '-webkit-line-clamp:' + line + ' ;' : ''}}"><slot/></view>

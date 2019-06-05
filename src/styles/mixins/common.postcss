@@ -1,0 +1,81 @@
+:root {
+  --base-font-size: 14;
+  --base-font-family: 'Microsoft Yahei', Arial, Helvetica, sans-serif;
+  --size-queue: 15, 20;
+  --font-size-queue: 12, 14, 16;
+}
+/*文字显示省略号*/
+@define-mixin ellipsis $row: 1, $width: 100% {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  @if ($row == 1) {
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    /* autoprefixer: off */
+    -webkit-box-orient: vertical;
+    /* autoprefixer: on */
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp: $(row);
+    white-space:normal;
+  }
+}
+
+@define-mixin elip $row: 1, $width: 100% {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  @if ($row == 1) {
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $(row);
+    overflow:hidden;
+    word-wrap:break-word;
+  }
+}
+
+@define-mixin one-line-base $direction, $size{
+  content: '';
+  position: absolute;
+  @if $direction == vertical {
+    height: $(size);
+    width: 1px;
+    transform: scale(0.5, 1);
+  } @else {
+    width: $(size);
+    height: 1px;
+    transform: scale(1, 0.5);
+  }
+}
+/* 1px线 */
+@define-mixin one-line $direction: vertical, $size: 100%, $pseudo: before {
+  @if $pseudo == null {
+    @mixin one-line-base $(direction), $(size);
+    @mixin-content;
+  } @else {
+    position: relative;
+    &::$(pseudo) {
+      @mixin one-line-base $(direction), $(size);
+      @mixin-content;
+    }
+  }
+}
+
+/* 价格标签 */
+@define-mixin price-tag $color {
+  @mixin-content;
+  .jfk-price-tag__mask {
+    background-color: color($(color) a(90%));
+    color: color($(color) a(90%));
+  }
+}
+/* 清除浮动 */
+@define-mixin clearfix {
+  &:before,&:after{
+    display: table;
+    content: '';
+  }
+  &:after {
+    clear: both;
+  }
+}

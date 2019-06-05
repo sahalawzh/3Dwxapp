@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=Component({behaviors:[],properties:{line:{type:Number,value:1}},data:{},methods:{}});

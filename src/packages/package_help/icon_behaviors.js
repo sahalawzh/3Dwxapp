@@ -1,0 +1,1 @@
+"use strict";module.exports=Behavior({data:{iconMaps:{error:"icon-user_icon_fail_norma",success:"icon-radio_icon_selected_default"}}});

@@ -1,0 +1,34 @@
+<template>
+  <view class="tabbar">
+    <navigator 
+      wx:for="{{tabBar}}" 
+      wx:key="item"
+      open-type="redirect"
+      hover-class="none"
+      url="{{item.link}}"
+      class="tabbar__item {{item.selected ? 'is-selected': '' }}">
+      <view class="tabbar__cont">
+        <text class="font {{item.icon}}"></text>
+        <text class="tabbar__label">{{item.label}}</text>
+      </view>
+    </navigator>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Tab extends wepy.component {
+  // 接收父级传递的tabBar信息
+  props = {
+    tabBar: {
+      type: Object,
+      default: {}
+    }
+  }
+  data = {
+  }
+  methods = {
+  }
+}
+</script>
+<style lang="postcss">
+</style>

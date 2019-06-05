@@ -1,0 +1,58 @@
+
+<template>
+  <view class="banner">
+    <swiper 
+      class="swiper"
+      bindchange="swiperChange"
+      indicator-dots="{{swiperOptions.indicatorDots}}"
+      autoplay="{{swiperOptions.autoplay}}" 
+      interval="{{swiperOptions.interval}}" 
+      duration="{{swiperOptions.duration}}"
+      next-margin="{{swiperOptions.nextMargin}}"
+      previous-margin="{{swiperOptions.previousMargin}}"
+      circular="{{swiperOptions.circular}}">
+        <swiper-item wx:for="{{bannerAdv}}" wx:key="item" class="swiper-item">
+          <navigator url="/pages/detail/index?id={{item.spuId}}">
+            <view style="background-image: url('{{item.image}}')" class="swiper-bg"></view>
+          </navigator>
+        </swiper-item>
+    </swiper>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Banner extends wepy.component {
+    props = {
+      bannerAdv: [Object, Array]
+    }
+    data = {
+      swiperOptions: {
+        indicatorDots: false,
+        circular: true,
+        interval: 3000,
+        duration: 500,
+        autoplay: true
+      },
+      advs: [
+        {
+          logo: '../../../images/mall/Bitmap.png'
+        }
+      ]
+    }
+
+    events = {
+    }
+
+    methods = {
+      swiperChange (e) {
+        let index = e.detail.current
+        this.current = index
+      }
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

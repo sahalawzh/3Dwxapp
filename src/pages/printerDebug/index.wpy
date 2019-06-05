@@ -1,0 +1,359 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-printer__debug">
+    <view class="debug-container">
+      <view class="debug-header">
+        <button @tap.stop="handleToOrigin" type="default" size="default" plain="true" class="debug-header__btn font-size--28 wow-flex is-align-middle is-justify-center">
+          <image class="debug-header__icon" src="../../images/printer/btn_printer_debugging_origin.png" mode="aspectFill"></image>
+          喷嘴和热床回到原点
+        </button>
+      </view>
+      <view class="debug-item">
+        <view class="debug-item__title font-size--30">喷嘴</view>
+        <View class="debug-item__content">
+          <view class="slider-box wow-flex is-justify-space-between">
+            <view class="wow-flex is-align-middle slider-box__slider">
+              <view class="font-size--28 label">X轴</view>
+              <image @tap.stop="handleToControl('x', 'reduce')" class="slider-box__icon" src="../../images/printer/btn_printer_debugging_injector_near.png" mode="aspectFill"></image>
+              <slider backgroundColor="{{bedTool.x.bgColor}}" value="{{bedTool.x.value}}" data-axis="x" bindchange="handleSliderAxis" activeColor="{{bedTool.x.activeColor}}" class="slider-control" step="{{bedTool.x.step}}"/>
+              <image @tap.stop="handleToControl('x', 'add')" class="slider-box__icon" src="../../images/printer/btn_printer_debugging_injector_far.png" mode="aspectFill"></image>
+            </view>
+            <view class="wow-flex is-align-middle slider-box__slider">
+              <view class="font-size--28 label">Y轴</view>
+              <image @tap.stop="handleToControl('y', 'reduce')" class="slider-box__icon" src="../../images/printer/btn_printer_debugging_injector_near.png" mode="aspectFill"></image>
+              <slider backgroundColor="{{bedTool.y.bgColor}}" value="{{bedTool.y.value}}" data-axis="y" bindchange="handleSliderAxis" activeColor="{{bedTool.y.activeColor}}" class="slider-control" step="{{bedTool.y.step}}"/>
+              <image @tap.stop="handleToControl('y', 'add')" class="slider-box__icon" src="../../images/printer/btn_printer_debugging_injector_far.png" mode="aspectFill"></image>
+            </view>
+          </view>
+        </View>
+      </view>
+
+      <view class="debug-item">
+        <view class="debug-item__title font-size--30">热床</view>
+        <View class="debug-item__content">
+          <view class="slider-box wow-flex is-justify-center">
+            <view class="wow-flex is-align-middle slider-box__slider">
+              <view class="font-size--28 label">Z轴</view>
+              <image @tap.stop="handleToControl('z', 'reduce')" class="slider-box__icon" src="../../images/printer/btn_printer_debugging_injector_near.png" mode="aspectFill"></image>
+              <slider backgroundColor="{{bedTool.z.bgColor}}" value="{{bedTool.z.value}}" data-axis="z" bindchange="handleSliderAxis" activeColor="{{bedTool.z.activeColor}}" class="slider-control" step="{{bedTool.z.step}}"/>
+              <image @tap.stop="handleToControl('z', 'add')" class="slider-box__icon" src="../../images/printer/btn_printer_debugging_injector_far.png" mode="aspectFill"></image>
+            </view>
+          </view>
+        </View>
+      </view>
+
+      <view class="debug-controls wow-flex is-justify-space-between">
+        <button type="default" bindlongpress="handleLongTap('add')" size="default" plain="true" class="debug-controls__btn font-size--28 wow-flex is-align-middle is-justify-center">
+          <image class="debug-controls__icon" src="../../images/printer/ico_printer_debugging_Feed.png" mode="aspectFill"></image>
+          长按进料
+        </button>
+        <button type="default" bindlongpress="handleLongTap('reduce')" size="default" plain="true" class="debug-controls__btn font-size--28 wow-flex is-align-middle is-justify-center">
+          <image class="debug-controls__icon" src="../../images/printer/ico_printer_debugging_Return.png" mode="aspectFill"></image>
+          长按退料
+        </button>
+      </view>
+
+      <view class="debug-adjust">
+        <view class="debug-adjust__title wow-flex is-align-middle is-justify-space-between">
+          <view class="font-size--30">喷嘴预热</view>
+          <switch color="#165de4" checked="{{toolTemperature.target !== 0}}" disabled />
+        </view>
+        <view class="debug-adjust__tool wow-flex is-align-middle">
+          <view class="adjust-list">
+            <view class="adjust-list__item font-size--24">
+              <label>当前</label>{{toolTemperature.actual}}℃
+            </view>
+            <view class="adjust-list__item font-size--24">
+              <label>预热</label>{{toolTemperature.target}}℃
+            </view>
+          </view>
+
+          <view class="wow-flex is-align-middle debug-adjust__slider">
+            <image class="debug-adjust__icon" @tap.stop="handleToPreheat('tool', 'reduce')" src="../../images/printer/btn_printer_debugging_injector_near.png" mode="aspectFill"></image>
+            <slider min="{{preheat.tool.min}}" max="{{preheat.tool.max}}" backgroundColor="{{preheat.tool.bgColor}}" value="{{preheat.tool.value}}" data-prehea="tool" bindchange="handleSliderPreheat" activeColor="{{preheat.tool.activeColor}}" class="adjust-control" step="{{preheat.tool.step}}"/>
+            <image class="debug-adjust__icon" @tap.stop="handleToPreheat('tool', 'add')" src="../../images/printer/btn_printer_debugging_injector_far.png" mode="aspectFill"></image>
+          </view>
+        </view>
+      </view>
+
+      <view class="debug-adjust">
+        <view class="debug-adjust__title wow-flex is-align-middle is-justify-space-between">
+          <view class="font-size--30">热床预热</view>
+          <switch color="#165de4" checked="{{bedTemperature.target !== 0}}" disabled />
+        </view>
+        <view class="debug-adjust__tool wow-flex is-align-middle">
+          <view class="adjust-list">
+            <view class="adjust-list__item font-size--24">
+              <label>当前</label>{{bedTemperature.actual}}℃
+            </view>
+            <view class="adjust-list__item font-size--24">
+              <label>预热</label>{{bedTemperature.target}}℃
+            </view>
+          </view>
+          <view class="wow-flex is-align-middle debug-adjust__slider">
+            <image class="debug-adjust__icon" @tap.stop="handleToPreheat('bed', 'reduce')" src="../../images/printer/btn_printer_debugging_injector_near.png" mode="aspectFill"></image>
+            <slider min="{{preheat.bed.min}}" max="{{preheat.bed.max}}" backgroundColor="{{preheat.bed.bgColor}}" value="{{preheat.bed.value}}" data-prehea="bed" bindchange="handleSliderPreheat" activeColor="{{preheat.bed.activeColor}}" class="adjust-control" step="{{preheat.bed.step}}"/>
+            <image class="debug-adjust__icon" @tap.stop="handleToPreheat('bed', 'add')" src="../../images/printer/btn_printer_debugging_injector_far.png" mode="aspectFill"></image>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{false}}" class="wow-flex is-align-middle is-justify-space-between debug-fan">
+        <view class="font-size--30">风扇</view>
+        <switch color="#165de4" checked disabled />
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  export default class printerDebug extends wepy.page {
+    config = {
+      navigationBarTitleText: '调试打印机'
+    }
+    data = {
+      printerId: false,
+      bedTemperature: {},
+      toolTemperature: {},
+      bedTool: {
+        x: {
+          bgColor: '#979797',
+          activeColor: '#165de4',
+          step: 20,
+          value: 0,
+          way: ''
+        },
+        y: {
+          bgColor: '#979797',
+          activeColor: '#165de4',
+          step: 20,
+          value: 0,
+          way: ''
+        },
+        z: {
+          bgColor: '#979797',
+          activeColor: '#165de4',
+          step: 20,
+          value: 0,
+          way: ''
+        }
+      },
+      preheat: {
+        bed: {
+          bgColor: '#979797',
+          activeColor: '#165de4',
+          min: 0,
+          max: 100,
+          step: 20,
+          value: 0,
+          way: ''
+        },
+        tool: {
+          bgColor: '#979797',
+          activeColor: '#165de4',
+          step: 20,
+          min: 0,
+          max: 100,
+          value: 40,
+          way: ''
+        }
+      },
+      command: '',
+      userId: '',
+      axis: '',
+      preheaType: ''
+    }
+    async debugPrinterXyzMove () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerId, command, userId, bedTool, axis } = this
+        let opts = {
+          printerId,
+          userId,
+          command
+        }
+        console.log(bedTool[axis].way)
+        if (command === 'home') { // 同时复位
+          opts.homeValue = 'x,y,z'
+        } else if (command === 'jog') {
+          opts[axis] = bedTool[axis].way
+        }
+        await printerApis.debugPrinterXyzMove(opts)
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    async debugPrinterBedTemperature () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerId, userId, preheat, preheaType, bedTemperature, toolTemperature } = this
+        let opts = {
+          printerId,
+          userId,
+          command: 'target',
+          commandValue: preheat[preheaType].way
+        }
+        await printerApis.debugPrinterBedTemperature(opts)
+        if (preheaType === 'bed') {
+          bedTemperature.target = preheat[preheaType].value
+        } else if (preheaType === 'tool') {
+          toolTemperature.target = preheat[preheaType].value
+        }
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    methods = {
+      async handleLongTap (type) {
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { printerId, userId } = this
+          const opts = {
+            printerId,
+            userId,
+            command: 'extrude',
+            commandValue: type === 'add' ? 10 : -10
+          }
+          await printerApis.debugPrinterTool(opts)
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          wx.hideLoading()
+        }
+      },
+      handleToPreheat (way, type) {
+        let { max, step } = this.preheat[way]
+        if (type === 'reduce' && this.preheat[way].value <= max && this.preheat[way].value >= step) {
+          this.preheat[way].value -= step
+          this.preheat[way].way = 0 - step
+        } else if (type === 'add' && this.preheat[way].value < max) {
+          this.preheat[way].value += step
+          this.preheat[way].way = step
+        }
+        this.preheaType = way
+        wx.nextTick(() => {
+          this.debugPrinterBedTemperature()
+        })
+      },
+      handleSliderPreheat (e) { // 预热滑块
+        const { prehea } = e.currentTarget.dataset
+        const { value } = e.detail
+        this.preheaType = prehea
+        console.log(value)
+        console.log(prehea)
+        this.preheat[prehea].way = value
+        wx.nextTick(() => {
+          this.debugPrinterBedTemperature()
+        })
+      },
+      handleToOrigin () { // 喷嘴和热床回到原点
+        this.command = 'home'
+        for (let i in this.bedTool) {
+          this.bedTool[i].value = 0
+        }
+        wx.nextTick(() => {
+          this.debugPrinterXyzMove()
+        })
+      },
+      handleSliderAxis (e) { // 操作喷嘴和热床x,z,y
+        const { axis } = e.currentTarget.dataset
+        const { value } = e.detail
+        this.bedTool[axis].value = value
+        this.command = 'jog'
+        this.axis = axis
+        wx.nextTick(() => {
+          this.debugPrinterXyzMove()
+        })
+      },
+      handleToControl (axis, type) { // 操作喷嘴和热床滑块
+        const MAX = 100
+        let { step } = this.bedTool[axis]
+        if (type === 'reduce' && this.bedTool[axis].value <= MAX && this.bedTool[axis].value >= step) {
+          this.bedTool[axis].value -= step
+          this.bedTool[axis].way = 0 - step
+        } else if (type === 'add' && this.bedTool[axis].value < MAX) {
+          this.bedTool[axis].value += step
+          this.bedTool[axis].way = step
+        }
+        this.command = 'jog'
+        this.axis = axis
+        wx.nextTick(() => {
+          this.debugPrinterXyzMove()
+        })
+      }
+    }
+    events = {
+    }
+    async getPrinterDetail () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerId, userId } = this
+        const opts = {
+          printerId,
+          userId
+        }
+        const { bedTemperature, toolTemperature } = await printerApis.getMyPrinter(opts)
+        this.bedTemperature = bedTemperature
+        this.toolTemperature = toolTemperature
+        const { bed, tool } = this.preheat
+        bed.value = bedTemperature.actual
+        tool.value = toolTemperature.actual
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    async getArgument () {
+      try {
+        const { printerId, userId } = this
+        const opts = {
+          printerId,
+          userId
+        }
+        const { data: modeData } = await printerApis.getPrintModeDetail(opts)
+        const { bedtemperaturer, printtemperaturer } = modeData
+        this.preheat.bed.min = Number(bedtemperaturer.minValue)
+        this.preheat.bed.max = Number(bedtemperaturer.maxValue)
+        this.preheat.tool.min = Number(printtemperaturer.minValue)
+        this.preheat.tool.max = Number(printtemperaturer.maxValue)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    onLoad ({ printerId }) {
+      this.printerId = printerId
+      this.userId = wepy.$instance.globalData.userId || wx.getStorageSync('wow').userId
+      this.getPrinterDetail()
+      this.getArgument()
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerDebug/common.postcss';
+</style>

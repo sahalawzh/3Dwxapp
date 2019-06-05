@@ -1,0 +1,330 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-printerAdvanced">
+    <form class="font-size--28" bindsubmit="formSubmit">
+      <view class="printer-section">
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">层厚({{everythickness.unit}})</view>
+          <view class="values">
+            <input maxlength="3" type="digit" name="everythickness" value="{{everythickness.value}}" class="values-control" placeholder-class="values-control__placeholder" type="digit" placeholder="{{everythickness.minValue}}~{{everythickness.maxValue}}，建议{{everythickness.recommendValue}}" placeholder-class="container-control__placeholder" />
+          </view>
+        </view>
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">外壳层厚(mm)</view>
+          <view class="values values-control" @tap.stop="handleToOptions({{exosporiumcounts}}, 'exosporiumcounts')">
+            {{exosporiumcounts.value}}
+          </view>
+        </view>
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between" @tap.stop="hanldeIsPumpback">
+          <view class="lebal">开启回退</view>
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image hidden="{{isPumpback.value !== 'Y'}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>
+          </view>
+        </view>
+      </view>
+
+      <view class="printer-section">
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">底层/顶层层厚(mm)</view>
+          <view class="values values-control" @tap.stop="handleToOptions({{seallayercounts}}, 'seallayercounts')">{{seallayercounts.value}}</view>
+        </view>
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">填充密度({{filldensities.unit}})</view>
+          <view class="values">
+            <input maxlength="3" type="number" name="filldensities" value="{{filldensities.value}}" class="values-control" placeholder-class="values-control__placeholder" type="number" placeholder="{{filldensities.minValue}}~{{filldensities.maxValue}}的整数，建议{{filldensities.recommendValue}}" placeholder-class="container-control__placeholder" />
+          </view>
+        </view>
+      </view>
+
+      <view class="printer-section">
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">打印速度({{printspeeds.unit}})</view>
+          <view class="values">
+            <input maxlength="3" type="number" name="printspeeds" value="{{printspeeds.value}}" class="values-control" placeholder-class="values-control__placeholder" type="number" placeholder="{{printspeeds.minValue}}~{{printspeeds.maxValue}}的整数，建议{{printspeeds.recommendValue}}" placeholder-class="container-control__placeholder" />
+          </view>
+        </view>
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">打印温度({{printtemperaturer.unit}})</view>
+          <view class="values">
+            <input maxlength="3" type="number" name="printtemperaturer" value="{{printtemperaturer.value}}" class="values-control" placeholder-class="values-control__placeholder" type="number" placeholder="{{printtemperaturer.minValue}}~{{printtemperaturer.maxValue}}的整数，建议{{printtemperaturer.recommendValue}}" placeholder-class="container-control__placeholder" />
+          </view>
+        </view>
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">热床温度({{bedtemperaturer.unit}})</view>
+          <view class="values">
+            <input maxlength="3" type="number" name="bedtemperaturer" value="{{bedtemperaturer.value}}" class="values-control" placeholder-class="values-control__placeholder" type="number" placeholder="{{bedtemperaturer.minValue}}~{{bedtemperaturer.maxValue}}的整数，建议{{bedtemperaturer.recommendValue}}" placeholder-class="container-control__placeholder" />
+          </view>
+        </view>
+      </view>
+
+      <view class="printer-section">
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">支撑类型</view>
+          <view class="values values-control" @tap.stop="handleToOptions({{supporttypes}}, 'supporttypes')">{{supporttypesTag}}</view>
+        </view>
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">黏附平台</view>
+          <view class="values values-control" @tap.stop="handleToOptions({{baseboards}}, 'baseboards')">{{baseboardsTag}}</view>
+        </view>
+      </view>
+
+      <view class="printer-section">
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">耗材直径({{filementDiameter.unit}})</view>
+          <view class="values values-control" @tap.stop="handleToOptions({{filementDiameter}}, 'filementDiameter')">{{filementDiameter.value}}</view>
+        </view>
+      </view>
+
+      <view class="printer-section">
+        <view class="printer-section__item wow-flex is-align-middle is-justify-space-between">
+          <view class="lebal">喷嘴孔径({{nozzleSize.unit}})</view>
+          <view class="values values-control" @tap.stop="handleToOptions({{nozzleSize}}, 'nozzleSize')">{{nozzleSize.value}}</view>
+        </view>
+      </view>
+
+      <view class="footer">
+        <button hover-class="none" class="footer-btn" form-type="submit">提交</button>
+      </view>
+    </form>
+
+    <wow-popup class="j_picker popup-picker" status="{{status}}" border-radius="false" full="false" gaps="{{[0]}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
+      <view style="width: 750rpx" class="season-picker__box" @tap.stop="noop">
+        <view class="popup-picker__toolbar jfk-flex is-justify-space-between font-size--32">
+          <text class="font-color-extra-light-gray" @tap.stop="handleCancelArea">取消</text>
+          <text @tap.stop="handleSelectedArea">完成</text>
+        </view>
+        <picker-view wx:if="{{optionList.length}}" indicator-style="height: 50px" style="height: 180px; width: 100%;" mask-class="address-picker__mask" indicator-class="address-picker__indicator" @change="handleChangeArea" class="font-size--28" value="{{optionTag}}">
+          <picker-view-column>
+            <view class="popup-picker__item" wx:for="{{optionList}}" wx:key="*this" style="line-height: 50px">{{recommendValue === item ? '推荐值 ' + item : item}}</view>
+          </picker-view-column>
+        </picker-view>
+      </view>
+    </wow-popup>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import printerApis from '../../api/printer'
+  import wxutils from '../../utils/wxutils'
+  const tag = {
+    everythickness: '层厚',
+    filldensities: '填充密度',
+    printspeeds: '打印速度',
+    printtemperaturer: '打印printerAdvanced温度',
+    bedtemperaturer: '热床温度'
+  }
+  export default class Search extends wepy.page {
+    config = {
+      navigationBarTitleText: '高级',
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    data = {
+      printerId: '',
+      everythickness: '',
+      exosporiumcounts: '',
+      seallayercounts: '',
+      filldensities: '',
+      printspeeds: '',
+      printtemperaturer: '',
+      bedtemperaturer: '',
+      supporttypes: '',
+      supporttypesTag: '',
+      baseboards: '',
+      baseboardsTag: '',
+      filementDiameter: '',
+      isPumpback: '',
+      nozzleSize: '',
+      optionList: [],
+      optionTag: [0],
+      status: 'hide',
+      recommendValue: '',
+      printMode: '',
+      optionKey: '',
+      userId: ''
+    }
+    verification (value) {
+      let error = []
+      for (let key in value) {
+        if (!value[key]) {
+          error.push('error')
+          return {...{error}, ...{key}}
+        }
+      }
+      return {...{error}}
+    }
+    methods = {
+      async formSubmit (e) {
+        try {
+          const { value } = e.detail
+          if (this.verification(value).error.length) {
+            const { key } = this.verification(value)
+            wx.showToast({
+              title: `${tag[key]}不能为空`,
+              icon: 'none'
+            })
+            return false
+          }
+          wx.showLoading({
+            title: '提交中',
+            mask: true
+          })
+          const { userId, printerId, queueId, printMode, exosporiumcounts, isPumpback, seallayercounts, filldensities, supporttypes, baseboards, filementDiameter, nozzleSize } = this
+          const opts = {
+            userId,
+            printMode,
+            exosporiumcounts: exosporiumcounts.value,
+            isPumpback: isPumpback.value,
+            seallayercounts: seallayercounts.value,
+            filldensities: filldensities.value,
+            supporttypes: supporttypes.value,
+            baseboards: baseboards.value,
+            filementDiameter: filementDiameter.value,
+            nozzleSize: nozzleSize.value,
+            ...value
+          }
+          if (printerId) {
+            opts.printerId = printerId
+          }
+          if (queueId) {
+            opts.queueId = queueId
+          }
+          console.log(opts)
+          await printerApis.choosePrintMode(opts)
+          wxutils.backOrNavigate('/pages/printerSet/index')
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      hanldeIsPumpback () {
+        const { value } = this.isPumpback
+        this.isPumpback.value = value === 'Y' ? 'N' : 'Y'
+      },
+      handleChangeArea (e) {
+        this.optionTag = e.detail.value
+      },
+      handleToOptions (data, key) {
+        this.optionList = data.values
+        this.recommendValue = data.recommendValue
+        this.optionTag = [this.optionList.findIndex(element => element === data.value)]
+        this.optionKey = key
+        this.status = 'show'
+        this.$apply()
+      },
+      handleCancelArea () {
+        this.status = 'hide'
+        this.$apply()
+      },
+      handleSelectedArea () {
+        const { printMode, exosporiumcounts, seallayercounts, filldensities, supporttypes, baseboards, filementDiameter, nozzleSize } = this
+        let currentVal = { printMode, exosporiumcounts, seallayercounts, filldensities, supporttypes, baseboards, filementDiameter, nozzleSize }
+        if (currentVal[this.optionKey]) {
+          let val = currentVal[this.optionKey].values[this.optionTag]
+          if (this.optionKey === 'supporttypes') {
+            this.supporttypesTag = val
+          } else if (this.optionKey === 'baseboards') {
+            this.baseboardsTag = val
+          } else {
+            currentVal[this.optionKey].value = val
+          }
+        }
+        this.status = 'hide'
+      }
+    }
+    async getArgument () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerId, queueId } = this
+        const opts = {
+          userId: wx.getStorageSync('wow').userId
+        }
+        if (printerId) {
+          opts.printerId = printerId
+        }
+        if (queueId) {
+          opts.queueId = queueId
+        }
+        const { data } = await printerApis.getPrintModeDetail(opts)
+        const {
+          everythickness,
+          filldensities,
+          printspeeds,
+          printtemperaturer,
+          bedtemperaturer,
+          supporttypes,
+          baseboards,
+          exosporiumcounts,
+          seallayercounts,
+          filementDiameter,
+          isPumpback,
+          nozzleSize,
+          printMode
+        } = data
+        // 层厚
+        this.everythickness = everythickness
+        // 外壳层厚（前端定义）
+        this.exosporiumcounts = exosporiumcounts
+        // 底层/顶层厚度
+        this.seallayercounts = seallayercounts
+        // 填充密度
+        this.filldensities = filldensities
+        // 打印速度
+        this.printspeeds = printspeeds
+        // 打印温度
+        this.printtemperaturer = printtemperaturer
+        // 热床温度
+        this.bedtemperaturer = bedtemperaturer
+        // 支撑类型
+        this.supporttypes = supporttypes
+        for (let i in {...supporttypes.others}) {
+          if (supporttypes.recommendValue === {...supporttypes.others}[i].value) {
+            this.supporttypesTag = {...supporttypes.others}[i].name
+          }
+          this.supporttypes.values.push({...supporttypes.others}[i].name)
+        }
+        // 黏附平台
+        this.baseboards = baseboards
+        for (let i in {...baseboards.others}) {
+          if (baseboards.recommendValue === {...baseboards.others}[i].value) {
+            this.baseboardsTag = {...baseboards.others}[i].name
+          }
+          this.baseboards.values.push({...baseboards.others}[i].name)
+        }
+        // 耗材直径
+        this.filementDiameter = filementDiameter
+        // 开启回退
+        this.isPumpback = isPumpback
+        // 孔径
+        this.nozzleSize = nozzleSize
+        this.printMode = printMode
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onLoad ({printerId, queueId}) {
+      this.printerId = printerId
+      this.queueId = queueId
+      this.userId = wepy.$instance.globalData.userId
+      this.getArgument()
+    }
+
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/printerAdvanced/common.postcss';
+</style>

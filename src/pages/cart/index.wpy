@@ -1,0 +1,479 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-cart">
+  
+    <block wx:if="{{goods.length > 0}}">
+      <view class="page-cart-choice wow-flex is-align-middle is-justify-space-between">
+        <view class="wow-flex is-align-middle" @tap.stop="handleCheckAll">
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image hidden='{{!isCheckAll}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>全选
+          </view>
+        </view>
+        <view class="opertaion font-size--26" @tap.stop="handleToManager">{{isEdit ? '完成' : '管理'}}</view>
+      </view>
+    
+      <view class="cart-lists">
+        <view class="cart-lists-items">
+          <block wx:for="{{goods}}" wx:key="{{index}}">
+            <view class="cart-lists-items__item wow-flex">
+              <view class="wow-radio radio-box font-size--26 cart-operate" @tap.stop="handleCheckSingle({{item}}, {{index}})">
+                <lebel class="radio" :class="{'disabled': item.isEnable === 0}">
+                  <image hidden='{{!item.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                </lebel>
+              </view>
+              <view class="wow-background-image cart-img" @tap.stop="handleToDeatil({{item}})"
+              style="background-image: url({{item.image}})"></view>
+              <view class="cart-info">
+                <wow-elip line="2" class="cart-info__title font-size--26">{{item.title}}</wow-elip>
+                <view class="cart-info__sku font-size--24" wx:if="{{item.spec}}" @tap.stop="handleToSku({{item}}, {{index}})">
+                  <view class="sku-box is-align-middle">
+                    <view class="label">{{commonwxs.specStr(item)}}</view>
+                    <image class="icon" src='../../images/common/arrow_down.png'></image>
+                  </view>
+                </view>
+                <view class="cart-info__price">
+                  <view class="color-price font-size--30"><text class="font-size--22">￥</text>{{item.price}}</view>
+                </view>
+                <view class="cart-info__step">
+                  <wow-stepper width="48rpx" height="46rpx" value="{{item.num}}" data-index="{{index}}" data-qty="{{item.num}}" data-id="{{item.id}}" @changenumber.stop="changeQty"></wow-stepper>
+                </view>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <view class="footer wow-clearfix">
+        <view class="wow-fl-l font-size--26 footer-price" hidden"{{isEdit}}">总计<text class="color-price font-size--30 wow-ml-30">￥{{price}}</text></view>
+        <view class="wow-fl-r font-size--26">
+          <view class="pay-btn font-color-white" @tap.stop="handleEvent">{{isEdit ? '删除' : '去结算'}}</view>
+        </view>
+      </view>
+
+      <view class="float-box {{isRuleTrue ? 'isRuleShow' : 'isRuleHide'}}" catchtouchmove="true">
+        <view class="float-box-mask" @tap.stop="handleClosePopup"></view>
+        <view class="float-box-wrap float-box-right">
+          <view class="animation-element">
+
+            <scroll-view scroll-y="true" class="float-box-scroll" style="height: {{slideHeight}}px">
+              <view class="wow-flex product">
+                <image mode="aspectFill" class="product-img" src="{{skuObj.image}}"></image>
+                <view class="product-info">
+                  <view class="color-price font-size--36">￥{{skuPrice}}</view>
+                  <!-- <view class="font-size--24 product-info__number">编号<text class="num">{{skuObj.specificationNumber}}</text></view> -->
+                </view>
+              </view>
+
+              <view class="product-spec" wx:for="{{spec}}" wx:for-index="idx" wx:for-item="itemName" wx:key="idx">
+                <view class="title font-size--24">{{itemName.styles}}</view>
+                <view class="items font-size--24 wow-flex">
+                  <view class="item" :class="{'active': commonwxs.intVal(select[idx]) === index}" wx:for="{{itemName.particular}}" wx:key="index" @tap.stop="handleToSelect({{idx}}, {{index}})">{{item}}</view>
+                </view>
+              </view>
+
+              <block wx:if="{{false}}">
+                <view class="wow-radio radio-box font-size--26 product-select" @tap.stop="handleToCheck('wrapp')">
+                  <lebel class="radio">
+                    <image hidden="{{!skuObj.isCheckWrapping}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                  </lebel>礼盒包装
+                </view>
+                <view class="wow-radio radio-box font-size--26 product-select" @tap.stop="handleToCheck('card')">
+                  <lebel class="radio">
+                    <image hidden="{{!skuObj.isCheckCardServer}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                  </lebel>卡片服务
+                </view>
+              </block>
+            </scroll-view>
+
+            <view class="btn-wrap">
+              <view class="product-tip font-size--24">定制商品付款后客服将与您取得联系</view>
+              <button class="btn font-size--26" @tap.stop="handleChangeSku()">确定</button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+
+    <view class="cart-empty" wx:else>
+      <view class="cart-empty-box">
+        <image class="cart-empty__icon" src='../../images/cart/ico_cart_empty.png'></image>
+        <view class="font-size--26 cart-empty__info">您的购物车还没有商品哦~</view>
+        <navigator url="/pages/index/mall" open-type="switchTab" hover-class="none" class="cart-empty__btn font-size--28 font-color-white">去挑好东西</navigator>
+      </view>
+
+      <!-- 小编推荐 -->
+      <view class="mall-recommed">
+        <view class="title font-size--32 wow-flex is-align-middle">
+          <image class="title-icon" src="../../images/mall/ico_shop_recommend.png" mode="aspectFill"></image>
+          <view>小编推荐</view>
+        </view>
+        <goodList :list.sync="lists"></goodList>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import cartApi from '../../api/cart'
+  import GoodList from '../../components/goodList'
+  import goodsApi from '../../api/goods'
+  import wxutils from '../../utils/wxutils'
+  import commonwxs from './wxs/common.wxs'
+  export default class Cart extends wepy.page {
+    config = {
+      navigationBarTitleText: '购物车',
+      usingComponents: {
+        'wow-radio': '../../packages/radio/index',
+        'wow-elip': '../../packages/elip/index',
+        'wow-stepper': '../../packages/stepper/index'
+      }
+    }
+    wxs = {
+      commonwxs: commonwxs
+    }
+    components = {
+      goodList: GoodList
+    }
+    computed = {
+      slideHeight () {
+        let maxHeight = ''
+        wx.getSystemInfo({
+          success: function (res) {
+            let windowHeight = res.windowHeight
+            maxHeight = windowHeight - 90
+          }
+        })
+        return maxHeight
+      },
+      skuPrice () {
+        let price = ''
+        this.sku.forEach(item => {
+          if (item.indexes === this.indexs) {
+            price = item.price
+          }
+        })
+        return price
+      }
+    }
+    data = {
+      isRuleTrue: false,
+      isEdit: false,
+      isCheckAll: false,
+      goods: [],
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false,
+      price: '0.00',
+      userId: '',
+      cartId: '',
+      skuObj: {},
+      sku: [],
+      spec: [],
+      select: {},
+      indexs: ''
+    }
+    async getCartList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { data } = await cartApi.cartList({userId: this.userId})
+        data = data || []
+        wx.hideLoading()
+        if (!data.length) {
+          this.getRecommend()
+          return
+        }
+        data.forEach(element => {
+          element.checked = false
+        })
+        this.goods = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getRecommend () {
+      try {
+        let { start, limits, lists } = this
+        const opts = {
+          start,
+          limits
+        }
+        let { data: recommendedData } = await goodsApi.recommended(opts)
+        let data = recommendedData.data
+        if (start === 0) {
+          lists = []
+        }
+        this.lists = lists.concat(data)
+        if (data.length < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start++
+        }
+        console.log(this.lists)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    onLoad ({ userId }) {
+      this.userId = wx.getStorageSync('wow').userId
+      this.getCartList()
+    }
+    onReachBottom () {
+      if (this.hasMoreData) {
+        this.getRecommend()
+      }
+    }
+    watch = {
+      goods (val) {
+        if (val.length === 0) {
+          this.getRecommend()
+        }
+      }
+    }
+    // 计算金额
+    async getCountPrice () {
+      try {
+        let detailsId = []
+        this.goods.forEach((element, index) => {
+          if (element.checked) {
+            detailsId.push(element.id)
+          }
+        })
+        if (!this.isEdit) {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+        }
+        this.cartId = detailsId.join('_')
+        const opts = {
+          userId: this.userId,
+          ids: this.cartId
+        }
+        const { data } = await cartApi.countPrice(opts)
+        this.price = data.price
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    // 删除购物车
+    async removeCart () {
+      try {
+        wx.showLoading({
+          title: '删除中',
+          mask: true
+        })
+        const { userId, cartId } = this
+        const opts = {
+          userId,
+          ids: cartId
+        }
+        await cartApi.removeCart(opts)
+        // for (let i = this.goods.length - 1; i >= 0; i--) {
+        //   if (this.goods[i].checked) {
+        //     this.goods.splice(i, 1)
+        //   }
+        // }
+        // this.getCountPrice()
+        this.getCartList()
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    // 修改数量
+    async modifyItemQty (data) {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        await cartApi.updateCartNum(data)
+        this.getCountPrice()
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    methods = {
+      async handleChangeSku () {
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { userId, indexs, skuObj } = this
+          const opts = {
+            userId,
+            cartId: skuObj.id,
+            indexes: indexs
+          }
+          const { status } = await cartApi.updateSku(opts)
+          wx.hideLoading()
+          if (status === 200) { // 修改规格
+            this.getCartList()
+          }
+          if (status === 500) { // 删除规格
+            this.goods.splice(skuObj.index, 1)
+          }
+          this.isRuleTrue = false
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      // 规格选择
+      handleToSelect (idx, index) {
+        this.select[idx] = index
+        const result = []
+        for (let i in this.select) {
+          result.push(this.select[i])
+        }
+        this.indexs = result.join('_')
+      },
+      // 礼品包装和卡片服务
+      handleToCheck (type) {
+        switch (type) {
+          case 'wrapp':
+            this.skuObj.isCheckWrapping = !this.skuObj.isCheckWrapping
+            break
+          case 'card':
+            this.skuObj.isCheckCardServer = !this.skuObj.isCheckCardServer
+            break
+          default:
+            break
+        }
+      },
+      handleClosePopup () {
+        this.isRuleTrue = false
+      },
+      async handleToSku (item, index) { // 打开规格
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const pid = item.spuId
+          this.skuObj = {
+            index,
+            image: item.image,
+            title: item.title,
+            price: item.price,
+            id: item.id,
+            specificationNumber: item.specificationNumber,
+            isCheckWrapping: item.wrapping === 1 || false, // 礼品包装
+            isCheckCardServer: item.card_service === 1 || false // 卡片服务
+          }
+          wx.nextTick(() => {
+            this.isRuleTrue = true
+          })
+          const { data: skuData } = await goodsApi.querySku({id: pid})
+          this.sku = skuData.data
+          const { data: spuData } = await goodsApi.querySpu({id: pid})
+          this.indexs = item.indexes
+          let selectSku = item.indexes.split('_')
+          this.spec = spuData
+          this.select = {...selectSku}
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      handleToDeatil (item) {
+        if (item.isEnable === 0) return
+        wxutils.backOrNavigate('/pages/detail/index?id=' + item.spuId)
+      },
+      changeQty (e) { // 修改数量
+        const { qty, id, index } = e.currentTarget.dataset
+        let changeAfterQty = e.detail.value
+        const { userId } = this
+        if (Number(qty) === changeAfterQty) {
+          return
+        }
+        let nowQty = qty
+        let opts = {
+          userId,
+          cartId: id,
+          num: changeAfterQty
+        }
+        if (changeAfterQty > nowQty) { // 按钮类型参数：1减一，2加一，直接修改数量时传0或不传
+          opts.add = 1
+        } else {
+          opts.reduce = 1
+        }
+        this.goods[index].num = changeAfterQty
+        this.modifyItemQty(opts)
+      },
+      handleEvent () { // 删除
+        if (!this.cartId) {
+          wx.showModal({
+            title: '提示',
+            content: '您还没有选择商品',
+            showCancel: false
+          })
+          return
+        }
+        if (this.isEdit) {
+          const that = this
+          wx.showModal({
+            title: '提示',
+            content: '是否删除选中的商品',
+            success(res) {
+              if (res.confirm) {
+                that.removeCart()
+              }
+            }
+          })
+        } else {
+          wxutils.backOrNavigate('/pages/reserver/index?cartId=' + this.cartId)
+        }
+      },
+      handleToManager () {
+        this.isEdit = !this.isEdit
+      },
+      handleCheckSingle (item, index) { // 单选
+        if (item.isEnable === 0) return
+        this.goods[index].checked = !item.checked
+        this.isCheckAll = this.goods.every(item => item.checked)
+        this.getCountPrice()
+      },
+      handleCheckAll () {
+        this.isCheckAll = !this.isCheckAll
+        this.goods.forEach(element => { // 全选
+          element.checked = this.isCheckAll
+        })
+        this.getCountPrice()
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/cart/common.postcss';
+</style>

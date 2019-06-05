@@ -1,0 +1,122 @@
+
+.page-logistics {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f6f7f7;
+  .logistics-header {
+    background-color: #fff;
+    margin: 20rpx 12rpx;
+    padding: 24rpx 34rpx 24rpx 38rpx;
+    border-radius: 8rpx;
+  }
+  .logistics-product {
+    &__img {
+      width: 86rpx;
+      height: 70rpx;
+      border-radius: 8rpx;
+      margin-right: 20rpx;
+    }
+    &__status {
+      color: #4a4a4a;
+      font-weight: 600;
+    }
+  }
+  .logistics-company {
+    &__info {
+      color: #4a4a4a;
+      margin-right: 16rpx;
+      text-align: right;
+      .label {
+        font-weight: 600;
+      }
+    }
+    &__icon {
+      width: 68rpx;
+      height: 68rpx;
+    }
+  }
+  .logistics-content {
+    margin: 0 12rpx;
+    background-color: #fff;
+    border-radius: 12rpx;
+    &__detail {
+      position: relative;
+      padding-top: 52rpx;
+      padding-bottom: 46rpx;
+    }
+    &__item {
+      position: relative;
+      padding: 0 30rpx 0 200rpx;
+      color: #4a4a4a;
+      .logo {
+        position: relative;
+        margin-top: 10rpx;
+        &-circle {
+          position: relative;
+          width: 10rpx;
+          height: 10rpx;
+          border-radius: 50%;
+          border: 1rpx solid #d7d7d7;
+          box-sizing: border-box;
+          &__default {
+            position: absolute;
+            top: 3rpx;
+            left: 3rpx;
+            width: 4rpx;
+            height: 4rpx;
+            border-radius: 50%;
+            background-color: #d7d7d7;
+            z-index: 11;
+          }
+        }
+      }
+      &:not(:last-child) .logo::after {
+        position: absolute;
+        content: "";
+        width: 1rpx;
+        left: 50%;
+        top: 16rpx;
+        bottom: 0;
+        background-color: #d7d7d7;
+        transform: translate(-50%, 0) scale(0.5, 1);
+        z-index: 8;
+      }
+      .info {
+        margin-bottom: 40rpx;
+      }
+      .time {
+        position: absolute;
+        left: 36rpx;
+        text-align: right;
+        line-height: 28rpx;
+        &-day {
+          margin-bottom: 2rpx;
+        }
+        &-detail {
+          font-size: 22rpx;
+        }
+      }
+      &.active {
+        .time-day, .info {
+          color: #373737;
+          font-weight: 600;
+        }
+        .logo-circle {
+          &__active {
+            position: absolute;
+            left: -16rpx;
+            top: -10rpx;
+            width: 44rpx;
+            height: 44rpx;
+            z-index: 12;
+            padding-bottom: 4rpx;
+            background-color: #fff;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+<template>
+  <view>
+    <view class="loading">
+      <image src="../images/common/ico_loading.png" class="loading-icon" mode="aspectFill"></image>
+      <view class="font-size--24 loading-message">{{message}}</view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Loading extends wepy.component {
+  props = {
+    message: {
+      type: String,
+      default: '向上滑动加载更多视频'
+    }
+  }
+}
+</script>
+
+<style lang='postcss'>
+  .loading {
+    text-align: center;
+    margin-top: 20rpx;
+    &-icon {
+      width: 36rpx;
+      height: 36rpx;
+    }
+    &-message {
+      color: #CECECE;
+    }
+  }
+</style>

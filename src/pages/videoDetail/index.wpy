@@ -1,0 +1,324 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-detail__video">
+    <!-- 视频 -->
+    <view class="video-box">
+      <video
+        custom-cache="{{false}}"
+        class="video-box__control"
+        id="myVideo"
+        src="{{info.video}}"
+        poster="{{info.image}}"
+        title="{{info.title}}"
+      ></video>
+    </view>
+
+    <view class="video-detail">
+      <!-- 视频内容 -->
+      <view class="video-content">
+        <view class="title font-size--30">{{info.title}}</view>
+        <view class="desc">{{info.description}}</view>
+        <view class="topic wow-flex">
+          <navigator wx:for="{{info.topic}}" wx:key="item" url="/pages/videoList/index?topicId={{item.id}}&topicName={{item.topic}}" class="wow-flex topic-item is-align-middle font-size--26">
+            <image class="icon" src="../../images/common/ico_Topics_select.png" mode="aspectFill"></image>
+            <view>{{item.topic}}</view>
+          </navigator>
+        </view>
+        <!-- 悬浮 -->
+        <view class="suspend-box">
+          <!-- 观看次数 -->
+          <view class="suspend-box__item">
+            <image class="icon" src="../../images/common/ico_seetime_big_black.png" mode="aspectFill"></image>
+            <view class="font-size--24">{{info.hot}}</view>
+          </view>
+          <!-- 消息条数 -->
+          <view wx:if="{{userId}}" class="suspend-box__item">
+            <image class="icon" src="../../images/common/btn_comment.png" mode="aspectFill"></image>
+            <view class="font-size--24">{{commetTotal}}</view>
+          </view>
+          <button wx:else data-type="videoCommet" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="suspend-box__item open-type-btn">
+            <image class="icon" src="../../images/common/btn_comment.png" mode="aspectFill"></image>
+            <view class="font-size--24">{{commetTotal}}</view>
+          </button>
+          <!-- 收藏数 -->
+          <view wx:if="{{userId}}" @tap.stop="handleToCollect" class="suspend-box__item">
+            <image class="icon" src="../../images/common/btn_Collection_big_black.png" mode="aspectFill"></image>
+            <view class="font-size--24">{{collectionNum}}</view>
+          </view>
+          <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="suspend-box__item open-type-btn">
+            <image class="icon" src="../../images/common/btn_Collection_big_black.png" mode="aspectFill"></image>
+            <view class="font-size--24">{{collectionNum}}</view>
+          </button>
+          <!-- 分享数 -->
+          <view class="suspend-box__item" @tap.stop="handleToShare">
+            <image class="icon" src="../../images/common/btn_sharetime_big_black.png" mode="aspectFill"></image>
+            <view class="font-size--24">{{info.share}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="print-wrap" wx:if="{{printer}}">
+        <!-- 相关产品 -->
+        <view class="print-box">
+          <view class="title">使用的打印机</view>
+          <navigator url="/pages/detail/index?id={{printer.id}}" hover-class="none" class="print-box__item wow-flex">
+            <image class="print-box__item-img" src="{{printer.image}}" mode="aspectFill"></image>
+            <view class="print-box__item-info">
+              <view class="name">{{printer.title}}</view>
+              <view class="desc">{{printer.info}}</view>
+              <view class="color-price price font-size--26">{{printer.text}}</view>
+            </view>
+          </navigator>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- 商品 -->
+    <view class="product" wx:if="{{info.spuVO.length}}">
+      <view class="font-size--26 title">相关商品</view>
+      <view class="products-layout">
+        <view class="mall-scroll-content">
+          <scroll-view 
+            class="mall-scroll"
+            scroll-x="true">
+            <navigator url="/pages/detail/index?id={{item.id}}" class="scroll-view-item" wx:for="{{info.spuVO}}" wx:key="item">
+              <view class="product-item">
+                <view class="product-item__img">
+                  <image mode="aspectFill" src="{{item.image}}"></image>
+                </view>
+                <view class="product-item__info">
+                  <view class="product-name font-size--28">
+                    <view class="elip">{{item.title}}</view>
+                  </view>
+                  <view class="font-size--24 product-price color-price">￥{{item.recommendedPrice}}</view>
+                </view>
+              </view>
+            </navigator>
+          </scroll-view>
+        </view>
+      </view>
+    </view>
+
+    <view class="cut"></view>
+    <!-- 评论 -->
+    <commet :userId.sync="userId" :commetList.sync="commetList" :commetTotal.sync="commetTotal"></commet>
+
+    <!-- 分享 -->
+    <wow-popup class="wow_share" componentTheme="light" position="bottom" full="false" show-close="false" border-radius="false">
+      <view class="wow-flex share-box">
+        <view class="share-box__item">
+          <button open-type="share" class="open-type-btn">
+            <image class="icon" src="../../images/common/btn_share_wefriend.png" mode="aspectFill"></image>
+          </button>
+        </view>
+        <!-- <view class="share-box__item" @tap.stop="handleToPoster">
+          <image class="icon" src="../../images/common/btn_share_weFriendship.png" mode="aspectFill"></image>
+        </view> -->
+      </view>
+    </wow-popup>
+
+    <!-- 分享 -->
+    <wow-popup class="wow_poster" componentTheme="light" show-close="false">
+      <view class="poster-box">
+        <poster :posterInfo.sync="info" :id.sync="id"></poster>
+      </view>
+    </wow-popup>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import videoApis from '../../api/video'
+  import collectApis from '../../api/collect'
+  import commetApis from '../../api/commet'
+  import Commet from '../../components/commet'
+  import CommonMixin from '../../mixins/common'
+  import { timeHandle } from '../../utils/commentTimeHandle'
+  import Poster from './modules/poster'
+  export default class VideoDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    mixins = [CommonMixin]
+    components = {
+      commet: Commet,
+      poster: Poster
+    }
+    data = {
+      id: '',
+      info: {},
+      userId: '',
+      commetList: [],
+      commetTotal: '',
+      sendInfo: '',
+      collectionNum: '',
+      printer: ''
+    }
+    methods = {
+      handleToCollect () {
+        this.handleCollect()
+      },
+      handleToShare () {
+        this.$wxpage.selectComponent('.wow_share').show()
+      },
+      handleToPoster () {
+        // this.$wxpage.selectComponent('.wow_poster').show()
+        // setTimeout(() => {
+        //   this.$broadcast('canvasStart')
+        // }, 0)
+      }
+    }
+    events = {
+      handleGetInfo (val) {
+        this.sendInfo = val
+      },
+      async handleSendInfo () {
+        try {
+          if (!this.sendInfo) return
+          wx.showLoading({
+            title: '发送中',
+            mask: true
+          })
+          const { userId, id, sendInfo } = this
+          const opts = {
+            userId,
+            videoId: id,
+            content: sendInfo
+          }
+          await commetApis.addVideoComment(opts)
+          this.sendInfo = ''
+          this.$broadcast('handleClearInput')
+          this.getVideoComment()
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          wx.hideLoading()
+        }
+      }
+    }
+    onShareAppMessage () {
+      const { id, info } = this
+      this.$wxpage.selectComponent('.wow_poster').hide()
+      this.getShareNum()
+      return {
+        title: info.title,
+        imageUrl: info.picture,
+        path: 'pages/videoDetail/index?id=' + id
+      }
+    }
+    async getShareNum () {
+      try {
+        const { data } = await videoApis.updateShareVideo({videoId: this.id})
+        this.info.share = data.num
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getSpuCollectionNum () {
+      try {
+        const { id } = this
+        const opts = {
+          videoId: id
+        }
+        const { data } = await collectApis.getVideoCollectionNum(opts)
+        this.collectionNum = data.num
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async handleCollect (e) {
+      try {
+        const { userId, id } = this
+        this.userId = e || userId
+        const opts = {
+          videoId: id,
+          userId: e || this.userId
+        }
+        const { data, msg } = await collectApis.addVideoCollection(opts)
+        this.collectionNum = data.num
+        wx.showToast({
+          title: msg,
+          duration: 1000
+        })
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getPrintByVideoId () {
+      try {
+        const { id } = this
+        const opts = {
+          videoId: id
+        }
+        const { data } = await videoApis.getPrintByVideoId(opts)
+        this.printer = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    handleVideoCommet () {
+      this.userId = wepy.$instance.globalData.userId
+      this.$apply()
+    }
+    async getVideoDetail (id) {
+      try {
+        const opts = {
+          id
+        }
+        const { data } = await videoApis.detail(opts)
+        wx.hideLoading()
+        this.info = data
+        wepy.$instance.globalData.subpub.on('collect', this.handleCollect, this)
+        wepy.$instance.globalData.subpub.on('videoCommet', this.handleVideoCommet, this)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getVideoComment () {
+      try {
+        const opts = {
+          videoId: this.id
+        }
+        const { data: commetData } = await commetApis.getVideoComment(opts)
+        commetData.data.length && commetData.data.forEach(item => {
+          item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
+        })
+        this.commetList = commetData.data
+        this.commetTotal = commetData.total
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    onLoad ({ id }) {
+      this.id = id
+      this.videoContext = wx.createVideoContext('myVideo')
+      this.getVideoDetail(id)
+      this.getVideoComment()
+      this.getSpuCollectionNum()
+      this.getPrintByVideoId()
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/videoDetail/common.postcss';
+</style>

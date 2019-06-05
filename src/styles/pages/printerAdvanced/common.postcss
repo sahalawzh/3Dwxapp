@@ -1,0 +1,74 @@
+@import '../../mixins/common.postcss';
+.pages-printerAdvanced {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #f6f7f7;
+  padding-bottom: 20rpx;
+  .printer-section {
+    margin-top: 16rpx;
+    background-color: #fff;
+    &__item {
+      position: relative;
+      padding: 0 50rpx 0 54rpx;
+      height: 98rpx;
+      line-height: 98rpx;
+      &:not(:last-child)::after {
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #dcdcdc;
+      }
+      .label {
+        color: #4a4a4a;
+      }
+      .radio-box {
+        line-height: normal;
+      }
+      .values-control {
+        color: #373737;
+        text-align: right;
+        flex: 1;
+        &__placeholder {
+          color: #959595;
+          text-align: right;
+        }
+      }
+    }
+  }
+  .footer {
+    padding: 16rpx 50rpx 60rpx;
+    background-color: #f7f7f7;
+    margin-top: 40rpx;
+    margin-bottom: 20rpx;
+    &-btn {
+      height: 72rpx;
+      line-height: 72rpx;
+      border-radius: 32rpx;
+      background-color: #1360e1;
+      color: #fff;
+    }
+  }
+  .popup-picker {
+    &__toolbar {
+      height: 80rpx;
+      line-height: 80rpx;
+      text {
+        padding: 0 17rpx;
+      }
+    }
+    &__item {
+      line-height: 72rpx;
+      padding: 0 20rpx;
+      text-align: center;
+    }
+    &__view {
+      color: #4a4a4a;
+    }
+  }
+}

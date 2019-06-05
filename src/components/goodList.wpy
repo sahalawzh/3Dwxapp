@@ -1,0 +1,88 @@
+
+<template>
+  <view class="recommed-list">
+    <navigator class="recommed-list__item" hover-class="none" wx:for="{{list}}" wx:key="index" url="/pages/detail/index?id={{item.id}}">
+      <view class="item-wrap-head">
+        <image class="recommed-list__item_bg" lazy-load="true" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="item-collection wow-flex is-align-middle">
+          <image class="icon" src="../images/common/ico_Collection_small_white.png" mode="aspectFill"></image>
+          <text class="font-color-white font-size--24">{{ item.collection }}</text>
+        </view>
+      </view>
+      <view class="item-info">
+        <view class="line font-size--34 item-name">{{ item.title }}</view>
+        <view class="line font-size--24 item-desc" wx:if="{{item.infoText}}">{{ item.infoText }}</view>
+        <view class="font-size--30 item-price color-price">￥{{ item.recommendedPrice }}</view>
+      </view>
+    </navigator>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Recommend extends wepy.component {
+    props = {
+      list: {
+        type: Array,
+        default: []
+      }
+    }
+    data = {
+    }
+
+    events = {
+    }
+
+    methods = {
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+.recommed-list {
+  &__item {
+    margin-bottom: 70rpx;
+    .item-wrap-head {
+      position: relative;
+      height: 532rpx;
+      .item-collection {
+        position: absolute;
+        left: 42rpx;
+        bottom: 26rpx;
+        .icon {
+          width: 30rpx;
+          height: 30rpx;
+          margin-right: 12rpx;
+        }
+      }
+    }
+    &_bg {
+      width: 100%;
+      height: 100%;
+      border-radius: 30rpx;
+    }
+    .item-info {
+      padding-left: 20rpx;
+      .line {
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .item-name {
+        font-weight: 600;
+        color: #595959;
+        padding-top: 30rpx;
+      }
+      .item-desc {
+        color: #9b9b9b;
+        padding-top: 8rpx;
+      }
+      .item-price {
+        padding-top: 8rpx;
+        margin-left: -4rpx;
+      }
+    }
+  }
+}
+</style>

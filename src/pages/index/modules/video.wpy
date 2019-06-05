@@ -1,0 +1,46 @@
+<template>
+  <view class="good-list">
+    <view class="products-layout">
+      <view class="products-layout__body">
+        <block wx:for="{{videoList}}" wx:key="id">
+          <navigator class="products-list__item" url="/pages/videoDetail/index?id={{item.id}}">
+            <view class="product-box">
+              <view class="product-image">
+                <image mode="aspectFill" lazy-load="{{true}}" class="product-image-cont" src="{{item.image}}"/>
+                <view class="wow-flex is-align-middle is-justify-space-between product-image_bottom">
+                  <view class="wow-flex">
+                    <image class="icon" lazy-load="true" src="../../../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
+                    <text class="font-size--28">{{item.hot}}</text>
+                  </view>
+                  <view class="wow-flex duration">
+                    <image class="icon" src="../../../images/index/ico_homevideolist_Duration.png" mode="aspectFill"></image>
+                    <text class="font-size--28">{{item.duration}}</text>
+                  </view>
+                </view>
+              </view>
+              <view class="product-info">
+                <view class="product-info__box">
+                  <view class="product-title font-size--32">
+                    <view class="product-title-elip">{{item.title}}</view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </navigator>
+        </block>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Video extends wepy.component {
+  props = {
+    videoList: [Array]
+  }
+  data = {
+  }
+  methods = {
+  }
+}
+</script>

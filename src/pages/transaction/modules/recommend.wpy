@@ -1,0 +1,38 @@
+<template>
+  <view class="good-list">
+    <view class="cut-split"></view>
+    <view class="products-layout">
+      <view class="products-layout__body">
+        <block wx:for="{{lists}}" wx:key="id">
+          <navigator class="products-list__item" url="/pages/detail/index?id={{item.id}}">
+            <view class="product-box">
+              <view class="product-image">
+                <image mode="aspectFill" lazy-load="{{true}}" class="product-image-cont" src="{{item.image}}"/>
+              </view>
+              <view class="product-info">
+                <view class="product-info__box">
+                  <view class="product-title font-size--32">
+                    <view class="product-title-elip">{{item.title}}</view>
+                  </view>
+                  <view class="font-size--26 product--price color-price">￥{{item.recommendedPrice}}</view>
+                </view>
+              </view>
+            </view>
+          </navigator>
+        </block>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Recommend extends wepy.component {
+  props = {
+    lists: [Array]
+  }
+  data = {
+  }
+  methods = {
+  }
+}
+</script>

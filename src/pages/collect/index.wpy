@@ -1,0 +1,183 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-collect">
+    <view class="wow-flex is-justify-center is-align-middle collect-tabs">
+      <view class="font-size--24 collect-tabs__panle" :class="{'active': defaultSelectTab === 'product'}" @tap.stop="handleToTab('product')">商品</view>
+      <view class="font-size--24 collect-tabs__panle" :class="{'active': defaultSelectTab === 'video'}" @tap.stop="handleToTab('video')">视频</view>
+    </view>
+
+    <view class="font-size--28 opertion-row">
+      <text class="manager" @tap.stop="handleToEdit">{{ isEdit ? '完成' : '管理' }}</text>
+    </view>
+
+    <product :productList.sync="productList" :isEdit.sync="isEdit" wx:if="{{defaultSelectTab === 'product' && productList.length}}"></product>
+
+    <video :videoList.sync="videoList" :isEdit.sync="isEdit" class="video-list" wx:elif="{{defaultSelectTab === 'video' && videoList.length}}"></video>
+
+    <view class="collect-empty" wx:else>
+      <view class="wow-ta-c">
+        <image class="collect-empty__icon" src="../../images/common/ico_printed_empty.png" mode="aspectFill"></image>
+        <view class="font-size--24 collect-empty__tip">您还没有收藏品哦~</view>
+      </view>
+    </view>
+    
+    <view class="collect-footer" wx:if="{{isEdit}}">
+      <view class="wow-radio radio-box font-size--26" @tap.stop="handleToChecked">
+        <lebel class="radio">
+          <image hidden='{{!isAllChecked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+        </lebel>全选
+      </view>
+      <view class="collect-btn queue-footer__delete font-size--28" @tap.stop="handleDelCollect">删除</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import Product from './modules/product'
+  import Video from './modules/video'
+  import collectApis from '../../api/collect'
+  export default class Collect extends wepy.page {
+    config = {
+      navigationBarTitleText: '我的收藏'
+    }
+    components = {
+      product: Product,
+      video: Video
+    }
+    async getCollectList () {
+      try {
+        let opts = {
+          userId: wepy.$instance.globalData.userId
+        }
+        if (this.defaultSelectTab === 'product') {
+          const { data: goodsData } = await collectApis.getUserCommodityCollection(opts)
+          goodsData.data.forEach(item => {
+            item.checked = false
+          })
+          this.productList = goodsData.data
+        } else if (this.defaultSelectTab === 'video') {
+          const { data: videoData } = await collectApis.getUserVideoCollection(opts)
+          videoData.data.forEach(item => {
+            item.checked = false
+          })
+          this.videoList = videoData.data
+        }
+        console.log(this.productList)
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    events = {
+      handleCheckedRadio (item, index) {
+        const result = []
+        if (this.defaultSelectTab === 'product') {
+          this.productList[index].checked = !item.checked
+          this.isAllChecked = this.productList.every(item => item.checked)
+          for (let i = 0; i < this.productList.length; i++) {
+            const item = this.productList[i]
+            if (item.checked) {
+              result.push(item.id)
+            }
+          }
+        } else {
+          this.videoList[index].checked = !item.checked
+          this.isAllChecked = this.videoList.every(item => item.checked)
+          for (let i = 0; i < this.videoList.length; i++) {
+            const item = this.videoList[i]
+            if (item.checked) {
+              result.push(item.id)
+            }
+          }
+        }
+        this.ids = result
+      }
+    }
+    methods = {
+      async handleDelCollect () {
+        try {
+          let isChecked
+          if (this.defaultSelectTab === 'product') {
+            isChecked = this.productList.some(item => item.checked)
+          } else {
+            isChecked = this.videoList.some(item => item.checked)
+          }
+          if (!isChecked) {
+            wx.showToast({
+              title: `还没勾选${this.defaultSelectTab === 'product' ? '商品' : '视频'}`,
+              icon: 'none'
+            })
+            return
+          }
+          wx.showLoading({
+            title: '删除中',
+            mask: true
+          })
+          const { ids } = this
+          const opts = {
+            ids: ids.join(',')
+          }
+          if (this.defaultSelectTab === 'product') {
+            await collectApis.updateSpuCollection(opts)
+          } else {
+            await collectApis.updateVideoCollection(opts)
+          }
+          this.getCollectList()
+          wx.hideLoading()
+        } catch (error) {
+          wx.hideLoading()
+          console.log(error)
+        }
+      },
+      handleToChecked () {
+        this.isAllChecked = !this.isAllChecked
+        const result = []
+        if (this.defaultSelectTab === 'product') {
+          this.productList.forEach(item => {
+            item.checked = this.isAllChecked
+            if (item.checked) {
+              result.push(item.id)
+            }
+          })
+        } else {
+          this.videoList.forEach(item => {
+            item.checked = this.isAllChecked
+            if (item.checked) {
+              result.push(item.id)
+            }
+          })
+        }
+        this.ids = result
+      },
+      handleToEdit () {
+        this.isEdit = !this.isEdit
+      },
+      handleToTab (type) {
+        this.defaultSelectTab = type
+        this.isAllChecked = false
+        this.getCollectList()
+      }
+    }
+    onLoad () {
+      this.getCollectList()
+    }
+    data = {
+      userId: '',
+      productList: [],
+      videoList: [],
+      defaultSelectTab: 'product',
+      isEdit: false,
+      isAllChecked: false,
+      ids: []
+    }
+
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/collect/common.postcss';
+</style>

@@ -1,0 +1,183 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-order">
+    <view class="order-lists" wx:if="{{list.length > 0}}">
+      <view class="order-lists-items">
+        <view class="section" wx:for="{{list}}" wx:key="{{index}}" wx:for-item="item" @tap.stop="handleToOrderDetail({{item.orderNo}})">
+          <view class="order-lists-items__item wow-flex"
+            wx:for="{{item.orderListBO}}" wx:key="{{index}}" wx:for-item="goodItem">
+            <view class="wow-background-image order-img"
+            style="background-image: url({{goodItem.image || 'https://wxsw.oss-cn-hangzhou.aliyuncs.com/video/model/pic/ad0a2217-5dd5-4482-b5a8-d63f36834e1b.jpg'}})"></view>
+            <view class="order-info">
+              <wow-elip line="2" class="order-info__title font-size--26">{{goodItem.title}}</wow-elip>
+              <view class="order-info__sku font-size--24">{{commonwxs.specStr(goodItem)}}</view>
+              <view class="order-info__bootom wow-flex is-justify-space-between is-align-middle">
+                <view class="color-price font-size--28"><text class="font-size--22">￥</text>{{goodItem.price}}</view>
+                <view class="font-size--24 num">数量 {{goodItem.num}}</view>
+              </view>
+            </view>
+          </view>
+          <view class="order-lists-items__status font-size--28 wow-flex is-justify-space-between is-align-middle">
+            <block wx:if="{{item.orderStatus === 0}}">
+              <!-- <image class="icon-status" src="../../images/order/ico_PendingPayment.png" mode="aspectFill"></image> -->
+              <view class="pay-tips font-size--24">定制商品支付订购单后客服将与您取得联系</view>
+              <view class="wow-flex is-align-middle font-size--26">
+                <view class="order-btn order-btn__pay">去支付</view>
+              </view>
+            </block>
+            <block wx:elif="{{item.orderStatus === 2}}">
+              <image class="icon-status" src="../../images/order/icon_remind.png" mode="aspectFill"></image>
+              <!-- <view class="logistics-tips font-size--24">客服即将与您取得联系</view> -->
+              <view class="wow-flex font-size--26" @tap.stop="handleRemindGoods">
+                <view class="order-btn order-btn__logistics">提醒发货</view>
+              </view>
+            </block>
+            <block wx:elif="{{item.orderStatus === 3}}">
+              <image class="icon-status" src="../../images/order/ico_received.png" mode="aspectFill"></image>
+              <view class="wow-flex font-size--26">
+                <view class="order-btn order-btn__affirm" @tap.stop="handleConfirmOrder({{item.orderNo}})">确认收货</view>
+                <view class="order-btn order-btn__logistics" @tap.stop="handleGetLogistics({{item}})">查看物流</view>
+              </view>
+            </block>
+            <block wx:elif="{{item.orderStatus === 4}}">
+              <image class="icon-status" src="../../images/order/icon_finsh.png" mode="aspectFill"></image>
+              <view class="wow-flex font-size--26">
+                <view class="order-btn order-btn__logistics">删除订单</view>
+                <view class="order-btn order-btn__logistics">查看评价</view>
+              </view>
+            </block>
+            <block wx:elif="{{item.orderStatus === 9}}">
+              <image class="icon-status" src="../../images/order/icon_cancel.png" mode="aspectFill"></image>
+              <!-- <view class="wow-flex font-size--26">
+                <view class="order-btn order-btn__logistics">删除订单</view>
+                <view class="order-btn order-btn__logistics">查看评价</view>
+              </view> -->
+            </block>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="order-empty" wx:else>
+      <image class="icon" src="../../images/order/ico_order_empty.png" mode="aspectFill"></image>
+      <view class="font-size--26">您还没有订单哦~</view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import orderApis from '../../api/order'
+  import commonwxs from './wxs/common.wxs'
+  import wxutils from '../../utils/wxutils'
+  export default class Order extends wepy.page {
+    config = {
+      navigationBarTitleText: '我的订单',
+      usingComponents: {
+        'wow-radio': '../../packages/radio/index',
+        'wow-elip': '../../packages/elip/index'
+      }
+    }
+    data = {
+      userId: '',
+      list: []
+    }
+    wxs = {
+      commonwxs: commonwxs
+    }
+    async orderList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { userId } = this
+        const opts = {
+          userId
+        }
+        const { data } = await orderApis.listOrder(opts)
+        this.list = data
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onLoad () {
+      this.userId = wx.getStorageSync('wow').userId
+      this.orderList()
+    }
+    async removeOrder (oid, index) {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const opts = {
+          orderNo: oid
+        }
+        await orderApis.updateOrderByCancel(opts)
+        this.list.splice(index, 1)
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    methods = {
+      // handleDelOrder (oid, index) {
+      //   const that = this
+      //   wx.showModal({
+      //     content: '确定要退出吗？',
+      //     success(res) {
+      //       if (res.confirm) {
+      //         that.removeOrder(oid, index)
+      //       }
+      //     }
+      //   })
+      // },
+      async handleConfirmOrder (oid) {
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const opts = {
+            orderNo: oid
+          }
+          await orderApis.updateOrderByConfirm(opts)
+          wxutils.backOrNavigate('/pages/transaction/index')
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      handleGetLogistics (item) {
+        const { expCode, expNo } = item
+        wxutils.backOrNavigate('/pages/logistics/index?expNo=' + expNo + '&expCode=' + expCode)
+      },
+      handleRemindGoods () {
+        wx.showToast({
+          title: '我们已收到提醒',
+          icon: 'none'
+        })
+      },
+      handleToOrderDetail (orderNo) {
+        wxutils.backOrNavigate('/pages/orderDetail/index?oid=' + orderNo)
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/order/common.postcss';
+</style>

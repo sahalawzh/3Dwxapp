@@ -1,0 +1,2 @@
+
+  <view class="jfk-radio is-theme-{{theme}} jfk-radio--shape-{{shape}} {{viewBlock === 'true' ? '' : 'jfk-d-ib'}} {{c === 'true' ? 'is-checked' : ''}} {{popup === 'true' ? 'jfk-radio--popup' : ''}} {{d === 'true' ? 'is-disabled' : ''}} is-radio-{{radioTheme}}"><view class="jfk-radio__label"><view class="jfk-radio__text" style="padding:{{p}};min-width:{{mw}};text-align:{{align}};"><view id="radio-text"><slot/></view></view><view class="jfk-radio__icon"><view class="jfk-wxapp-common-font icon-radio_icon_selected_default jfk-radio__icon-icon"/></view></view></view>

@@ -1,0 +1,120 @@
+
+@import '../../mixins/common.postcss';
+.page-printer {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  background-color: #f0f2f7;
+  .printer-items {
+    padding: 0 16rpx 20rpx;
+    &__card{
+      position: relative;
+      border-radius: 8rpx;
+      background-color: #fff;
+      margin-top: 16rpx;
+    }
+    &__item {
+      padding: 20rpx 30rpx 28rpx 0;
+      .radio-box {
+        padding: 0 34rpx;
+      }
+      .printer-img {
+        width: 126rpx;
+        height: 130rpx;
+        margin-right: 28rpx;
+      }
+      .printer-info {
+        position: relative;
+        flex: 1;
+        &__status {
+          color: #010101;
+          .name {
+            margin-right: 14rpx;
+          }
+          .status-img {
+            width: 62rpx;
+            height: 32rpx;
+            &__single {
+              width: 30rpx;
+              height: 30rpx;
+            }
+          }
+          .btn_set {
+            padding: 16rpx 0 30rpx 10rpx;
+            width: 32rpx;
+            height: 8rpx;
+          }
+        }
+        &__tip {
+          color: #6993e2;
+          margin-top: 12rpx;
+          &.print-invalid {
+            color: #9d9d9d;
+            .print-invalid__day {
+              color: #deb66b;
+              margin-right: 12rpx;
+            }
+          }
+          &.print-limit {
+            color: #99efbd;
+          }
+        }
+        &__set {
+          position: absolute;
+          right: 0;
+          top: 0;
+          .icon {
+            width: 30rpx;
+            height: 8rpx;
+          }
+        }
+        &__record {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          color: #d5eaff;
+          .icon {
+            width: 36rpx;
+            height: 48rpx;
+            margin-left: 8rpx;
+          }
+        }
+      }
+    }
+    &__progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 12rpx;
+      border-radius: 22rpx;
+      overflow: hidden;
+      .printer-progress {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  .queue-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    padding: 30rpx 0;
+    .queue-btn {
+      height: 62rpx;
+      line-height: 62rpx;
+      border-radius: 30rpx;
+      color: #fff;
+      text-align: center;
+      width: 280rpx;
+      float: right;
+      margin-right: 30rpx;
+      background-color: #1360e1;
+    }
+  }
+}

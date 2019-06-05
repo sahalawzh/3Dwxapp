@@ -1,0 +1,174 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain pages-search">
+    <view class="opertion-box">
+      <view class="search-sign">
+        <view class="search-sign__control">
+          <input type="text"
+            confirm-type="search"
+            placeholder="搜索一下"
+            auto-focus
+            placeholder-class="font-size--28"
+            bindconfirm="handleToSearch"
+            value="{{searchVal}}"
+            class="control font-size--28"/>   
+        </view>
+      </view>
+    </view> 
+
+    <view class="goods" wx:if="{{lists.length}}">
+      <goodList :list.sync="lists"></goodList>
+    </view>
+
+    <block wx:else>
+      <view class="history-box">
+        <view class="font-size--28 history-box__empty" wx:if="{{searchVal}}">没有找到相关商品</view>
+        <view class="title font-size--28" wx:if="{{searchList.length}}">
+          <text>历史搜索</text>
+          <image class="btn-delete" src="../../images/common/btn_delete.png" mode="aspectFill" @tap.stop="handleDelHistory()"></image>
+        </view>
+        <view class="history-box__info wow-flex is-align-middle">
+          <view class="item font-size--26 wow-flex is-align-middle" @tap.stop="handleToFind({{item}})" wx:for="{{searchList}}" wx:key="item">{{item}}</view>
+        </view>
+      </view>
+      <view class="hot-box {{searchList.length === 0 ? 'no-search' : ''}}">
+        <view class="hot-title font-size--28" wx:if="{{hotList.length}}">搜索发现</view>
+        <view class="hot-content wow-flex">
+          <view class="font-size--26 hot-content__item" @tap.stop="handleToFind({{item}})" wx:for="{{hotList}}" wx:key="item">{{item}}</view>
+        </view>
+      </view>
+    </block>
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import goodsApis from '../../api/goods'
+  import GoodList from '../../components/goodList'
+  export default class Search extends wepy.page {
+    config = {
+      navigationBarTitleText: '搜索',
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    components = {
+      goodList: GoodList
+    }
+    data = {
+      searchVal: '',
+      start: 1,
+      limits: 20,
+      lists: [],
+      hasMoreData: false, // 默认不用拉数据
+      searchList: [],
+      hotList: []
+    }
+    handleToSearch (e) {
+      const { value } = e.detail
+      this.searchVal = value
+      if (this.searchVal) {
+        this.getGoodsList()
+      } else {
+        this.lists = []
+      }
+    }
+    async getGoodsList () {
+      try {
+        wx.showLoading({
+          title: '加载中...',
+          mask: true
+        })
+        let { start, limits, lists } = this
+        const opts = {
+          start,
+          limits
+        }
+        opts.key = this.searchVal
+        const { data: goodsData } = await goodsApis.queryShoppingByName(opts)
+        const { data, total } = goodsData
+        if (start === 0) {
+          lists = []
+        }
+        this.lists = lists.concat(data)
+        if (total < limits) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.start++
+        }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getHistorySearch () {
+      try {
+        const { data } = await goodsApis.getHistorySearch()
+        this.searchList = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getHeatSearch () {
+      try {
+        const { data } = await goodsApis.getHeatSearch()
+        console.log(data)
+        this.hotList = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async removeAllHistorySearch () {
+      try {
+        await goodsApis.removeAllHistorySearch()
+        this.searchList = []
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    methods = {
+      handleDelHistory () {
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '您确定删除全部历史记录？',
+          success(res) {
+            if (res.confirm) {
+              that.removeAllHistorySearch()
+            }
+          }
+        })
+      },
+      handleToFind (val) {
+        if (val) {
+          this.searchVal = val
+          this.getGoodsList()
+        }
+      }
+    }
+    onLoad () {
+      if (wepy.$instance.globalData.Token) {
+        this.getHistorySearch()
+      }
+      this.getHeatSearch()
+    }
+
+    onReachBottom () {
+      if (this.hasMoreData) {
+        this.getGoodsList()
+      }
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/search/common.postcss';
+</style>

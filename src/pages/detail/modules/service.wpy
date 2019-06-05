@@ -1,0 +1,23 @@
+<template>
+  <view class="good-line">
+    <view class="font-size--28 good-line-items">
+      <view class="wow-flex is-align-middle font-size--24 good-line-item">
+        <view class="good-line-item__label">服务</view>
+        <view class="good-line-item__serve">{{good.serve}}</view>
+        <view></view>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Service extends wepy.component {
+  props = {
+    good: [Object]
+  }
+  data = {
+  }
+  methods = {
+  }
+}
+</script>

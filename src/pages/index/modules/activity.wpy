@@ -1,0 +1,88 @@
+
+<template>
+  <view class="mall-activity">
+    <!-- 活动title -->
+    <view class="title wow-flex is-align-middle">
+      <image class="icon" src="../../../images/mall/ico_shop_time limit.png" mode="aspectFill"></image>
+      <view class="font-size--32 mall-activity__label">限时秒杀</view>
+      <view class="font-size--24 secs">
+        <text class="time-box">01</text>
+        <text class="colon">:</text>
+        <text class="time-box">01</text>
+        <text class="colon">:</text>
+        <text class="time-box">01</text>
+      </view>
+    </view>
+
+    <!-- 商品 -->
+    <view class="products-layout">
+      <view class="mall-scroll-content">
+        <scroll-view 
+          class="mall-scroll"
+          scroll-x="true">
+          <view class="scroll-view-item" wx:for="{{goods}}" wx:key="item" bindtap="handleToDetail({{item.id}})">
+            <view class="product-item">
+              <view class="product-item__img">
+                <image mode="aspectFill" src="../../../images/test/02-2.jpg"></image>
+              </view>
+              <view class="product-item__info">
+                <view class="product-name font-size--28">
+                  <view class="elip">{{item.name}}</view>
+                </view>
+                <view class="product-price font-size--24">￥{{item.price}}</view>
+                <view class="product-price-maket price-maket font-size--24">原价 ￥{{item.maket_price}}</view>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Activity extends wepy.component {
+    props = {
+    }
+    data = {
+      goods: [
+        {
+          name: '测试商品名称测试商品名称商品名称测试商品名称',
+          price: '200',
+          maket_price: '300',
+          src: ''
+        },
+        {
+          name: '测试商品名称测试商品名称测试商品名称',
+          price: '200',
+          maket_price: '300',
+          src: ''
+        },
+        {
+          name: '测试商品名称测试商品名称测试商品名称',
+          price: '200',
+          maket_price: '300',
+          src: ''
+        },
+        {
+          name: '测试商品名称测试商品名称测试商品名称',
+          price: '200',
+          maket_price: '300',
+          src: ''
+        }
+      ]
+    }
+
+    events = {
+    }
+
+    methods = {
+      handleToDetail () {}
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

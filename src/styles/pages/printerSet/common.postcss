@@ -1,0 +1,83 @@
+
+.page-printer-set {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  .printer-header {
+    position: relative;
+    padding: 36rpx 48rpx 32rpx 56rpx;
+    background-color: #fff;
+    &__img {
+      width: 126rpx;
+      height: 130rpx;
+      margin-right: 26rpx;
+    }
+    &__info {
+      color: #707070;
+      padding-top: 4rpx;
+      .item {
+        margin-top: 10rpx;
+      }
+      .exponent {
+        color: #010101;
+        margin-left: 16rpx;
+      }
+      .printer-action {
+        position: absolute;
+        top: 80rpx;
+        right: 48rpx;
+      }
+    }
+    &__status {
+      position: absolute;
+      right: 44rpx;
+      top: 80rpx;
+      width: 58rpx;
+      height: 48rpx;
+    }
+  }
+  .set-list {
+    position: relative;
+    padding-top: 16rpx;
+    background-color: #f6f7f7;
+    &__item {
+      background-color: #fff;
+      position: relative;
+      height: 98rpx;
+      color: #4a4a4a;
+      padding: 0 48rpx 0 54rpx;
+      &:not(:last-child)::after {
+        position: absolute;
+        content: "";
+        height: 2rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #DEDEE4;
+      }
+      .arrow {
+        width: 16rpx;
+        height: 26rpx;
+        margin-right: 14rpx;
+      }
+    }
+    .set-debug {
+      position: relative;
+      padding-top: 16rpx;
+      background-color: #f6f7f7;
+      .set-list__item::after {
+        position: absolute;
+        content: "";
+        height: 2rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #DEDEE4;
+      }
+    }
+  }
+}

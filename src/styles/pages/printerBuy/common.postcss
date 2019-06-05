@@ -1,0 +1,82 @@
+
+.page-printerBuy {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  .printer-buy {
+    padding: 52rpx 50rpx 56rpx;
+    &__btn {
+      border-radius: 68rpx;
+      background-color: rgba(237,237,237,.4);
+      padding: 42rpx 0 32rpx;
+      border: 1rpx solid #dbdbdc;
+      text-align: center;
+      .discount {
+        color: #1360e1;
+      }
+      .tip {
+        color: #9b9b9b;
+        margin-top: 8rpx;
+      }
+    }
+    &__desc {
+      color: #9b9b9b;
+      margin-top: 22rpx;
+      text-align: center;
+    }
+  }
+  .printer-rent {
+    background-color: #f6f7f7;
+    &__wrap {
+      background-color: #fff;
+      margin-top: 18rpx;
+      padding: 56rpx 50rpx 0;
+    }
+    &__title {
+      color: #484848;
+      font-weight: 600;
+    }
+    &__desc {
+      color: #9b9b9b;
+      margin-top: 22rpx;
+      padding-bottom: 8rpx;
+      letter-spacing: 2rpx;
+    }
+    &__items {
+      font-size: 28rpx;
+      flex-wrap: wrap;
+      .item {
+        width: 198rpx;
+        height: 62rpx;
+        color: #484848;
+        font-weight: 600;
+        margin-top: 26rpx;
+        border-radius: 32rpx;
+        background-color: rgba(237,237,237,.4);
+        border: 1rpx solid #dbdbdc;
+        &.active {
+          background-color: #dde8f7;
+          border: 1rpx solid #1360e1;
+          color: #1360e1;
+        }
+      }
+    }
+    &__btn {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      padding: 16rpx 50rpx 60rpx;
+      margin-top: 40rpx;
+      margin-bottom: 20rpx;
+      .btn {
+        height: 72rpx;
+        border-radius: 32rpx;
+        background-color: #1360e1;
+        color: #fff;
+      }
+    }
+  }
+}
