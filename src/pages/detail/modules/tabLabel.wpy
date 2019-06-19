@@ -4,7 +4,7 @@
       <view class="font-size--24 collect-tabs__panle"
         :class="{'active': defaultSelectTab === 'product'}">商品介绍</view>
       <view class="font-size--24 collect-tabs__panle"
-      :class="{'active': defaultSelectTab === 'commet'}"><navigator url="/pages/comment/index?lastpage=detail" hover-class="none">评价</navigator></view>
+      :class="{'active': defaultSelectTab === 'commet'}"><navigator url="/pages/comment/index?lastpage=detail&spuId={{pid}}" hover-class="none">评价</navigator></view>
     </view>
     <view class="font-size--28 tab-label-detail" id="tupian">
       <image bindload="imageLoad" style="width: {{imageWidth}}px; height: {{imageHight}}px" src="{{good.introductionImage}}" mode="aspectFill"></image>
@@ -21,7 +21,8 @@ export default class TabLabel extends wepy.component {
       type: String,
       default: 'product',
       twoWay: true
-    }
+    },
+    pid: [Number, String]
   }
   data = {
     imageWidth: '',

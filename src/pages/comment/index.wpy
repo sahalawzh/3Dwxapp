@@ -1,13 +1,15 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-commet">
-    <commet :lastpage.sync="lastpage"></commet>
+    <commet :lastpage.sync="lastpage" :commetList.sync="commetList" :commetTotal.sync="commetTotal"></commet>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
   import Commet from '../../components/commet'
+  import commetApis from '../../api/commet'
+  import { timeHandle } from '../../utils/commentTimeHandle'
   export default class Comment extends wepy.page {
     config = {
       navigationBarTitleText: '评价'
@@ -16,11 +18,37 @@
       commet: Commet
     }
     data = {
-      lastpage: ''
+      lastpage: '',
+      spuId: '',
+      commetList: [],
+      commetTotal: ''
     }
-    onLoad ({ lastpage }) {
-      console.log(lastpage)
+    async getSpuComment () {
+      try {
+        wx.showLoading({
+          title: '提交中',
+          mask: true
+        })
+        const opts = {
+          spuId: this.spuId
+        }
+        const { data: commetData } = await commetApis.getSpuComment(opts)
+        commetData.data.length && commetData.data.forEach(item => {
+          item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
+        })
+        this.commetList = commetData.data
+        this.commetTotal = commetData.total
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onLoad ({ lastpage, spuId }) {
       this.lastpage = lastpage
+      this.spuId = spuId
+      this.getSpuComment()
     }
     methods = {
     }

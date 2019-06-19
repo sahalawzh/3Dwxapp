@@ -94,7 +94,6 @@
       try {
         const { data: advData } = await advertisementApis.queryAdvertisements()
         this.bannerAdv = advData.filter(item => item.advertisementType === 4)[0]
-        console.log(this.bannerAdv)
         this.$apply()
       } catch (error) {
         console.log(error)
@@ -109,6 +108,12 @@
       this.$apply()
     }
     methods = {
+    }
+    onShareAppMessage () {
+      return {
+        title: '无限三维 · 让孩子创造未来',
+        path: 'pages/index/index'
+      }
     }
     onReachBottom () {
       if (this.hasMoreData) {

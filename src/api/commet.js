@@ -22,7 +22,25 @@ export default class commet extends base {
   static insertSpuComment (opts) {
     return this.post(`/api/comment/insertSpuComment`, opts)
   }
-  static insertSpuComment (opts) {
-    return this.post(`api/file`, opts)
+  /**
+   * 上传图片
+   * @param {object} opts 参数
+   */
+  static uploadImg (opts) {
+    return this.post(`api/file/upload`, opts)
+  }
+  /**
+   * 删除图片
+   * @param {object} opts 参数
+   */
+  static deleteImg (opts) {
+    return this.post(`api/file/delete`, opts)
+  }
+  /**
+   * 获取商品评论
+   * @param {object} opts 参数
+   */
+  static getSpuComment (opts) {
+    return this.get(`api/comment/getSpuComment`, opts)
   }
 }

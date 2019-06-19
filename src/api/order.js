@@ -58,4 +58,11 @@ export default class order extends base {
   static getLogisticsMessage (opts) {
     return this.get(`api/logistics/getLogisticsMessage`, opts)
   }
+  /**
+   * 物流信息
+   * @param {object} opts 参数
+   */
+  static deleteOrder (opts) {
+    return this.get(`api/order/deleteOrder`, opts)
+  }
 }

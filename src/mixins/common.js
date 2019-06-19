@@ -10,7 +10,7 @@ export default class CommonMixin extends wepy.mixin {
     url: '',
     userId: '',
     authType: '',
-    userInfo: '',
+    userInfo: wepy.$instance.globalData.userInfo || '',
     target: ''
   }
   async getCartNum () { // 获取购物车数量

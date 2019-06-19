@@ -44,7 +44,8 @@
 
 <script>
   import wepy from 'wepy'
-  // import commetApis from '../../api/commet'
+  import commetApis from '../../api/commet'
+  import wxutils from '../../utils/wxutils'
   export default class PublishCommet extends wepy.page {
     config = {
       navigationBarTitleText: '发表评论'
@@ -55,15 +56,36 @@
         logistics: ['star_empty', 'star_empty', 'star_empty', 'star_empty', 'star_empty'],
         service: ['star_empty', 'star_empty', 'star_empty', 'star_empty', 'star_empty']
       },
-      uploadImgs: []
+      uploadImgs: [],
+      spuId: '',
+      oid: '',
+      skuId: ''
     }
-    onLoad () {
+    onLoad ({spuId, oid, skuId}) {
+      this.spuId = spuId
+      this.oid = oid
+      this.skuId = skuId
+    }
+    async insertSpuComment (params) {
+      try {
+        wx.showLoading({
+          title: '提交中',
+          mask: true
+        })
+        await commetApis.insertSpuComment(params)
+        wxutils.backOrRedirect('/pages/order/index')
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
     }
     methods = {
       handleImagePreview (idx) {
         wx.previewImage({
-          current: this.uploadImgs[idx],  //当前预览的图片
-          urls: this.uploadImgs,  //所有要预览的图片
+          current: this.uploadImgs[idx], // 当前预览的图片
+          urls: this.uploadImgs // 所有要预览的图片
         })
       },
       handleCreatCommet (e) {
@@ -72,18 +94,33 @@
         commet = commet.trim()
         let i = 0
         let errorMsg = ''
-        let hasService = service.some(item => item === 'star')
-        if (!hasService) {
+        let serviceScore = 0
+        service.forEach(element => {
+          if (element === 'star') {
+            serviceScore++
+          }
+        })
+        if (!serviceScore) {
           errorMsg = '还未选服务态度'
           i++
         }
-        let hasLogistics = logistics.some(item => item === 'star')
-        if (!hasLogistics) {
+        let logisticsScore = 0
+        logistics.forEach(element => {
+          if (element === 'star') {
+            logisticsScore++
+          }
+        })
+        if (!logisticsScore) {
           errorMsg = '还未选物流信息'
           i++
         }
-        let hasTotal = total.some(item => item === 'star')
-        if (!hasTotal) {
+        let totalScore = 0
+        total.forEach(element => {
+          if (element === 'star') {
+            totalScore++
+          }
+        })
+        if (!totalScore) {
           errorMsg = '还未选满意度'
           i++
         }
@@ -92,26 +129,72 @@
           i++
         }
         if (i > 0) {
-          wx.showToast({
+          return wx.showToast({
             title: errorMsg,
             icon: 'none'
           })
-          return
+        }
+
+        const { spuId, oid, skuId } = this
+        let opts = {
+          content: commet,
+          spuId,
+          totalScore,
+          logisticsScore,
+          serviceScore,
+          orderNo: oid,
+          skuId
         }
         if (this.uploadImgs.length) {
-          const arr = this.uploadImgs.map(path => {
-            return wxUploadFile({
-              url: config.urls.question + '/image/upload',
-              filePath: path,
-              fileType: 'comment',
+          wx.showLoading({
+            title: '上传中',
+            mask: true
+          })
+          let uploads = []
+          this.uploadImgs.map((item, index) => {
+            uploads[index] = new Promise((resolve, reject) => {
+              wx.uploadFile({
+                url: wepy.$instance.globalData.baseUrl + '/api/file/upload',
+                filePath: item,
+                name: 'file',
+                header: {
+                  'token': wepy.$instance.globalData.Token,
+                  'Content-Type': 'multipart/form-data'
+                },
+                formData: {
+                  'fileType': 'comment'
+                },
+                success: function (res) {
+                  resolve(JSON.parse(res.data).data)
+                },
+                fail: function (error) {
+                  reject(error)
+                }
+              })
             })
           })
-          console.log(arr)
+          Promise.all(uploads).then((result) => {
+            let uploadsId = []
+            let arr = [].concat.apply([], result)
+            arr.forEach(element => {
+              uploadsId.push(element.id)
+            })
+            if (result.length) {
+              opts.imageIndex = uploadsId.join('_')
+            }
+            wx.hideLoading()
+            this.insertSpuComment(opts)
+          }).catch((err) => {
+            console.log(err)
+            wx.hideLoading()
+            wx.showToast({
+              title: '图片上传失败',
+              icon: 'none'
+            })
+          })
+        } else {
+          this.insertSpuComment(opts)
         }
-        wx.uploadFile({
-
-        })
-        // await commetApis.insertSpuComment()
       },
       handleRemoveImg (index) {
         this.uploadImgs.splice(index, 1)
@@ -123,17 +206,26 @@
           })
         }
       },
-      handleToUpload () {
+      async handleToUpload () {
         const that = this
         wx.chooseImage({
           count: 5,
           success: function(res) {
-            const { errMsg, tempFilePaths } = res
+            const { errMsg, tempFilePaths, tempFiles } = res
             if (errMsg === 'chooseImage:ok') {
-              const MAX = 5
-              const images = that.uploadImgs.concat(tempFilePaths)
-              that.uploadImgs = images.length <= MAX ? images : images.slice(0, MAX)
-              that.$apply()
+              const MAXSIZE = 2000000
+              let isLimit = tempFiles.some(item => item.size > MAXSIZE)
+              if (isLimit) {
+                wx.showToast({
+                  title: '上传图片不能大于2M!',
+                  icon: 'none'
+                })
+              } else {
+                const MAX = 5
+                const images = that.uploadImgs.concat(tempFilePaths)
+                that.uploadImgs = images.length <= MAX ? images : images.slice(0, MAX)
+                that.$apply()
+              }
             }
           }
         })

@@ -13,6 +13,10 @@
       ></video>
     </view>
 
+    <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
+      <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
+    </navigator>
+
     <view class="video-detail">
       <!-- 视频内容 -->
       <view class="video-content">

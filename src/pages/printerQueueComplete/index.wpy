@@ -39,7 +39,7 @@
               </view>
               <view class="printer-address wow-flex is-align-middle">
                 <image class="icon" src="../../images/printer/ico_File.png" mode="aspectFill"></image>
-                <view class="font-size--24">{{item.fileInfo.origin}}</view>
+                <view class="font-size--24">{{item.fileInfo.path}}</view>
               </view>
               <view class="printer-time font-size--28">{{item.updateTime}}</view>
             </view>

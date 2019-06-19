@@ -109,7 +109,7 @@
                     success: function (e) {
                       let page = getCurrentPages().pop()
                       if (page === undefined || page === null) return
-                      page.onLoad()
+                      page.onLoad({id: serialNumber})
                     }
                   })
                 }, 2000)

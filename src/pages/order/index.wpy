@@ -42,16 +42,16 @@
             <block wx:elif="{{item.orderStatus === 4}}">
               <image class="icon-status" src="../../images/order/icon_finsh.png" mode="aspectFill"></image>
               <view class="wow-flex font-size--26">
-                <view class="order-btn order-btn__logistics">删除订单</view>
-                <view class="order-btn order-btn__logistics">查看评价</view>
+                <view class="order-btn order-btn__logistics" @tap.stop="handleDelOrder({{item.orderNo}}, {{index}})">删除订单</view>
+                <!-- <navigator url="/pages/comment/index?spuId={{item.spuId}}" class="order-btn order-btn__logistics">查看评价</navigator> -->
               </view>
             </block>
             <block wx:elif="{{item.orderStatus === 9}}">
               <image class="icon-status" src="../../images/order/icon_cancel.png" mode="aspectFill"></image>
-              <!-- <view class="wow-flex font-size--26">
-                <view class="order-btn order-btn__logistics">删除订单</view>
-                <view class="order-btn order-btn__logistics">查看评价</view>
-              </view> -->
+              <view class="wow-flex font-size--26">
+                <view class="order-btn order-btn__logistics" @tap.stop="handleDelOrder({{item.orderNo}}, {{index}})">删除订单</view>
+                <!-- <view class="order-btn order-btn__logistics">查看评价</view> -->
+              </view>
             </block>
           </view>
         </view>
@@ -111,7 +111,7 @@
     async removeOrder (oid, index) {
       try {
         wx.showLoading({
-          title: '加载中',
+          title: '取消中',
           mask: true
         })
         const opts = {
@@ -126,18 +126,37 @@
         wx.hideLoading()
       }
     }
+    async deleteOrder (orderNo, index) {
+      try {
+        wx.showLoading({
+          title: '删除中',
+          mask: true
+        })
+        const opts = {
+          orderNo
+        }
+        await orderApis.deleteOrder(opts)
+        this.list.splice(index, 1)
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
     methods = {
-      // handleDelOrder (oid, index) {
-      //   const that = this
-      //   wx.showModal({
-      //     content: '确定要退出吗？',
-      //     success(res) {
-      //       if (res.confirm) {
-      //         that.removeOrder(oid, index)
-      //       }
-      //     }
-      //   })
-      // },
+      handleDelOrder (orderNo, index) {
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '确定删除改订单？',
+          success(res) {
+            if (res.confirm) {
+              that.deleteOrder(orderNo, index)
+            }
+          }
+        })
+      },
       async handleConfirmOrder (oid) {
         try {
           wx.showLoading({
@@ -148,7 +167,7 @@
             orderNo: oid
           }
           await orderApis.updateOrderByConfirm(opts)
-          wxutils.backOrNavigate('/pages/transaction/index')
+          wxutils.backOrNavigate('/pages/transaction/index?oid=' + oid)
           wx.hideLoading()
           this.$apply()
         } catch (error) {

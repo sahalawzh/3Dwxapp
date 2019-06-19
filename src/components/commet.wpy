@@ -8,21 +8,19 @@
           <image class="head" src="{{item.smallAvator}}" mode="aspectFill"></image>
           <view class="content">
             <view class="name">{{item.nickname}}</view>
-            <view class="time">{{item.createTime}}</view>
-            <view class="message">{{item.content}}</view>
-          </view>
-        </view>
-        <!-- <view class="wow-flex commet-items_item">
-          <image class="head" src="../images/common/ico_Userhead_small.png" mode="aspectFill"></image>
-          <view class="content">
-            <view class="name">测试</view>
-            <view class="time">2天前</view>
-            <view class="message">测试内容测试内容测试内容测试内容测试内容测试内容测试内容测试内容测试内容测试内容</view>
-            <view class="reply-message">
-              <view class="reply-message__info">测试回复内容测试回复内容测试回复内容测试回复内容</view>
+            <view class="time">{{item.createTime}}<text class="content-sku" wx:if="{{ item.spec }}">{{item.spec}}</text></view>
+            <view class="{{lastpage === 'detail' ? 'commet-detail' : ''}}">
+              <view class="message">{{item.content}}</view>
+              <view class="commet-img wow-flex" wx:if="{{item.image.length}}">
+                <image class="commet-img__upload" wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="imageItem" wx:key="" @tap.stop="handleImagePreview({{item.image}}, {{idx}})" src="{{imageItem}}" mode="aspectFill"></image>
+              </view>
+              <view class="reply-message font-size--26" wx:if="{{ item.reply }}">
+                <view>客服回复：</view>
+                <view class="reply-message__info">{{ item.reply }}</view>
+              </view>
             </view>
           </view>
-        </view> -->
+        </view>
       </view>
     </view>
 
@@ -30,22 +28,23 @@
       <image class="icon" src="../images/common/ico_comment_empty.png" mode="aspectFill"></image>
       <view class="tip font-size--30">暂时还没有评价，快来做第一个吧~</view>
     </view>
-
-    <view class="wow-flex commet-wrap__apply is-align-middle" wx:if="{{lastpage !== 'detail' && userId}}">
+    <view class="commet-wrap__apply" wx:if="{{lastpage !== 'detail' && userId}}">
       <view class="commet-wrap__apply_input">
         <input
           bindblur="handleGetInfo"
-          class="font-size--28"
-          placeholder-class="font-size--28"
+          class="font-size--30"
+          placeholder-class="placeholder-input"
           value="{{sendVal}}"
-          placeholder="写评论..."/>
+          placeholder="来发表一下你的评论吧..."/>
       </view>
-      <button wx:if="{{userInfo}}" class="open-type-btn send-btn" @tap.stop="handleToSend">
-        发送
-      </button>
-      <button wx:else class="open-type-btn send-btn" data-target="commet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">
-        发送
-      </button>
+      <view class="send-box">
+        <button wx:if="{{userInfo}}" class="wow-flex is-align-middle is-justify-center open-type-btn send-btn" @tap.stop="handleToSend">
+          发送<image class="icon" src="../images/common/ico_send.png" mode="aspectFill"></image>
+        </button>
+        <button wx:else class="wow-flex is-align-middle is-justify-center open-type-btn send-btn" data-target="commet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">
+          发送<image class="icon" src="../images/common/ico_send.png" mode="aspectFill"></image>
+        </button>
+      </view>
     </view>
   </view>
 </template>
@@ -73,6 +72,12 @@ export default class Commet extends wepy.component {
     }
   }
   methods = {
+    handleImagePreview (imgList, idx) {
+      wx.previewImage({
+        current: imgList[idx], // 当前预览的图片
+        urls: imgList // 所有要预览的图片
+      })
+    },
     handleToSend () {
       this.$emit('handleSendInfo')
     },
@@ -126,6 +131,9 @@ export default class Commet extends wepy.component {
             font-size: 32rpx;
             color: #4a4a4a;
           }
+          &-sku {
+            margin-left: 30rpx;
+          }
           .time {
             font-size: 24rpx;
             color: #9e9e9e;
@@ -136,36 +144,27 @@ export default class Commet extends wepy.component {
             margin-top: 28rpx;
           }
           .reply-message {
-            position: relative;
-            background-color: #f4f4f4;
-            border-radius: 14rpx;
-            padding: 40rpx 30rpx;
-            margin-top: 24rpx;
+            margin-top: 14rpx;
+            color: #9e9e9e;
             &__info {
-              &::before{
-                position: absolute;
-                content: "";
-                width: 0;
-                height: 0;
-                left: 30rpx;
-                top: 0;
-                border-width: 0 20rpx 20rpx;
-                border-style: solid;
-                border-color: transparent transparent #f4f4f4;/*透明 透明  灰*/
-              }
-              &:after{
-                position: absolute;
-                content: "";
-                width: 0;
-                height: 0;
-                left: 30rpx;
-                top: -14rpx;
-                border-width: 0 14rpx 14rpx;
-                border-style: solid;
-                border-color: transparent transparent #f4f4f4;/*透明 透明  灰*/
-              }
+              margin-top: 8rpx;
             }
           }
+        }
+      }
+      .commet-detail {
+        margin-left: -108rpx;
+      }
+      .commet-img {
+        flex-wrap: wrap;
+        margin-top: 30rpx;
+        &__upload {
+          width: 30.33%;
+          height: 206rpx;
+          border-radius: 8rpx;
+          margin-right: 10rpx;
+          margin-bottom: 10rpx;
+          overflow: hidden;
         }
       }
     }
@@ -175,25 +174,34 @@ export default class Commet extends wepy.component {
       bottom:0;
       width:100%;
       box-sizing:border-box;
-      padding: 36rpx 42rpx 36rpx 46rpx;
-      background-color: #e0e0e0; 
+      padding: 46rpx 48rpx 52rpx;
+      background-color: #fff;
+      box-shadow: 0px -1rpx 4rpx #ccc;
       &_input {
-        flex: 1;
+        .placeholder-input {
+          color: #9a9a9a;
+        }
         input {
-          background-color: #fff;
           border-radius: 6rpx;
           padding: 4rpx 10rpx 4rpx 20rpx;
           height: 100%;
+          color: #4a4a4a;
         }
       }
-      .send-btn {
-        width: 128rpx;
-        height: 60rpx;
-        line-height: 60rpx;
-        margin-left: 30rpx;
-        background-color: #145ee1;
-        color: #fff;
-        font-size: 30rpx;
+      .send-box {
+        text-align: center;
+        margin-top: 50rpx;
+        .send-btn {
+          color: #145ee1;
+          font-size: 30rpx;
+          margin: 0 auto;
+          width: 164rpx;
+        }
+        .icon {
+          width: 48rpx;
+          height: 48rpx;
+          margin-left: 8rpx;
+        }
       }
     }
     .commet-empty {

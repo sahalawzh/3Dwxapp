@@ -55,7 +55,8 @@ export default class extends wepy.app {
       'pages/printerQueueComplete/index',
       'pages/printerList/index',
       'pages/videoList/index',
-      'pages/publishCommet/index'
+      'pages/publishCommet/index',
+      'pages/webView/index'
     ],
     tabBar: {
       backgroundColor: '#ffffff',
@@ -164,7 +165,7 @@ export default class extends wepy.app {
         console.log('app', wx.imageQuality)
       }
     })
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development') { // http://testapi.gdlwzn.com
       this.globalData.baseUrl = 'http://testapi.gdlwzn.com'
     } else {
       if (process.env.TARGET_APP === 'proapp') {

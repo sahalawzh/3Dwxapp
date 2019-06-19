@@ -23,7 +23,10 @@
               </view>
               <image class="btn_set" wx:if="{{item.printerState === 'Operational' || item.printerState === 'Offline'}}" src="../../images/printer/btn_set.png" @tap.stop="handleToSetPrinter({{item.printerId}}, {{item.printerSerialNumber}}, {{item.printerAlias}})" mode="aspectFill"></image>
             </view>
-            <view class="printer-info__tip font-size--24" style="color: {{item.printerStateDesc.showColor}}">{{item.printerStateDesc.showText}}</view>
+            <view class="printer-info__tip font-size--24">
+              <text wx:if="{{item.expiredTimeDesc.showText}}" style="color: {{item.expiredTimeDesc.showColor}}">{{item.expiredTimeDesc.showText}}</text>
+              <text style="color: {{item.printerStateDesc.showColor}}">{{item.printerStateDesc.showText}}</text>
+            </view>
             <view class="printer-info__record wow-flex is-align-middle">
               <view class="font-size--24">{{item.queueTotal}}</view>
               <image class="icon" src="../../images/printer/ico_playlist_{{printerSate[item.printerState].record}}.png" mode="aspectFill"></image>
@@ -232,10 +235,8 @@
         success(res) {
           const { errMsg, result } = res
           if (errMsg === 'scanCode:ok') {
-            const startIndex = result.indexOf('=') + 1
-            const endIndex = result.length
-            const val = result.substring(startIndex, endIndex)
-            wxutils.backOrNavigate('/pages/printerAdd/index?id=' + val)
+            const scanArr = result.split('=')
+            wxutils.backOrNavigate('/pages/printerAdd/index?id=' + scanArr[1])
           }
         },
         fail (error) {

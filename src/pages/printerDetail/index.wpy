@@ -2,7 +2,7 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-printer-detail">
     <view class="printer-header wow-flex is-align-middle">
-      <image class="printer-header__img" src="../../images/printer/ico_printer_blue.png" mode="aspectFill"></image>
+      <image class="printer-header__img" src="{{colorImage}}" mode="aspectFill"></image>
       <view class="printer-header__info font-size--26">
         <view class="font-size--24">{{printerTypeName}}</view>
         <view class="item">热床温度<text class="exponent">{{bedTemperature.actual}}℃</text></view>
@@ -111,7 +111,8 @@
       },
       printerState: '',
       userId: '',
-      title: ''
+      title: '',
+      colorImage: ''
     }
     methods = {
       hanldeToSet (printerState, item, index) {
@@ -228,12 +229,13 @@
           printerId,
           userId
         }
-        const { bedTemperature, printerState, queueList, queueTotal, toolTemperature } = await printerApis.getMyPrinter(opts)
+        const { bedTemperature, printerState, printerColor, queueList, queueTotal, toolTemperature } = await printerApis.getMyPrinter(opts)
         this.queueList = queueList
         this.queueTotal = queueTotal
         this.bedTemperature = bedTemperature
         this.toolTemperature = toolTemperature
         this.printerState = printerState
+        this.colorImage = printerColor.colorImage
         wx.hideLoading()
         this.$apply()
       } catch (error) {

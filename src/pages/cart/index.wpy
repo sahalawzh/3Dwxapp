@@ -73,6 +73,12 @@
                 </view>
               </view>
 
+              <view class="wow-radio radio-box font-size--26 product-select" wx:if="{{isLease}}" @tap="handleToCheck('lease')">
+                <lebel class="radio">
+                  <image hidden="{{!isCheckLease}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                </lebel><text class="agreement-cont" @tap.stop="handleToLease({{skuObj.agreement}})">请勾选已阅租并同意赁协议再进行购买</text>
+              </view>
+
               <block wx:if="{{false}}">
                 <view class="wow-radio radio-box font-size--26 product-select" @tap.stop="handleToCheck('wrapp')">
                   <lebel class="radio">
@@ -88,7 +94,7 @@
             </scroll-view>
 
             <view class="btn-wrap">
-              <view class="product-tip font-size--24">定制商品付款后客服将与您取得联系</view>
+              <view class="product-tip font-size--24" wx:if="{{skuObj.isCustomized === 1}}">定制商品付款后客服将与您取得联系</view>
               <button class="btn font-size--26" @tap.stop="handleChangeSku()">确定</button>
             </view>
           </view>
@@ -157,6 +163,12 @@
           }
         })
         return price
+      },
+      isLease () { // 720是购买,其他都是租赁
+        if (this.sku.length && this.indexs) {
+          let skuItem = this.sku.filter(item => item.indexes === this.indexs)[0]
+          return skuItem.leaseDay !== 720 && skuItem.leaseDay !== 0
+        }
       }
     }
     data = {
@@ -175,7 +187,8 @@
       sku: [],
       spec: [],
       select: {},
-      indexs: ''
+      indexs: '',
+      isCheckLease: false
     }
     async getCartList () {
       try {
@@ -314,8 +327,19 @@
       }
     }
     methods = {
+      handleToLease (url) {
+        wxutils.backOrNavigate('/pages/webView/index?webUrl=' + encodeURIComponent(url))
+      },
       async handleChangeSku () {
         try {
+          if (this.isLease && !this.isCheckLease) {
+            wx.showModal({
+              title: '提示',
+              content: '请勾选已阅租并同意赁协议再进行购买',
+              showCancel: false
+            })
+            return
+          }
           wx.showLoading({
             title: '加载中',
             mask: true
@@ -359,6 +383,9 @@
           case 'card':
             this.skuObj.isCheckCardServer = !this.skuObj.isCheckCardServer
             break
+          case 'lease':
+            this.isCheckLease = !this.isCheckLease
+            break
           default:
             break
         }
@@ -380,6 +407,8 @@
             price: item.price,
             id: item.id,
             specificationNumber: item.specificationNumber,
+            agreement: item.agreement,
+            isCustomized: item.isCustomized,
             isCheckWrapping: item.wrapping === 1 || false, // 礼品包装
             isCheckCardServer: item.card_service === 1 || false // 卡片服务
           }

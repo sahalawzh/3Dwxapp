@@ -1,0 +1,23 @@
+<template lang="wxml" miniapp="wepy">
+  <web-view src="{{webUrl}}"></web-view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class webView extends wepy.page {
+    data = {
+      webUrl: ''
+    }
+    config = {
+      navigationBarTitleText: '租赁协议'
+    }
+    onLoad (options) {
+      this.webUrl = decodeURIComponent(options.webUrl)
+    }
+
+    methods = {
+    }
+  }
+</script>
+
+<style lang="postcss">
+</style>

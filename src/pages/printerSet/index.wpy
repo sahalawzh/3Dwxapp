@@ -2,11 +2,11 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-printer-set">
     <view class="printer-header wow-flex">
-      <image class="printer-header__img" src="../../images/printer/ico_printer_blue.png" mode="aspectFill"></image>
+      <image class="printer-header__img" src="{{colorImage}}" mode="aspectFill"></image>
       <view class="printer-header__info font-size--26">
         <view class="font-size--24">Makesome5.0</view>
-        <view class="item">热床温度<text class="exponent">{{bedtemperaturer}}℃</text></view>
-        <view class="item">喷头温度<text class="exponent">{{printtemperaturer}}℃</text></view>
+        <view class="item">热床温度<text class="exponent">{{bedtemperature.actual}}℃</text></view>
+        <view class="item">喷头温度<text class="exponent">{{toolTemperature.actual}}℃</text></view>
         <view class="font-size--30 printer-action" @tap.stop="hanldeUnBindPrinterModal">解绑</view>
       </view>
     </view>
@@ -72,8 +72,10 @@
       printerSerialNumber: '',
       printMode: '',
       userId: '',
-      bedtemperaturer: '',
-      printtemperaturer: ''
+      bedTemperature: '',
+      toolTemperature: '',
+      title: '',
+      colorImage: ''
     }
     async hanldeUnBindPrinter () {
       try {
@@ -81,7 +83,7 @@
           title: '加载中',
           mask: true
         })
-        const { printerSerialNumber, userId } = this
+        const { printerSerialNumber, userId, printerId, title } = this
         const opts = {
           printerSerialNumber,
           userId
@@ -92,13 +94,29 @@
           success: function (e) {
             let page = getCurrentPages().pop()
             if (page === undefined || page === null) return
-            page.onLoad()
+            page.onLoad({printerSerialNumber, printerId, title})
           }
         })
         wx.hideLoading()
         this.$apply()
       } catch (error) {
         console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getMyPrinter () {
+      try {
+        const { printerId, userId } = this
+        const opts = {
+          printerId,
+          userId
+        }
+        const { bedTemperature, toolTemperature, printerColor } = await printerApis.getMyPrinter(opts)
+        this.bedTemperature = bedTemperature
+        this.toolTemperature = toolTemperature
+        this.colorImage = printerColor.colorImage
+        this.$apply()
+      } catch (error) {
         wx.hideLoading()
       }
     }
@@ -114,10 +132,8 @@
           userId
         }
         const { data } = await printerApis.getPrintMode(opts)
-        const { printMode, bedtemperaturer, printtemperaturer } = data
-        this.printMode = printMode
-        this.bedtemperaturer = bedtemperaturer
-        this.printtemperaturer = printtemperaturer
+        this.printMode = data.printMode
+        this.getMyPrinter()
         wx.hideLoading()
         this.$apply()
       } catch (error) {
@@ -160,11 +176,21 @@
         })
       }
     }
+    onPullDownRefresh () {
+      if (!this.userId) {
+        wx.stopPullDownRefresh()
+        return
+      }
+      this.getMyPrinter()
+      wx.nextTick(() => {
+        wx.stopPullDownRefresh()
+      })
+    }
     onLoad ({ printerId, printerSerialNumber, title }) {
       this.printerId = printerId
       this.printerSerialNumber = printerSerialNumber
+      this.title = title
       this.userId = wepy.$instance.globalData.userId
-      console.log(decodeURIComponent(title))
       this.getPrintMode()
       wx.setNavigationBarTitle({
         title: decodeURIComponent(title)

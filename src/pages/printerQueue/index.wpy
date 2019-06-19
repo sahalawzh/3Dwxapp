@@ -29,7 +29,7 @@
             </view>
             <view class="printer-address wow-flex is-align-middle">
               <image class="icon" src="../../images/printer/ico_File.png" mode="aspectFill"></image>
-              <view class="font-size--24">{{item.fileInfo.origin}}</view>
+              <view class="font-size--24">{{item.fileInfo.path}}</view>
             </view>
             <view class="printer-opertion font-size--24" wx:if="{{item.printerInfo}}" @tap.stop="handleControlPrinter({{item}})">
               <text>{{item.printerInfo.printerAlias}}</text>
@@ -222,7 +222,7 @@
               })
               return
             }
-            that.handleToLink(link[res.tapIndex], item.id)
+            that.handleToLink(link[res.tapIndex], item.id, item.printerId)
           },
           fail(res) {
             console.log(res.errMsg)
@@ -268,9 +268,9 @@
         wx.hideLoading()
       }
     }
-    handleToLink (url, queueId) {
+    handleToLink (url, queueId, printerId) {
       wx.navigateTo({
-        url: `${url}?queueId=${queueId}`
+        url: `${url}?queueId=${queueId}&printerId=${printerId}`
       })
     }
     /***

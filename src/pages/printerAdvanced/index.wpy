@@ -195,7 +195,7 @@
           }
           console.log(opts)
           await printerApis.choosePrintMode(opts)
-          wxutils.backOrNavigate('/pages/printerSet/index')
+          wxutils.backOrNavigate('/pages/printerSet/index?printerId=' + printerId)
           wx.hideLoading()
           this.$apply()
         } catch (error) {

@@ -70,6 +70,7 @@
       this.searchVal = value
       if (this.searchVal) {
         this.getGoodsList()
+        this.start = 1
       } else {
         this.lists = []
       }
@@ -88,7 +89,7 @@
         opts.key = this.searchVal
         const { data: goodsData } = await goodsApis.queryShoppingByName(opts)
         const { data, total } = goodsData
-        if (start === 0) {
+        if (start === 1) {
           lists = []
         }
         this.lists = lists.concat(data)
