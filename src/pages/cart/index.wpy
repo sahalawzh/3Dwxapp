@@ -172,6 +172,7 @@
       }
     }
     data = {
+      isFirst: false,
       isRuleTrue: false,
       isEdit: false,
       isCheckAll: false,
@@ -197,6 +198,7 @@
           mask: true
         })
         let { data } = await cartApi.cartList({userId: this.userId})
+        this.isFirst = true
         data = data || []
         wx.hideLoading()
         if (!data.length) {
@@ -500,6 +502,9 @@
     onHide () {
     }
     onShow () {
+      if (this.isFirst) {
+        this.getCartList()
+      }
     }
   }
 </script>

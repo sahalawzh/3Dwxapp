@@ -1,6 +1,7 @@
 <template>
   <!-- 评论 -->
   <view class="commet-wrap">
+    <view class="mask" @tap.stop="handleCloseCommetMask" wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}"></view>
     <view class="commet-box" wx:if="{{commetList.length}}">
       <view class="title">{{commetTotal}}条评论</view>
       <view class="commet-items">
@@ -28,11 +29,13 @@
       <image class="icon" src="../images/common/ico_comment_empty.png" mode="aspectFill"></image>
       <view class="tip font-size--30">暂时还没有评价，快来做第一个吧~</view>
     </view>
-    <view class="commet-wrap__apply" wx:if="{{lastpage !== 'detail' && userId}}">
+    <view class="commet-wrap__apply" wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}">
       <view class="commet-wrap__apply_input">
         <input
+          cursor-spacing="60"
           bindblur="handleGetInfo"
           class="font-size--30"
+          focus="{{autoFocus}}"
           placeholder-class="placeholder-input"
           value="{{sendVal}}"
           placeholder="来发表一下你的评论吧..."/>
@@ -59,19 +62,31 @@ export default class Commet extends wepy.component {
       twoWay: true
     },
     commetList: [Array],
-    commetTotal: [String, Number]
+    commetTotal: [String, Number],
+    isShowCommetInput: {
+      type: Boolean,
+      twoWay: true
+    }
   }
   data = {
-    sendVal: null
+    sendVal: null,
+    autoFocus: true
   }
   mixins = [CommonMixin]
   events = {
     handleClearInput (val) {
-      this.sendVal = ''
+      this.sendVal = val
+      this.$apply()
+    },
+    handleSendVal (val) {
+      this.sendVal = val
       this.$apply()
     }
   }
   methods = {
+    handleCloseCommetMask () {
+      this.$emit('handleCloseCommetMask')
+    },
     handleImagePreview (imgList, idx) {
       wx.previewImage({
         current: imgList[idx], // 当前预览的图片
@@ -92,6 +107,14 @@ export default class Commet extends wepy.component {
 <style lang='postcss'>
   .commet-wrap {
     padding-top: 12rpx;
+    .mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      z-index: 99;
+    }
     .title {
       color: #737373;
       font-size: 32rpx;
@@ -174,9 +197,10 @@ export default class Commet extends wepy.component {
       bottom:0;
       width:100%;
       box-sizing:border-box;
-      padding: 46rpx 48rpx 52rpx;
+      padding: 46rpx 38rpx 52rpx 28rpx;
       background-color: #fff;
       box-shadow: 0px -1rpx 4rpx #ccc;
+      z-index: 100;
       &_input {
         .placeholder-input {
           color: #9a9a9a;

@@ -383,4 +383,30 @@
   .float-box-scroll {
     height: 950rpx;
   }
+  .share-box {
+    width: 750rpx;
+    padding-bottom: 84rpx;
+    background-color: #fff;
+    &__item {
+      position: relative;
+      padding: 30rpx 0;
+      text-align: center;
+      color: #4a4a4a;
+      &:not(:last-child)::after{
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #ccc;
+      }
+      .ico_share_img {
+        width: 36rpx;
+        height: 36rpx;
+        margin-bottom: 12rpx;
+      }
+    }
+  }
 }

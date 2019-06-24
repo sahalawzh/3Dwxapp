@@ -55,7 +55,7 @@
         </view>
       </view>
 
-      <view class="queue-footer wow-flex is-align-middle is-justify-space-between" wx:if="{{editStatus}}">
+      <view class="queue-footer wow-flex is-align-middle is-justify-end" wx:if="{{editStatus}}">
         <view class="queue-btn queue-footer__again font-size--28" wx:if="{{false}}" @tap.stop="handleAgainPrinter">再次打印</view>
         <view class="queue-btn queue-footer__delete font-size--28" @tap.stop="handleDelQueue">删除</view>
       </view>

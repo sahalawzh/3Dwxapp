@@ -15,11 +15,11 @@
         </view>
         <view class="item-control">
           <image class="icon" @tap.stop="handleToEdite({{item}}, {{index}})" src="../../images/set/ico_set_Change.png" mode="aspectFill"></image>
-          <view class="wow-radio radio-box" @tap.stop="handleSelectDefault({{item}}, {{index}})">
+          <!-- <view class="wow-radio radio-box" @tap.stop="handleSelectDefault({{item}}, {{index}})">
             <lebel class="radio">
               <image class="ico_selected" src='../../images/common/ico_selected.png' hidden='{{item.isDefault !== 0}}'></image>
             </lebel>
-          </view>
+          </view> -->
         </view>
       </view>
 
@@ -267,32 +267,32 @@
       this.getAddressList()
     }
     methods = {
-      async handleSelectDefault (item, index) {
-        try {
-          if (item.isDefault === 0) return
-          wx.showLoading({
-            title: '加载中',
-            mask: true
-          })
-          const { areaId, recipient, id, phone, address, addressDetail } = item
-          const opts = {
-            districtId: areaId,
-            recipient,
-            phone,
-            address,
-            addressDetail,
-            isDefault: 0,
-            userId: this.userId,
-            id
-          }
-          await addressApis.updateAddress(opts)
-          wx.hideLoading()
-          this.getAddressList()
-        } catch (error) {
-          console.log(error)
-          wx.hideLoading()
-        }
-      },
+      // async handleSelectDefault (item, index) {
+      //   try {
+      //     if (item.isDefault === 0) return
+      //     wx.showLoading({
+      //       title: '加载中',
+      //       mask: true
+      //     })
+      //     const { areaId, recipient, id, phone, address, addressDetail } = item
+      //     const opts = {
+      //       districtId: areaId,
+      //       recipient,
+      //       phone,
+      //       address,
+      //       addressDetail,
+      //       isDefault: 0,
+      //       userId: this.userId,
+      //       id
+      //     }
+      //     await addressApis.updateAddress(opts)
+      //     wx.hideLoading()
+      //     this.getAddressList()
+      //   } catch (error) {
+      //     console.log(error)
+      //     wx.hideLoading()
+      //   }
+      // },
       hanldeSelectAddress (item, index) {
         this.singleInfo = item
         this.goNextPage()
@@ -404,6 +404,12 @@
               singleInfo.id = data.id
               singleInfo.isDefault = data.isDefault
               this.showAdd = false
+              if (singleInfo.isDefault === 0) {
+                list.forEach(element => {
+                  element.isDefault = 1
+                })
+              }
+              singleInfo.areaId = districtId
               list.unshift(singleInfo)
               wepy.hideLoading()
               if (isFirstAdd) { // 第一次添加
@@ -452,7 +458,7 @@
           address: pca || '',
           addressDetail: addressDetail || '',
           id: id || '',
-          isDefault,
+          isDefault: isDefault || 0,
           phone: phone || '',
           recipient: recipient || '',
           value: [provinceId, cityId, areaId]

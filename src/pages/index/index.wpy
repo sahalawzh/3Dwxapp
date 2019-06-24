@@ -16,11 +16,15 @@
         <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
       </button>
       
-      <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon wow-mt-30 open-type-btn">
+      <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon open-type-btn">
         <image src="../../images/common/btn_user_normal.png" mode="aspectFill"></image>
       </navigator>
       <button wx:else data-url="/pages/person/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="person-icon wow-mt-30 open-type-btn">
         <image src="../../images/common/btn_user_normal.png" mode="aspectFill"></image>
+      </button>
+
+      <button open-type="share" hover-class="none" class="share-icon open-type-btn">
+        <image src="../../images/index/btn_index_share.png" mode="aspectFill"></image>
       </button>
     </view>
 

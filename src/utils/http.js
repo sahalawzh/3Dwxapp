@@ -105,7 +105,9 @@ export default class http {
       }
       console.log('wxlogin complete', Date.now())
       try {
-        await this.get(`${this.getConfig('loginUrl')}`, data)
+        const { data: loginData } = await this.get(`${this.getConfig('loginUrl')}`, data)
+        const { token } = loginData
+        this.setConfig('Token', token)
       } catch (e) {
         console.log(e)
       }

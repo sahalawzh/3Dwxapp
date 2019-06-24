@@ -239,7 +239,7 @@ export default class extends wepy.app {
   }
 
   createAuthHeader () {
-    const token = wepy.$instance.globalData.Token
+    const token = this.globalData.Token
     let header = {
       token,
       'X-Requested-With': 'XMLHttpRequest'

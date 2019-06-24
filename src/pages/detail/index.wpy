@@ -71,6 +71,21 @@
       </view>
     </view>
 
+    <!-- 分享 -->
+    <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
+      <view class="share-box">
+        <view class="share-box__item" @tap.stop="handleSharePoster">
+          <image class="ico_share_img" src="../../images/common/ico_share_img.png" mode="aspectFill"></image>
+          <view class="font-size--28">生成分享海报</view>
+        </view>
+        <view class="share-box__item">
+          <button open-type="share" class="open-type-btn">
+            <view class="font-size--28">转发</view>
+          </button>
+        </view>
+      </view>
+    </wow-popup>
+
   </view>
 </template>
 
@@ -87,8 +102,10 @@
   import cartApis from '../../api/cart'
   import collectApis from '../../api/collect'
   import printerApis from '../../api/printer'
+  import shareApis from '../../api/share'
   import CommonMixin from '../../mixins/common'
   import wxutils from '../../utils/wxutils'
+  import { parseQueryString } from '../../utils/utils'
   export default class Detail extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -109,11 +126,16 @@
     mixins = [CommonMixin]
     async getProductDetail () {
       try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
         let opts = {
           id: this.pid
         }
         const { data } = await goodsApis.getSpuById(opts)
         this.detail = data
+        wx.hideLoading()
         wx.setNavigationBarTitle({
           title: data.title
         })
@@ -130,6 +152,7 @@
         this.$apply()
       } catch (error) {
         console.log(error)
+        wx.hideLoading()
       }
     }
     async getPrintSpu () {
@@ -144,6 +167,33 @@
     changeQty (e) {
       const { value } = e.detail
       this.num = value
+    }
+    async handleSharePoster () {
+      try {
+        wx.showLoading({
+          title: '生成中',
+          mask: true
+        })
+        const opts = {
+          type: 'commodity',
+          id: this.pid,
+          page: 'pages/detail/index',
+          scene: `id=${this.pid}`
+        }
+        const { data } = await shareApis.createSharePoster(opts)
+        wx.hideLoading()
+        this.poster = data
+        this.$wxpage.selectComponent('.wow_share').hide()
+        this.posterStatus = true
+        wx.previewImage({
+          current: data,
+          urls: [data]
+        })
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
     }
     async getQuerySku () {
       try {
@@ -202,14 +252,14 @@
     }
     async handleCollect (e) {
       try {
-        const { pid, userId } = this
-        this.userId = e || userId
+        const { pid } = this
+        this.userId = e
         const opts = {
-          spuId: pid,
-          userId: this.userId
+          spuId: pid
         }
         const { data, msg } = await collectApis.insertSpuCollection(opts)
         this.collectionNum = data.num
+        this.detail.isEnable = data.isEnable
         wx.showToast({
           title: msg,
           icon: 'success',
@@ -221,6 +271,10 @@
       }
     }
     methods = {
+      handleToDetail () {
+        this.posterStatus = false
+        this.$wxpage.selectComponent('.wow_share').hide()
+      },
       handleToLease (url) {
         wxutils.backOrNavigate('/pages/webView/index?webUrl=' + encodeURIComponent(url))
       },
@@ -235,7 +289,7 @@
             isPackage: isCheckWrapping ? 1 : 0,
             isHasCard: isCheckCardServer ? 1 : 0,
             card_text: cardText,
-            userId: wx.getStorageSync('wow').userId,
+            userId: this.userId,
             specs: detail.isSpec
           }
           if (isLease && !isCheckLease) {
@@ -299,10 +353,18 @@
       },
       handleToCollect () {
         this.handleCollect()
+      },
+      handleShareItems () {
+        this.$wxpage.selectComponent('.wow_share').show()
       }
     }
-    onLoad ({id}) {
-      this.pid = id
+    onLoad (options) {
+      if (options.scene) {
+        let sceneObj = decodeURIComponent(options.scene)
+        let urlObj = 'url?' + sceneObj
+        options = parseQueryString(urlObj)
+      }
+      this.pid = options.id
       this.getProductDetail()
       this.getRelatedProducts()
       this.getSpuCollectionNum()
@@ -310,7 +372,6 @@
     computed = {
       isLease () { // 720是购买,其他都是租赁
         if (this.sku.length && this.indexs) {
-          console.log(this.indexs)
           let skuItem = this.sku.filter(item => item.indexes === this.indexs)[0]
           return skuItem.leaseDay !== 720 && skuItem.leaseDay !== 0
         }
@@ -365,7 +426,9 @@
       userId: '',
       collectionNum: '', // 收藏数量
       printerInfo: '',
-      isCheckLease: false
+      isCheckLease: false,
+      poster: '',
+      posterStatus: false
     }
 
     async getShareNum () {
@@ -382,8 +445,8 @@
       const { pid, detail } = this
       this.getShareNum()
       return {
-        title: detail.name,
-        imageUrl: detail.picture,
+        title: detail.title,
+        imageUrl: detail.image,
         path: 'pages/detail/index?id=' + pid
       }
     }

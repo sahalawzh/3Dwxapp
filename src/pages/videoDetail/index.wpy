@@ -8,14 +8,22 @@
         class="video-box__control"
         id="myVideo"
         src="{{info.video}}"
-        poster="{{info.image}}"
+        poster="{{initTime > 0 ? '' : info.image}}"
         title="{{info.title}}"
+        initial-time="{{initTime}}"
+        bindtimeupdate="handleRecordTime"
       ></video>
     </view>
 
-    <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
-      <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
-    </navigator>
+    <view class="video-resource wow-flex is-justify-end is-align-middle" wx:if="{{ info.play.length }}">
+      <view wx:for="{{info.play}}" wx:key="index" @tap.stop="handleTogglePlay({{ item }}, {{ index }})" class="video-resource__item font-size--24 {{item.videoActive ? 'active' : ''}}">{{ item.definition }}</view>
+    </view>
+
+    <cover-view>
+      <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
+        <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
+      </navigator>
+    </cover-view>
 
     <view class="video-detail">
       <!-- 视频内容 -->
@@ -35,29 +43,6 @@
             <image class="icon" src="../../images/common/ico_seetime_big_black.png" mode="aspectFill"></image>
             <view class="font-size--24">{{info.hot}}</view>
           </view>
-          <!-- 消息条数 -->
-          <view wx:if="{{userId}}" class="suspend-box__item">
-            <image class="icon" src="../../images/common/btn_comment.png" mode="aspectFill"></image>
-            <view class="font-size--24">{{commetTotal}}</view>
-          </view>
-          <button wx:else data-type="videoCommet" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="suspend-box__item open-type-btn">
-            <image class="icon" src="../../images/common/btn_comment.png" mode="aspectFill"></image>
-            <view class="font-size--24">{{commetTotal}}</view>
-          </button>
-          <!-- 收藏数 -->
-          <view wx:if="{{userId}}" @tap.stop="handleToCollect" class="suspend-box__item">
-            <image class="icon" src="../../images/common/btn_Collection_big_black.png" mode="aspectFill"></image>
-            <view class="font-size--24">{{collectionNum}}</view>
-          </view>
-          <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="suspend-box__item open-type-btn">
-            <image class="icon" src="../../images/common/btn_Collection_big_black.png" mode="aspectFill"></image>
-            <view class="font-size--24">{{collectionNum}}</view>
-          </button>
-          <!-- 分享数 -->
-          <view class="suspend-box__item" @tap.stop="handleToShare">
-            <image class="icon" src="../../images/common/btn_sharetime_big_black.png" mode="aspectFill"></image>
-            <view class="font-size--24">{{info.share}}</view>
-          </view>
         </view>
       </view>
 
@@ -68,8 +53,8 @@
           <navigator url="/pages/detail/index?id={{printer.id}}" hover-class="none" class="print-box__item wow-flex">
             <image class="print-box__item-img" src="{{printer.image}}" mode="aspectFill"></image>
             <view class="print-box__item-info">
-              <view class="name">{{printer.title}}</view>
-              <view class="desc">{{printer.info}}</view>
+              <wow-elip line="2" class="name">{{printer.title}}</wow-elip>
+              <wow-elip line="2" class="desc">{{printer.info}}</wow-elip>
               <view class="color-price price font-size--26">{{printer.text}}</view>
             </view>
           </navigator>
@@ -106,19 +91,39 @@
 
     <view class="cut"></view>
     <!-- 评论 -->
-    <commet :userId.sync="userId" :commetList.sync="commetList" :commetTotal.sync="commetTotal"></commet>
+    <commet
+      :isShowCommetInput.sync="isShowCommetInput"
+      :userId.sync="userId"
+      :commetList.sync="commetList"
+      :commetTotal.sync="commetTotal"
+    ></commet>
+
+    <view class="controls wow-flex is-justify-space-between" wx:if="{{ isShowControls }}">
+      <image wx:if="{{ userId }}" @tap.stop="handleShowCommetInput" class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      <button wx:else data-type="videoCommet" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+        <image class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      </button>
+      <view class="wow-flex">
+        <image @tap.stop="handleShareItems" class="icon ico_share" src="../../images/common/ico_share.png" mode="aspectFill"></image>
+        <image wx:if="{{userId}}" @tap.stop="handleToCollect" class="icon" src="../../images/common/btn_collection{{ info.isEnable === 1 ? '_on' : ''}}.png" mode="aspectFill"></image>
+        <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+          <image class="icon" src="../../images/common/btn_collection.png" mode="aspectFill"></image>
+        </button>
+      </view>
+    </view>
 
     <!-- 分享 -->
-    <wow-popup class="wow_share" componentTheme="light" position="bottom" full="false" show-close="false" border-radius="false">
-      <view class="wow-flex share-box">
+    <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
+      <view class="share-box">
+        <view class="share-box__item" @tap.stop="handleSharePoster">
+          <image class="ico_share_img" src="../../images/common/ico_share_img.png" mode="aspectFill"></image>
+          <view class="font-size--28">生成分享海报</view>
+        </view>
         <view class="share-box__item">
           <button open-type="share" class="open-type-btn">
-            <image class="icon" src="../../images/common/btn_share_wefriend.png" mode="aspectFill"></image>
+            <view class="font-size--28">转发</view>
           </button>
         </view>
-        <!-- <view class="share-box__item" @tap.stop="handleToPoster">
-          <image class="icon" src="../../images/common/btn_share_weFriendship.png" mode="aspectFill"></image>
-        </view> -->
       </view>
     </wow-popup>
 
@@ -137,15 +142,18 @@
   import videoApis from '../../api/video'
   import collectApis from '../../api/collect'
   import commetApis from '../../api/commet'
+  import shareApis from '../../api/share'
   import Commet from '../../components/commet'
   import CommonMixin from '../../mixins/common'
   import { timeHandle } from '../../utils/commentTimeHandle'
   import Poster from './modules/poster'
+  import { parseQueryString } from '../../utils/utils'
   export default class VideoDetail extends wepy.page {
     config = {
-      navigationBarTitleText: '无限三维',
+      navigationBarTitleText: '',
       usingComponents: {
-        'wow-popup': '../../packages/popup/index'
+        'wow-popup': '../../packages/popup/index',
+        'wow-elip': '../../packages/elip/index'
       }
     }
     mixins = [CommonMixin]
@@ -161,23 +169,81 @@
       commetTotal: '',
       sendInfo: '',
       collectionNum: '',
-      printer: ''
+      printer: '',
+      isShowCommetInput: false,
+      isShowControls: true,
+      networkType: '',
+      initTime: 0,
+      currentTime: 0,
+      poster: '',
+      posterStatus: false
     }
     methods = {
+      handleTogglePlay (item, index) {
+        if (item.videoActive) return
+        this.info.play.forEach(element => {
+          element.videoActive = false
+        })
+        this.info.play[index].videoActive = true
+        this.info.video = item.url
+        this.initTime = this.currentTime
+        const that = this
+        wx.nextTick(() => {
+          wx.showToast({
+            title: item.definition,
+            icon: 'success',
+            success: function () {
+              setTimeout(() => {
+                wx.hideToast()
+                that.videoContext.play()
+              }, 2000)
+            }
+          })
+        })
+        this.$apply()
+      },
+      handleShowCommetInput () {
+        this.handleVideoCommet()
+      },
       handleToCollect () {
         this.handleCollect()
       },
-      handleToShare () {
+      handleShareItems () {
         this.$wxpage.selectComponent('.wow_share').show()
       },
-      handleToPoster () {
-        // this.$wxpage.selectComponent('.wow_poster').show()
-        // setTimeout(() => {
-        //   this.$broadcast('canvasStart')
-        // }, 0)
+      async handleSharePoster () {
+        try {
+          wx.showLoading({
+            title: '生成中',
+            mask: true
+          })
+          const opts = {
+            type: 'video',
+            id: this.id,
+            page: 'pages/videoDetail/index',
+            scene: `id=${this.id}`
+          }
+          const { data } = await shareApis.createSharePoster(opts)
+          this.poster = data
+          this.$wxpage.selectComponent('.wow_share').hide()
+          this.posterStatus = true
+          wx.previewImage({
+            current: data,
+            urls: [data]
+          })
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
       }
     }
     events = {
+      handleCloseCommetMask () {
+        this.isShowCommetInput = false
+        this.isShowControls = true
+      },
       handleGetInfo (val) {
         this.sendInfo = val
       },
@@ -196,8 +262,9 @@
           }
           await commetApis.addVideoComment(opts)
           this.sendInfo = ''
-          this.$broadcast('handleClearInput')
+          this.$broadcast('handleClearInput', this.sendInfo)
           this.getVideoComment()
+          this.isShowCommetInput = true
           wx.hideLoading()
           this.$apply()
         } catch (error) {
@@ -205,13 +272,17 @@
         }
       }
     }
+    handleRecordTime (e) {
+      const { currentTime } = e.detail
+      this.currentTime = currentTime
+    }
     onShareAppMessage () {
       const { id, info } = this
       this.$wxpage.selectComponent('.wow_poster').hide()
       this.getShareNum()
       return {
         title: info.title,
-        imageUrl: info.picture,
+        imageUrl: info.image,
         path: 'pages/videoDetail/index?id=' + id
       }
     }
@@ -239,14 +310,13 @@
     }
     async handleCollect (e) {
       try {
-        const { userId, id } = this
-        this.userId = e || userId
+        const { id } = this
+        this.userId = e
         const opts = {
-          videoId: id,
-          userId: e || this.userId
+          videoId: id
         }
         const { data, msg } = await collectApis.addVideoCollection(opts)
-        this.collectionNum = data.num
+        this.info.isEnable = data.isEnable
         wx.showToast({
           title: msg,
           duration: 1000
@@ -269,8 +339,12 @@
         console.log(error)
       }
     }
-    handleVideoCommet () {
-      this.userId = wepy.$instance.globalData.userId
+    handleVideoCommet (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+      this.isShowControls = false
+      this.isShowCommetInput = true
+      // this.$broadcast('handleSendVal', this.sendInfo)
       this.$apply()
     }
     async getVideoDetail (id) {
@@ -281,6 +355,16 @@
         const { data } = await videoApis.detail(opts)
         wx.hideLoading()
         this.info = data
+        wx.setNavigationBarTitle({
+          title: decodeURIComponent(data.title)
+        })
+        if (data.play.length > 1) {
+          data.video = this.networkType === 'wifi' ? data.play[1].url : data.play[0].url
+          data.play[1].videoActive = this.networkType === 'wifi'
+          data.play[0].videoActive = this.networkType !== 'wifi'
+        } else {
+          data.play[0].videoActive = true
+        }
         wepy.$instance.globalData.subpub.on('collect', this.handleCollect, this)
         wepy.$instance.globalData.subpub.on('videoCommet', this.handleVideoCommet, this)
         this.$apply()
@@ -304,10 +388,15 @@
         console.log(error)
       }
     }
-    onLoad ({ id }) {
-      this.id = id
+    onLoad (options) {
+      if (options.scene) {
+        let sceneObj = decodeURIComponent(options.scene)
+        let urlObj = 'url?' + sceneObj
+        options = parseQueryString(urlObj)
+      }
+      this.id = options.id
       this.videoContext = wx.createVideoContext('myVideo')
-      this.getVideoDetail(id)
+      this.getVideoDetail(options.id)
       this.getVideoComment()
       this.getSpuCollectionNum()
       this.getPrintByVideoId()
@@ -317,6 +406,12 @@
     onHide () {
     }
     onShow () {
+      const that = this
+      wx.getNetworkType({
+        success (res) {
+          that.networkType = res.networkType
+        }
+      })
       if (wepy.$instance.globalData.userId) {
         this.userId = wepy.$instance.globalData.userId
       }

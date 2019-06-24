@@ -20,7 +20,7 @@
 		}
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.7.1",
+	"libVersion": "2.7.2",
 	"appid": "wx5819d1f1540598a5",
 	"projectname": "3Dwxapp",
 	"miniprogramRoot": "dist/",
@@ -45,7 +45,7 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 29,
+			"current": 26,
 			"list": [
 				{
 					"id": 0,
@@ -230,10 +230,10 @@
 					"scene": null
 				},
 				{
-					"id": 25,
+					"id": 26,
 					"name": "视频详情",
 					"pathName": "pages/videoDetail/index",
-					"query": "id=75",
+					"query": "id=50",
 					"scene": null
 				},
 				{

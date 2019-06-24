@@ -61,9 +61,9 @@
             <view>快递 包邮</view>
           </view>
           <view class="order-lists-items__status font-size--26 wow-flex is-align-middle is-justify-end"  wx:if="{{orderData.orderStatus === 4}}">
-            <navigator wx:if="{{ item.commentStatus === 0 }}" url="/pages/publishCommet/index?spuId={{item.spuId}}&oid={{orderData.orderNum}}&skuId={{item.skuId}}" class="font-size--28 order-lists__btn">
+            <view wx:if="{{ item.commentStatus === 0 }}" @tap.stop="handleToCommet({{item}})" class="font-size--28 order-lists__btn">
               <view>评价晒单</view>
-            </navigator>
+            </view>
             <navigator wx:if="{{ item.commentStatus === 1 }}" url="/pages/comment/index?spuId={{item.spuId}}" class="font-size--28 order-lists__btn">
               <view>查看评论</view>
             </navigator>
@@ -319,6 +319,17 @@
       }
     }
     methods = {
+      handleToCommet (item) {
+        const { spuId, image, skuId } = item
+        const { orderNum } = this.orderData
+        wx.setStorage({
+          key: 'spuImage',
+          data: image,
+          success: () => {
+            wxutils.backOrNavigate(`/pages/publishCommet/index?spuId=${spuId}&oid=${orderNum}&skuId=${skuId}`)
+          }
+        })
+      },
       handleSelectedArea () {
         const that = this
         wx.showModal({
@@ -337,7 +348,6 @@
       handleCancelOrder () {
         let $popup = this.$wxpage.selectComponent('.j_season')
         $popup && $popup.show()
-        console.log('pp')
       },
       handleRemindGoods (orderStatus) {
         switch (orderStatus) {

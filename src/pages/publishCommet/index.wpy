@@ -4,9 +4,9 @@
     <form bindsubmit="handleCreatCommet">
       <view class="commet-wrap">
         <view class="wow-flex is-align-middle satisfaction-row">
-          <view class="icon-header">
-            <open-data type="userAvatarUrl"></open-data>
-          </view>
+          <image class="icon-header" wx:if="{{image}}" mode="aspectFill" src="{{image}}">
+            <!-- <open-data type="userAvatarUrl"></open-data> -->
+          </image>
           <image class="icon-star" wx:for="{{stars.total}}" wx:key="index" @tap.stop="handleToStar({{'total'}}, {{index}})" src="../../images/common/btn_evaluate_{{item}}.png" mode="aspectFill"></image>
           <view class="font-size--28 satisfaction-row__label">满意度</view>
         </view>
@@ -59,12 +59,19 @@
       uploadImgs: [],
       spuId: '',
       oid: '',
-      skuId: ''
+      skuId: '',
+      image: ''
     }
     onLoad ({spuId, oid, skuId}) {
       this.spuId = spuId
       this.oid = oid
       this.skuId = skuId
+      wx.getStorage({
+        key: 'spuImage',
+        success: (res) => {
+          this.image = res.data
+        }
+      })
     }
     async insertSpuComment (params) {
       try {
@@ -232,6 +239,9 @@
       }
     }
     onUnload () {
+      wx.removeStorage({
+        key: 'spuImage'
+      })
     }
     onHide () {
     }

@@ -6,16 +6,16 @@
         <button class="controls-item open-type-btn" open-type="contact">
           <image mode="aspectFill" class="controls-box controls-wechat" src="../../../images/common/ico_Detailspage_viewtimes.png"></image>
         </button>
-        <button open-type="share" class="controls-item open-type-btn">
-          <image mode="aspectFill" class="controls-box controls-share" src="../../../images/common/btn_share.png"></image>
+        <view class="controls-item" @tap.stop="handleShareItems">
+          <image mode="aspectFill" class="controls-box controls-share" src="../../../images/common/ico_share.png"></image>
           <view class="controls-item__sign font-size--24">{{good.share}}</view>
-        </button>
+        </view>
         <view wx:if="{{userId}}" @tap.stop="handleToCollect" class="controls-item">
-          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_Collection.png"></image>
+          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_collection{{good.isEnable === 1 ? '_on' : ''}}.png"></image>
           <view class="controls-item__sign font-size--24">{{collectionNum}}</view>
         </view>
         <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="controls-item open-type-btn">
-          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_Collection.png"></image>
+          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_collection{{good.isEnable === 1 ? '_on' : ''}}.png"></image>
           <view class="controls-item__sign font-size--24">{{collectionNum}}</view>
         </button>
         <!-- <view class="controls-box controls-share">{{good.share}}</view>
@@ -49,6 +49,9 @@ export default class Footer extends wepy.component {
     },
     handleToCollect () {
       this.$emit('handleToCollect')
+    },
+    handleShareItems () {
+      this.$emit('handleShareItems')
     }
   }
 }
