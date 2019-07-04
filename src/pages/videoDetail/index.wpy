@@ -13,17 +13,17 @@
         initial-time="{{initTime}}"
         bindtimeupdate="handleRecordTime"
       ></video>
+      <cover-view>
+        <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
+          <cover-image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></cover-image>
+        </navigator>
+      </cover-view>
     </view>
 
     <view class="video-resource wow-flex is-justify-end is-align-middle" wx:if="{{ info.play.length }}">
       <view wx:for="{{info.play}}" wx:key="index" @tap.stop="handleTogglePlay({{ item }}, {{ index }})" class="video-resource__item font-size--24 {{item.videoActive ? 'active' : ''}}">{{ item.definition }}</view>
     </view>
 
-    <cover-view>
-      <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
-        <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
-      </navigator>
-    </cover-view>
 
     <view class="video-detail">
       <!-- 视频内容 -->
@@ -105,10 +105,13 @@
       </button>
       <view class="wow-flex">
         <image @tap.stop="handleShareItems" class="icon ico_share" src="../../images/common/ico_share.png" mode="aspectFill"></image>
-        <image wx:if="{{userId}}" @tap.stop="handleToCollect" class="icon" src="../../images/common/btn_collection{{ info.isEnable === 1 ? '_on' : ''}}.png" mode="aspectFill"></image>
-        <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
-          <image class="icon" src="../../images/common/btn_collection.png" mode="aspectFill"></image>
-        </button>
+        <view class="collect-box">
+          <view class="collect-num font-size--24" wx:if="{{collectionNum}}">{{collectionNum}}</view>
+          <image wx:if="{{userId}}" @tap.stop="handleToCollect" class="icon" src="../../images/common/btn_collection{{ isCollection === 1 ? '_on' : ''}}.png" mode="aspectFill"></image>
+          <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+            <image class="icon" src="../../images/common/btn_collection.png" mode="aspectFill"></image>
+          </button>
+        </view>
       </view>
     </view>
 
@@ -176,7 +179,8 @@
       initTime: 0,
       currentTime: 0,
       poster: '',
-      posterStatus: false
+      posterStatus: false,
+      isCollection: 0
     }
     methods = {
       handleTogglePlay (item, index) {
@@ -264,7 +268,6 @@
           this.sendInfo = ''
           this.$broadcast('handleClearInput', this.sendInfo)
           this.getVideoComment()
-          this.isShowCommetInput = true
           wx.hideLoading()
           this.$apply()
         } catch (error) {
@@ -295,6 +298,19 @@
         console.log(error)
       }
     }
+    async getTheVideoCollection () {
+      try {
+        const { id } = this
+        const opts = {
+          videoId: id
+        }
+        const { data } = await collectApis.getTheVideoCollection(opts)
+        this.isCollection = data.isCollection
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
     async getSpuCollectionNum () {
       try {
         const { id } = this
@@ -316,7 +332,8 @@
           videoId: id
         }
         const { data, msg } = await collectApis.addVideoCollection(opts)
-        this.info.isEnable = data.isEnable
+        this.isCollection = data.isCollection
+        this.collectionNum = data.num
         wx.showToast({
           title: msg,
           duration: 1000
@@ -344,7 +361,6 @@
       this.userId = e
       this.isShowControls = false
       this.isShowCommetInput = true
-      // this.$broadcast('handleSendVal', this.sendInfo)
       this.$apply()
     }
     async getVideoDetail (id) {
@@ -383,6 +399,8 @@
         })
         this.commetList = commetData.data
         this.commetTotal = commetData.total
+        this.isShowCommetInput = false
+        this.isShowControls = true
         this.$apply()
       } catch (error) {
         console.log(error)
@@ -400,6 +418,7 @@
       this.getVideoComment()
       this.getSpuCollectionNum()
       this.getPrintByVideoId()
+      this.getTheVideoCollection()
     }
     onUnload () {
     }

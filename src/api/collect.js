@@ -51,4 +51,16 @@ export default class collect extends base {
   static updateVideoCollection (opts) {
     return this.put(`api/collection/updateVideoCollection`, opts)
   }
+  /**
+   * 商品是否收藏
+   */
+  static getTheSpuCollection (opts) {
+    return this.get(`api/collection/getTheSpuCollection`, opts)
+  }
+  /**
+   * 视频是否收藏
+   */
+  static getTheVideoCollection (opts) {
+    return this.get(`api/collection/getTheVideoCollection`, opts)
+  }
 }

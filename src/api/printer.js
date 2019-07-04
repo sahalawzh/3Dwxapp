@@ -102,4 +102,20 @@ export default class printer extends base {
   static getCountQueue (opts) {
     return this.get(`/api/printerQueue/countQueue`, opts)
   }
+  // 获取打印机是否能续租
+  static getLeaseDay (opts) {
+    return this.get(`api/lease/getLeaseDay`, opts)
+  }
+  // 查看打印机对应的续租sku
+  static getSkuList (opts) {
+    return this.get(`api/lease/getSkuList`, opts)
+  }
+  // 续租拉起支付
+  static wxAppletsInsertOrder (opts) {
+    return this.post(`api/lease/wxAppletsInsertOrder`, opts)
+  }
+  // 续租支付信息
+  static getRenewalInformation (opts) {
+    return this.get(`api/lease/getRenewalInformation`, opts)
+  }
 }

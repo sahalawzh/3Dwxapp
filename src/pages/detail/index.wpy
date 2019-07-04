@@ -13,7 +13,7 @@
     
     <tabLabel :good.sync="detail" :defaultSelectTab.sync="defaultSelectTab" :pid.sync="pid"></tabLabel>
 
-    <footer :good.sync="detail" :userId.sync="userId" :collectionNum.sync="collectionNum"></footer>
+    <footer :good.sync="detail" :isCollection.sync="isCollection" :userId.sync="userId" :collectionNum.sync="collectionNum"></footer>
 
     <view class="float-box {{isRuleTrue ? 'isRuleShow' : 'isRuleHide'}}" catchtouchmove="true">
       <view class="float-box-mask" @tap.stop="handleClosePopup"></view>
@@ -250,6 +250,19 @@
         console.log(error)
       }
     }
+    async getTheSpuCollection () {
+      try {
+        const { pid } = this
+        const opts = {
+          spuId: pid
+        }
+        const { data } = await collectApis.getTheSpuCollection(opts)
+        this.isCollection = data.isCollection
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
     async handleCollect (e) {
       try {
         const { pid } = this
@@ -259,7 +272,7 @@
         }
         const { data, msg } = await collectApis.insertSpuCollection(opts)
         this.collectionNum = data.num
-        this.detail.isEnable = data.isEnable
+        this.isCollection = data.isCollection
         wx.showToast({
           title: msg,
           icon: 'success',
@@ -368,6 +381,7 @@
       this.getProductDetail()
       this.getRelatedProducts()
       this.getSpuCollectionNum()
+      this.getTheSpuCollection()
     }
     computed = {
       isLease () { // 720是购买,其他都是租赁
@@ -428,7 +442,8 @@
       printerInfo: '',
       isCheckLease: false,
       poster: '',
-      posterStatus: false
+      posterStatus: false,
+      isCollection: 0
     }
 
     async getShareNum () {

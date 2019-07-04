@@ -22,7 +22,7 @@
 
     <loading wx:if="{{hasMoreData}}"></loading>
 
-    <custom-tabbar tabbar="{{tabbar}}"></custom-tabbar>
+    <custom-tabbar tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
   </view>
 </template>
 
@@ -54,6 +54,7 @@
       loading: Loading
     }
     data = {
+      isModelIPX: false,
       tabbar: {},
       start: 1,
       limits: 20,
@@ -101,6 +102,7 @@
       wepy.$instance.editTabbar()
       this.getRecommend()
       this.getAdvertisement()
+      this.isModelIPX = wepy.$instance.globalData.isModelIPX
     }
 
     onReachBottom () {

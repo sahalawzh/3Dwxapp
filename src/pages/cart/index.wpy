@@ -6,7 +6,7 @@
       <view class="page-cart-choice wow-flex is-align-middle is-justify-space-between">
         <view class="wow-flex is-align-middle" @tap.stop="handleCheckAll">
           <view class="wow-radio radio-box font-size--26">
-            <lebel class="radio">
+            <lebel class="radio" :class="{'disabled': isAllEnble && !isEdit}">
               <image hidden='{{!isCheckAll}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
             </lebel>全选
           </view>
@@ -19,26 +19,29 @@
           <block wx:for="{{goods}}" wx:key="{{index}}">
             <view class="cart-lists-items__item wow-flex">
               <view class="wow-radio radio-box font-size--26 cart-operate" @tap.stop="handleCheckSingle({{item}}, {{index}})">
-                <lebel class="radio" :class="{'disabled': item.isEnable === 0}">
+                <lebel class="radio" :class="{'disabled': item.isEnable === 0 && !isEdit}">
                   <image hidden='{{!item.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
                 </lebel>
               </view>
               <view class="wow-background-image cart-img" @tap.stop="handleToDeatil({{item}})"
               style="background-image: url({{item.image}})"></view>
               <view class="cart-info">
-                <wow-elip line="2" class="cart-info__title font-size--26">{{item.title}}</wow-elip>
+                <view class="cart-info__title font-size--26">
+                  <wow-elip line="2">{{item.title}}</wow-elip>
+                </view>
                 <view class="cart-info__sku font-size--24" wx:if="{{item.spec}}" @tap.stop="handleToSku({{item}}, {{index}})">
                   <view class="sku-box is-align-middle">
                     <view class="label">{{commonwxs.specStr(item)}}</view>
-                    <image class="icon" src='../../images/common/arrow_down.png'></image>
+                    <image class="icon" src='../../images/common/arrow_down.png' wx:if="{{item.isEnable === 1}}"></image>
                   </view>
                 </view>
-                <view class="cart-info__price">
+                <view class="cart-info__price wow-flex is-align-middle is-justify-space-between" wx:if="{{item.isEnable === 1}}">
                   <view class="color-price font-size--30"><text class="font-size--22">￥</text>{{item.price}}</view>
+                  <view class="step">
+                    <wow-stepper width="48rpx" height="46rpx" value="{{item.num}}" data-index="{{index}}" data-qty="{{item.num}}" data-id="{{item.id}}" @changenumber.stop="changeQty"></wow-stepper>
+                  </view>
                 </view>
-                <view class="cart-info__step">
-                  <wow-stepper width="48rpx" height="46rpx" value="{{item.num}}" data-index="{{index}}" data-qty="{{item.num}}" data-id="{{item.id}}" @changenumber.stop="changeQty"></wow-stepper>
-                </view>
+                <view class="cart-lose font-size--24" wx:else>商品已经失效</view>
               </view>
             </view>
           </block>
@@ -48,7 +51,7 @@
       <view class="footer wow-clearfix">
         <view class="wow-fl-l font-size--26 footer-price" hidden"{{isEdit}}">总计<text class="color-price font-size--30 wow-ml-30">￥{{price}}</text></view>
         <view class="wow-fl-r font-size--26">
-          <view class="pay-btn font-color-white" @tap.stop="handleEvent">{{isEdit ? '删除' : '去结算'}}</view>
+          <view class="pay-btn font-color-white {{ cartId ? '' : 'btn-disabled'}}" @tap.stop="handleEvent">{{isEdit ? '删除' : '去结算'}}</view>
         </view>
       </view>
 
@@ -145,6 +148,9 @@
       goodList: GoodList
     }
     computed = {
+      isAllEnble () {
+        return this.lists.length && this.lists.every(item => item.isEnable === 0)
+      },
       slideHeight () {
         let maxHeight = ''
         wx.getSystemInfo({
@@ -201,15 +207,18 @@
         this.isFirst = true
         data = data || []
         wx.hideLoading()
+        data.forEach(element => {
+          if (element.isEnable === 1) {
+            element.checked = false
+          }
+        })
+        this.goods = data
+        this.isCheckAll = false
+        this.$apply()
         if (!data.length) {
           this.getRecommend()
           return
         }
-        data.forEach(element => {
-          element.checked = false
-        })
-        this.goods = data
-        this.$apply()
       } catch (error) {
         console.log(error)
         wx.hideLoading()
@@ -227,6 +236,9 @@
         if (start === 0) {
           lists = []
         }
+        data.forEach(item => {
+          item.finishLoadFlag = false
+        })
         this.lists = lists.concat(data)
         if (data.length < limits) {
           this.hasMoreData = false
@@ -298,12 +310,6 @@
           ids: cartId
         }
         await cartApi.removeCart(opts)
-        // for (let i = this.goods.length - 1; i >= 0; i--) {
-        //   if (this.goods[i].checked) {
-        //     this.goods.splice(i, 1)
-        //   }
-        // }
-        // this.getCountPrice()
         this.getCartList()
         wx.hideLoading()
         this.$apply()
@@ -397,6 +403,7 @@
       },
       async handleToSku (item, index) { // 打开规格
         try {
+          if (item.isEnable === 0) return
           wx.showLoading({
             title: '加载中',
             mask: true
@@ -482,14 +489,24 @@
       },
       handleToManager () {
         this.isEdit = !this.isEdit
+        if (!this.isEdit && this.isAllEnble) {
+          this.isCheckAll = false
+          this.goods.forEach(element => {
+            if (element.isEnable === 0) {
+              element.checked = false
+            }
+          })
+          this.getCountPrice()
+        }
       },
       handleCheckSingle (item, index) { // 单选
-        if (item.isEnable === 0) return
+        if (item.isEnable === 0 && !this.isEdit) return
         this.goods[index].checked = !item.checked
         this.isCheckAll = this.goods.every(item => item.checked)
         this.getCountPrice()
       },
       handleCheckAll () {
+        if (this.isAllEnble && !this.isEdit) return
         this.isCheckAll = !this.isCheckAll
         this.goods.forEach(element => { // 全选
           element.checked = this.isCheckAll

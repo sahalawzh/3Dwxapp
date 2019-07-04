@@ -111,4 +111,11 @@ export default class goods extends base {
   static removeAllHistorySearch (opts) {
     return this.get(`api/spu/removeAllHistorySearch`, opts)
   }
+  /**
+   * 打印列表勾选缺省
+   * @param {object} opts 参数
+   */
+  static getPrint (opts) {
+    return this.get(`/api/spu/getPrint`, opts)
+  }
 }

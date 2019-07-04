@@ -14,10 +14,10 @@
                 <image mode="aspectFill" src="{{item.image}}"></image>
               </view>
               <view class="product-item__info">
-                <view class="product-name font-size--32">
+                <view class="product-name font-size--30">
                   <view class="elip">{{item.title}}</view>
                 </view>
-                <view class="product-price font-size--24 color-price">￥{{item.recommendedPrice}}</view>
+                <view class="product-price font-size--26 color-price">￥{{item.recommendedPrice}}</view>
               </view>
             </view>
           </navigator>

@@ -1,46 +1,77 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-printer">
-    <view class="printer-items" wx:if="{{!isDefault}}">
+    <block wx:if="{{ printerList.length }}">
+      <view class="printer-items" wx:if="{{!isDefault}}">
 
-      <view class="printer-items__card" wx:for="{{printerList}}" wx:key="index">
-        <view class="printer-items__item wow-flex is-align-middle">
-          <view class="wow-radio radio-box font-size--26" @tap.stop="handleCheckedPrinter({{item}}, {{index}})">
-            <lebel class="radio">
-              <image hidden='{{!item.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
-            </lebel>
-          </view>
-          <image class="printer-img" src="{{item.printerColor.colorImage}}" mode="aspectFill"></image>
-          <view class="printer-info">
-            <view class="wow-flex printer-info__status is-align-middle is-justify-space-between">
-              <view class="wow-flex is-align-middle">
-                <view class="name font-size--32">{{item.printerAlias}}</view>
-                <image class="status-img{{item.printerState === 'Printing' || item.printerState === 'Paused' ? '' : '__single'}}" src="../../images/printer/ico_print_{{printerSate[item.printerState].status}}.png" mode="aspectFill"></image>
+        <view class="printer-items__card" wx:for="{{printerList}}" wx:key="index">
+          <view class="printer-items__item wow-flex is-align-middle">
+            <view class="wow-radio radio-box font-size--26" @tap.stop="handleCheckedPrinter({{item}}, {{index}})">
+              <lebel class="radio">
+                <image hidden='{{!item.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+              </lebel>
+            </view>
+            <image class="printer-img" src="{{item.printerColor.colorImage}}" mode="aspectFill"></image>
+            <view class="printer-info">
+              <view class="wow-flex printer-info__status is-align-middle is-justify-space-between">
+                <view class="wow-flex is-align-middle">
+                  <view class="name font-size--32">{{item.printerAlias}}</view>
+                  <image class="status-img{{item.printerState === 'Printing' || item.printerState === 'Paused' ? '' : '__single'}}" src="../../images/printer/ico_print_{{printerSate[item.printerState].status}}.png" mode="aspectFill"></image>
+                </view>
+                <image class="btn_set" wx:if="{{item.printerState === 'Operational'}}" src="../../images/printer/btn_set.png" mode="aspectFill"></image>
               </view>
-              <image class="btn_set" wx:if="{{item.printerState === 'Operational'}}" src="../../images/printer/btn_set.png" mode="aspectFill"></image>
+              <view class="printer-info__tip font-size--24" style="color: {{item.printerStateDesc.showColor}}">{{item.printerStateDesc.showText}}</view>
+              <view class="printer-info__record wow-flex is-align-middle">
+                <view class="font-size--24">{{item.queueTotal}}</view>
+                <image class="icon" src="../../images/printer/ico_playlist_{{printerSate[item.printerState].record}}.png" mode="aspectFill"></image>
+              </view>
             </view>
-            <view class="printer-info__tip font-size--24" style="color: {{item.printerStateDesc.showColor}}">{{item.printerStateDesc.showText}}</view>
-            <view class="printer-info__record wow-flex is-align-middle">
-              <view class="font-size--24">{{item.queueTotal}}</view>
-              <image class="icon" src="../../images/printer/ico_playlist_{{printerSate[item.printerState].record}}.png" mode="aspectFill"></image>
-            </view>
+          </view>
+          <view class="printer-items__progress">
+            <progress
+              class="printer-progress"
+              stroke-width='10'
+              backgroundColor="{{printerSate[item.printerState].color}}"
+              activeColor="{{printerSate[item.printerState].activeColor}}"
+              percent='{{item.printerProcessCompletion || 0}}'
+            ></progress>
           </view>
         </view>
-        <view class="printer-items__progress">
-          <progress
-            class="printer-progress"
-            stroke-width='10'
-            backgroundColor="{{printerSate[item.printerState].color}}"
-            activeColor="{{printerSate[item.printerState].activeColor}}"
-            percent='{{item.printerProcessCompletion || 0}}'
-          ></progress>
+
+      </view>
+      <view class="queue-footer">
+        <view class="queue-btn font-size--28" @tap.stop="hanldeSelectPrinter">确认</view>
+      </view>
+    </block>
+
+    <view class="printer-empty" wx:else>
+      <view class="printer-empty__box">
+        <image class="icon" src="../../images/printer/ico_print_add_default.png" mode="aspectFill"></image>
+        <view class="font-size--26 info">您还没有绑定打印机哟~</view>
+
+        <view class="printer-add" @tap="handleToScan">
+          <image class="icon-help" src="../../images/printer/btn_help.png" mode="aspectFill"></image>
+          <image class="icon" src="../../images/printer/btn_printlist_add_printer.png" mode="aspectFill"></image>
+          <view class="font-size--28">添加打印机</view>
         </view>
       </view>
-
-    </view>
-
-    <view class="queue-footer">
-      <view class="queue-btn font-size--28" @tap.stop="hanldeSelectPrinter">确认</view>
+      <view class="printer-empty__recommed" wx:if="{{ printer }}">
+        <view class="empty-box">
+          <view class="title">推荐打印机</view>
+          <navigator url="/pages/detail/index?id={{printer.id}}" hover-class="none" class="empty-box__item wow-flex">
+            <image class="empty-box__item-img" src="{{printer.image}}" mode="aspectFill"></image>
+            <view class="empty-box__item-info">
+              <view class="name">
+                <wow-elip line="2">{{printer.title}}</wow-elip>
+              </view>
+              <view class="desc">
+                <wow-elip line="2">{{printer.info}}</wow-elip>
+              </view>
+              <view class="color-price price font-size--26">{{printer.text}}</view>
+            </view>
+          </navigator>
+        </view>
+      </view>
     </view>
   </view>
 </template>
@@ -48,10 +79,14 @@
 <script>
   import wepy from 'wepy'
   import printerApis from '../../api/printer'
+  import goodsApis from '../../api/goods'
   import wxutils from '../../utils/wxutils'
   export default class PrinterList extends wepy.page {
     config = {
-      navigationBarTitleText: '打印机'
+      navigationBarTitleText: '打印机',
+      usingComponents: {
+        'wow-elip': '../../packages/elip/index'
+      }
     }
     data = {
       isFirst: false,
@@ -84,15 +119,40 @@
       },
       userId: '',
       queueId: '',
-      printerId: ''
+      printerId: '',
+      printer: ''
     }
     methods = {
+      handleToScan () {
+        // 允许从相机和相册扫码
+        wx.scanCode({
+          success(res) {
+            const { errMsg, result } = res
+            if (errMsg === 'scanCode:ok') {
+              const scanArr = result.split('=')
+              wxutils.backOrNavigate('/pages/printerAdd/index?id=' + scanArr[1])
+            }
+          },
+          fail (error) {
+            console.log(error)
+          }
+        })
+      },
       handleCheckedPrinter (item, index) {
         this.printerList.forEach(item => {
           item.checked = false
         })
         this.printerList[index].checked = !item.checked
         this.printerId = item.printerId
+      }
+    }
+    async getPrint () {
+      try {
+        const { data } = await goodsApis.getPrint()
+        this.printer = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
       }
     }
     async hanldeSelectPrinter () {
@@ -142,6 +202,9 @@
           element.checked = false
         })
         this.printerList = data
+        if (data.length === 0) {
+          this.getPrint()
+        }
         this.isFirst = true
         this.$apply()
         wx.hideLoading()

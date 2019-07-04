@@ -5,6 +5,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  padding-bottom: 180rpx;
   .printer-buy {
     padding: 52rpx 50rpx 56rpx;
     &__btn {
@@ -31,8 +32,7 @@
     background-color: #f6f7f7;
     &__wrap {
       background-color: #fff;
-      margin-top: 18rpx;
-      padding: 56rpx 50rpx 0;
+      padding: 56rpx 50rpx 60rpx;
     }
     &__title {
       color: #484848;
@@ -60,6 +60,66 @@
           background-color: #dde8f7;
           border: 1rpx solid #1360e1;
           color: #1360e1;
+        }
+      }
+    }
+    &__record {
+      margin-top: 18rpx;
+      background-color: #fff;
+      .title {
+        padding: 0 50rpx;
+        color: #484848;
+        font-weight: 600;
+        height: 128rpx;
+        line-height: 128rpx;
+      }
+      .tip {
+        padding: 12rpx 50rpx;
+        background-color: #fbf2de;
+        color: #c6a039;
+        font-weight: 600;
+        &-desc {
+          margin-top: 10rpx;
+        }
+      }
+      .record-list {
+        &__item {
+          position: relative;
+          .record-time {
+            height: 60rpx;
+            line-height: 60rpx;
+            padding: 0 50rpx;
+            background-color: #f6f7f7;
+            color: #000;
+          }
+          .record-desc {
+            padding: 14rpx 50rpx;
+            color: #9b9b9b;
+          }
+          .record-item {
+            position: relative;
+            padding: 24rpx 50rpx;
+            color: #000;
+            &::before{
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 1rpx;
+              transform: scaleY(0.5);
+              background-color: #EDEDED;
+            }
+            &__time {
+              margin-top: 24rpx;
+              color: #9b9b9b;
+            }
+            &__price {
+              position: absolute;
+              right: 50rpx;
+              top: 40%;
+            }
+          }
         }
       }
     }

@@ -92,6 +92,9 @@
         if (start === 1) {
           lists = []
         }
+        data.forEach(item => {
+          item.finishLoadFlag = false
+        })
         this.lists = lists.concat(data)
         if (total < limits) {
           this.hasMoreData = false

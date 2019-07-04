@@ -32,7 +32,7 @@
 
     <loading wx:if="{{hasMoreData}}"></loading>
 
-    <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}"></custom-tabbar>
+    <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
   </view>
 </template>
 
@@ -56,6 +56,7 @@
     }
     mixins = [CommonMixin]
     data = {
+      isModelIPX: false,
       tabbar: '',
       start: 1,
       limits: 20,
@@ -107,6 +108,7 @@
       // 隐藏系统tabbar
       wx.hideTabBar()
       wepy.$instance.editTabbar()
+      this.isModelIPX = wepy.$instance.globalData.isModelIPX
       this.getVideoList()
       this.getAdvertisement()
       this.$apply()

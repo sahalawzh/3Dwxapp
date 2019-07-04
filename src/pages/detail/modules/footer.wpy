@@ -11,12 +11,12 @@
           <view class="controls-item__sign font-size--24">{{good.share}}</view>
         </view>
         <view wx:if="{{userId}}" @tap.stop="handleToCollect" class="controls-item">
-          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_collection{{good.isEnable === 1 ? '_on' : ''}}.png"></image>
-          <view class="controls-item__sign font-size--24">{{collectionNum}}</view>
+          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_collection{{isCollection === 1 ? '_on' : ''}}.png"></image>
+          <view class="controls-item__sign font-size--24" wx:if="{{collectionNum}}">{{collectionNum}}</view>
         </view>
         <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="controls-item open-type-btn">
-          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_collection{{good.isEnable === 1 ? '_on' : ''}}.png"></image>
-          <view class="controls-item__sign font-size--24">{{collectionNum}}</view>
+          <image mode="aspectFill" class="controls-box controls-commet" src="../../../images/common/btn_collection{{isCollection === 1 ? '_on' : ''}}.png"></image>
+          <view class="controls-item__sign font-size--24" wx:if="{{collectionNum}}">{{collectionNum}}</view>
         </button>
         <!-- <view class="controls-box controls-share">{{good.share}}</view>
         <view class="controls-box controls-commet"></view> -->
@@ -38,6 +38,7 @@ export default class Footer extends wepy.component {
       twoWay: true
     },
     userId: [String, Number],
+    isCollection: [String, Number],
     collectionNum: [String, Number]
   }
   data = {

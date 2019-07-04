@@ -1,11 +1,12 @@
 
 <template>
-  <view class="search-sign wow-flex is-align-middle">
-    <person class="icon" :userId.sync="userId"></person>
-    <navigator url="/pages/search/index" class="search-sign__control open-type-btn">
-      <image class="search-icon" src="../images/common/btn_bar_search_white.png" mode="aspectFill"></image>
-      <view class="control font-size--28"></view>
-    </navigator>
+  <view class="search-sign wow-flex is-justify-space-between">
+    <view class="search-sign__control wow-flex">
+      <person class="icon" :userId.sync="userId"></person>
+      <navigator url="/pages/search/index" class="open-type-btn">
+        <image class="icon search-icon" src="../images/common/btn_bar_search_white.png" mode="aspectFill"></image>
+      </navigator>
+    </view>
     <cart class="icon" :userId.sync="userId"  :cartNum.sync="cartNum"></cart>
   </view>
 </template>
@@ -49,27 +50,8 @@
     height: 54rpx;
   }
   &__control {
-    position: relative;
-    margin: 0 30rpx;
-    flex: 1;
-    height: 54rpx;
-    .control {
-      padding-left: 80rpx;
-      color: #fff;
-    }
     .search-icon {
-      position: absolute;
-      left: 0;
-      width: 54rpx;
-      height: 54rpx;
-    }
-  }
-  .person-icon {
-    width: 54rpx;
-    height: 54rpx;
-    image {
-      width: 100%;
-      height: 100%;
+      margin-left: 30rpx;
     }
   }
 }

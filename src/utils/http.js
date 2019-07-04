@@ -5,7 +5,6 @@ export default class http {
   static waitSendQues = []
   static loginStatus = 0
   static async clearWaitSendQues () {
-    console.log('clearWaitSendQues')
     const {waitSendQues} = this
     let que = null
     while ((que = waitSendQues.shift())) {
@@ -40,7 +39,6 @@ export default class http {
       this.setConfig('Token', token)
       this.setConfig('userId', userId)
       this.setConfig('userDO', userDO)
-      console.log('wowlogin complete', Date.now())
       wx.setStorage({
         key: 'wow',
         data: {
@@ -97,17 +95,22 @@ export default class http {
       return
     }
     this.loginStatus = 1
-    console.log('logining', Date.now())
     try {
       const {code} = await wepy.login()
       const data = {
         code
       }
-      console.log('wxlogin complete', Date.now())
       try {
         const { data: loginData } = await this.get(`${this.getConfig('loginUrl')}`, data)
+        this.loginStatus = 0
         const { token } = loginData
         this.setConfig('Token', token)
+        wx.setStorage({
+          key: 'wow',
+          data: {
+            token
+          }
+        })
       } catch (e) {
         console.log(e)
       }
@@ -136,31 +139,35 @@ export default class http {
         throw error
       }
     } else {
-      let res
-      try {
-        res = await wepy.request({
-          method,
-          url,
-          data
-        })
-      } catch (e) {
-        console.log(e)
-        // this.requestNetworkFail(e, config)
-      }
-      if (this.isSuccess(res)) {
-        return res.data
-      } else {
-        const error = this.requestException(res)
-        wx.hideLoading()
-        throw wx.showModal({
-          title: '提示',
-          showCancel: false,
-          content: error.msg || '系统繁忙',
-          success(res) {
-            if (res.confirm) {
+      if (this.checkNeedLogin()) {
+        return await this.waitSendAfterLogin(method, url, data, config)
+      } else { // 正常发送请求
+        let res
+        try {
+          res = await wepy.request({
+            method,
+            url,
+            data
+          })
+        } catch (e) {
+          console.log(e)
+          // this.requestNetworkFail(e, config)
+        }
+        if (this.isSuccess(res)) {
+          return res.data
+        } else {
+          const error = this.requestException(res)
+          wx.hideLoading()
+          throw wx.showModal({
+            title: '提示',
+            showCancel: false,
+            content: error.msg || '系统繁忙',
+            success(res) {
+              if (res.confirm) {
+              }
             }
-          }
-        })
+          })
+        }
       }
     }
   }
@@ -194,31 +201,31 @@ export default class http {
   /**
    * 网络异常处理，无网络，请求超时
   */
-  static requestNetworkFail (e, config) {
-    if (!config.REJECT_REQUEST_FAIL) {
-      wx.hideLoading() // 关闭可能存在的loading
-      if (e) {
-        let msg = e.errMsg
-        if (msg && msg.indexOf('request:fail') === 0) {
-          let pages = getCurrentPages()
-          let len = pages.length
-          let lastPage = pages[len - 1]
-          wepy.$instance.globalData.networkFailConf = {
-            url: lastPage.__route__,
-            opts: lastPage.options,
-            msg
-          }
-          wx.hideLoading() // 关闭可能存在的loading
-          wx.redirectTo({
-            url: '/pages/network/index'
-          })
-          e.REDIRECTED = true
-          throw e
-        }
-      }
-    }
-    throw e
-  }
+  // static requestNetworkFail (e, config) {
+  //   if (!config.REJECT_REQUEST_FAIL) {
+  //     wx.hideLoading() // 关闭可能存在的loading
+  //     if (e) {
+  //       let msg = e.errMsg
+  //       if (msg && msg.indexOf('request:fail') === 0) {
+  //         let pages = getCurrentPages()
+  //         let len = pages.length
+  //         let lastPage = pages[len - 1]
+  //         wepy.$instance.globalData.networkFailConf = {
+  //           url: lastPage.__route__,
+  //           opts: lastPage.options,
+  //           msg
+  //         }
+  //         wx.hideLoading() // 关闭可能存在的loading
+  //         wx.redirectTo({
+  //           url: '/pages/network/index'
+  //         })
+  //         e.REDIRECTED = true
+  //         throw e
+  //       }
+  //     }
+  //   }
+  //   throw e
+  // }
 
   static get (url, data, config) {
     return this.request('GET', url, data, config)

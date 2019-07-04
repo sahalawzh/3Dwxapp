@@ -1,12 +1,29 @@
 @import '../mixins/common.postcss';
 .video-lists {
-  &__item {
+  .video-item {
     position: relative;
     height: 502rpx;
     margin: 44rpx 52rpx 0;
     border-radius: 30rpx;
-    font-weight: 600;
     overflow: hidden;
+  }
+  .bg-default {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    z-index: 6;
+  }
+  &__item {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+    font-weight: 600;
+    z-index: 8;
+    background-position: center top;
     .bg-mask {
       position: absolute;
       left: 0;
@@ -14,6 +31,7 @@
       width: 100%;
       height: 100%;
       z-index: 9;
+      background-position: center top;
     }
     .item{
       position: relative;

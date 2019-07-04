@@ -45,7 +45,7 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 26,
+			"current": 16,
 			"list": [
 				{
 					"id": 0,
@@ -93,7 +93,7 @@
 					"id": 6,
 					"name": "订单详情",
 					"pathName": "pages/orderDetail/index",
-					"query": "oid=10000285562019042623384734929567",
+					"query": "oid=100483201906251837137857",
 					"scene": null
 				},
 				{
@@ -146,10 +146,10 @@
 					"scene": null
 				},
 				{
-					"id": 13,
+					"id": 14,
 					"name": "打印详情",
 					"pathName": "pages/printerDetail/index",
-					"query": "printerId=68725bfb-0550-4167-bbec-80571e3e63ad&printerAlias=0422%E6%89%93%E5%8D%B0%E6%9C%BA&printerTypeName=Makesome",
+					"query": "printerId=68725bfb-0550-4167-bbec-80571e3e63ad&printerAlias=%E6%B5%8B%E8%AF%95%E7%94%A8%E7%9A%84%E7%A9%BA%E6%89%93&printerTypeName=Makesome&printerSerialNumber=HJNLA0000c91608dba03",
 					"scene": null
 				},
 				{
@@ -160,11 +160,11 @@
 					"scene": ""
 				},
 				{
-					"id": 0,
+					"id": 16,
 					"name": "续租/买断",
 					"pathName": "pages/printerBuy/index",
-					"query": "",
-					"scene": ""
+					"query": "printerSerialNumber= HJNLA000146b9c72ad5a",
+					"scene": null
 				},
 				{
 					"id": 0,
@@ -254,7 +254,7 @@
 					"id": 29,
 					"name": "详情",
 					"pathName": "pages/detail/index",
-					"query": "id=13",
+					"query": "id=17",
 					"scene": null
 				},
 				{

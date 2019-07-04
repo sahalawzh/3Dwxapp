@@ -7,7 +7,7 @@
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  background-color: #f0f2f7;
+  background-color: #fff;
   .printer-items {
     padding: 0 16rpx 20rpx;
     &__card{
@@ -115,6 +115,88 @@
       float: right;
       margin-right: 30rpx;
       background-color: #1360e1;
+    }
+  }
+  .printer-empty {
+    &__box {
+      background-color: #fff;
+      padding: 42rpx 52rpx 48rpx;
+      text-align: center;
+      .icon {
+        width: 158rpx;
+        height: 84rpx;
+      }
+      .info {
+        margin-top: 34rpx;
+        color: #010101;
+      }
+      .printer-add {
+        position: relative;
+        width: 100%;
+        padding: 40rpx 0 34rpx;
+        box-sizing: border-box;
+        background-color: #f3faff;
+        border-radius: 22rpx;
+        text-align: center;
+        color: #aeaeae;
+        margin-top: 30rpx;
+        .icon-help {
+          position: absolute;
+          right: 34rpx;
+          top: 14rpx;
+          width: 48rpx;
+          height: 48rpx;
+        }
+        .icon {
+          width: 116rpx;
+          height: 116rpx;
+          margin-bottom: 22rpx;
+        }
+      }
+    }
+    &__recommed {
+      background-color: #f0f2f7;
+      padding-top: 18rpx;
+      .empty-box {
+        padding: 48rpx 52rpx 0;
+        background-color: #fff;
+        .title {
+          font-size: 26rpx;
+          color: #4a4a4a;
+          font-weight: 600;
+        }
+        &__item {
+          position: relative;
+          padding-top: 26rpx;
+          padding-bottom: 32rpx;
+          &-img {
+            width: 190rpx;
+            height: 148rpx;
+            margin-right: 16rpx;
+            overflow: hidden;
+            border-radius: 14rpx;
+            background-color: #f6f7f7;
+          }
+          &-info {
+            flex: 1;
+            overflow: hidden;
+            .name {
+              font-size: 26rpx;
+              margin-top: 10rpx;
+              color: #4a4a4a;
+              font-weight: 600;
+            }
+            .desc {
+              color: #9c9c9c;
+              font-size: 24rpx;
+              margin-top: 12rpx;
+            }
+            .price {
+              margin-top: 14rpx;
+            }
+          }
+        }
+      }
     }
   }
 }

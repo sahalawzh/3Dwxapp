@@ -1,7 +1,7 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-printerBuy">
-    <view class="printer-buy">
+    <view class="printer-buy" wx:if="{{ false }}">
       <view class="printer-buy__btn">
         <view class="font-size--32 discount">5折买断</view>
         <view class="font-size--28 tip">再也不用为续租烦心啦~</view>
@@ -11,17 +11,43 @@
 
     <view class="printer-rent">
       <view class="printer-rent__wrap">
-        <view class="printer-rent__title font-size--32">续租费用￥4/天</view>
-        <view class="printer-rent__desc font-size--26">已为达达付费90天，再续费630天，达达就将永久属于您~</view>
+        <view class="printer-rent__title font-size--32">{{ priceDay }}</view>
+        <view class="printer-rent__desc font-size--26">{{ payInfo }}</view>
         <view class="printer-rent__items wow-flex is-justify-space-between">
-          <view class="item wow-flex is-align-middle is-justify-center active">30天</view>
-          <view class="item wow-flex is-align-middle is-justify-center">90天</view>
-          <view class="item wow-flex is-align-middle is-justify-center">240天</view>
-          <view class="item wow-flex is-align-middle is-justify-center">360天</view>
+          <view class="item wow-flex is-align-middle is-justify-center {{ item.checked ? 'active' : '' }}" @tap.stop="handleSelectLeaseDay({{ item }}, {{ index }})" wx:for="{{ skuList }}" wx:key="index">{{ item.leaseDay }}天</view>
         </view>
       </view>
+
+      <view class="printer-rent__record" wx:if="{{ false }}">
+        <view class="title font-size--32">续租记录</view>
+        <view class="tip font-size--26">
+          <view>续费逾期共{{ allOverdue }}天</view>
+          <view class="tip-desc">(请及时续费，每延期1天需支付当日租金+应支付金额的日千分之三违约金，延期总计超30天，将不返还押金)</view>
+        </view>
+        <view class="record-list">
+          <view class="record-list__item">
+            <view class="record-time font-size--28">4月</view>
+            <view class="record-desc font-size--26">已付费15天，还需25天。本次续费预期1天</view>
+            <view class="record-item">
+              <view class="font-size--30">续租30天</view>
+              <view class="font-size--26 record-item__time">04月22日</view>
+              <view class="font-size--30 record-item__price">122</view>
+            </view>
+          </view>
+          <view class="record-list__item">
+            <view class="record-time font-size--28">4月</view>
+            <view class="record-desc font-size--26">已付费15天，还需25天。本次续费预期1天</view>
+            <view class="record-item">
+              <view class="font-size--30">续租30天</view>
+              <view class="font-size--26 record-item__time">04月22日</view>
+              <view class="font-size--30 record-item__price">122</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
       <view class="printer-rent__btn">
-        <button hover-class="none" class="btn font-size--28" form-type="submit">共计￥120，提交订单</button>
+        <button hover-class="none" class="btn font-size--28" @tap.stop="handleToPay"><text wx:if="{{ selectedLeasePrice }}">共计￥{{ selectedLeasePrice }}，</text>提交订单</button>
       </view>
     </view>
   </view>
@@ -29,15 +55,147 @@
 
 <script>
   import wepy from 'wepy'
-  export default class Set extends wepy.page {
+  import printerApis from '../../api/printer'
+  import isEmpty from '../../utils/isEmpty'
+  import wxutils from '../../utils/wxutils'
+  export default class printerBuy extends wepy.page {
     config = {
-      navigationBarTitleText: '续租/买断'
+      navigationBarTitleText: '续租'
     }
     data = {
+      printerSerialNumber: '',
+      skuList: [],
+      currentItem: {},
+      priceDay: '',
+      payInfo: '',
+      orderLeaseDOList: [],
+      allOverdue: ''
     }
-    onLoad () {
+    computed = {
+      selectedLeasePrice () {
+        return isEmpty(this.currentItem) ? 0 : this.currentItem.price
+      }
+    }
+    async getLeaseDay () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { printerSerialNumber } = this
+        const opts = {
+          printerSerialNumber
+        }
+        const { data } = await printerApis.getLeaseDay(opts)
+        wx.hideLoading()
+        if (data.isShow === 1) {
+          this.getSkuList()
+          this.getRenewalInformation()
+        } else {
+          wx.showModal({
+            title: '提示',
+            content: '本机是无限期版本，不需要续费哦~',
+            showCancel: false,
+            confirmText: '返回',
+            success (res) {
+              if (res.confirm) {
+                wx.switchTab({
+                  url: '/pages/index/printer'
+                })
+              }
+            }
+          })
+        }
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    async getSkuList () {
+      try {
+        const { printerSerialNumber } = this
+        let opts = {
+          printerSerialNumber
+        }
+        const { data } = await printerApis.getSkuList(opts)
+        data.forEach(element => {
+          element.checked = false
+        })
+        this.skuList = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    async getRenewalInformation () {
+      try {
+        const { printerSerialNumber } = this
+        let opts = {
+          printerSerialNumber
+        }
+        const { data } = await printerApis.getRenewalInformation(opts)
+        const { priceDay, allOverdue, printerAlias, payDay, remainingDay, orderLeaseDOList } = data
+        this.priceDay = priceDay
+        this.payInfo = `已为${printerAlias}付费${payDay}天，再续费${remainingDay}天，${printerAlias}就将永久属于您~`
+        console.log(data)
+        this.allOverdue = allOverdue
+        this.orderLeaseDOList = orderLeaseDOList
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+        console.log(error)
+      }
+    }
+    onLoad ({ printerSerialNumber }) {
+      this.printerSerialNumber = printerSerialNumber
+      this.getLeaseDay()
     }
     methods = {
+      async handleToPay () {
+        if (!this.selectedLeasePrice) {
+          wx.showToast({
+            title: '您还没选择续费天数',
+            icon: 'none'
+          })
+          return
+        }
+        const { currentItem, printerSerialNumber } = this
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          let opts = {
+            skuId: currentItem.id,
+            printerSerialNumber,
+            paymentType: 6
+          }
+          const { data } = await printerApis.wxAppletsInsertOrder(opts)
+          wxutils.wxPay(data).then(function () {
+            wx.redirectTo({
+              url: '/pages/printerBuy/index?printerSerialNumber=' + printerSerialNumber
+            })
+          }).catch(function (e) {
+            wx.redirectTo({
+              url: '/pages/printerBuy/index?printerSerialNumber=' + printerSerialNumber
+            })
+          })
+          wx.hideLoading()
+        } catch (error) {
+          wx.redirectTo({
+            url: '/pages/printerBuy/index?printerSerialNumber=' + printerSerialNumber
+          })
+          wx.hideLoading()
+        }
+      },
+      handleSelectLeaseDay (item, index) {
+        this.currentItem = item
+        this.skuList.forEach(item => {
+          item.checked = false
+        })
+        this.skuList[index].checked = true
+      }
     }
     onUnload () {
     }

@@ -12,13 +12,13 @@
 import wepy from 'wepy'
 import 'wepy-async-function'
 import Event from './utils/Event'
-import http from './utils/http'
-const networkTypeImageTypes = {
-  'wifi': 80,
-  '4g': 80,
-  '3g': 70,
-  '2g': 50
-}
+// import http from './utils/http'
+// const networkTypeImageTypes = {
+//   'wifi': 80,
+//   '4g': 80,
+//   '3g': 70,
+//   '2g': 50
+// }
 export default class extends wepy.app {
   config = {
     pages: [
@@ -96,8 +96,8 @@ export default class extends wepy.app {
     }
   }
   globalData = {
+    isModelIPX: false,
     subpub: new Event(),
-    networkFailConf: {},
     userInfo: wx.getStorageSync('userInfo') || null,
     baseUrl: '',
     addressData: {
@@ -141,8 +141,10 @@ export default class extends wepy.app {
     wx.pixelRatio = 2
     wx.rpx2px = wx.windowWidth / 750
     wx.isSupportWebp = false
+    const that = this
     wx.getSystemInfo({
-      success({windowWidth, windowHeight, pixelRatio, system}) {
+      success({windowWidth, windowHeight, pixelRatio, system, model}) {
+        that.globalData.isModelIPX = model === 'iPhone X'
         let systemInfo = system.split(/\s/) || []
         if (systemInfo[0] === 'Android' && systemInfo[1] > '4.2.1') {
           wx.isSupportWebp = true
@@ -154,17 +156,17 @@ export default class extends wepy.app {
       }
     })
     // 根据网络变化加载不同质量的图片
-    wx.onNetworkStatusChange(function (res) {
-      if (res.isConnected) {
-        wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
-      }
-    })
-    wx.getNetworkType({
-      success (res) {
-        wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
-        console.log('app', wx.imageQuality)
-      }
-    })
+    // wx.onNetworkStatusChange(function (res) {
+    //   if (res.isConnected) {
+    //     wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
+    //   }
+    // })
+    // wx.getNetworkType({
+    //   success (res) {
+    //     wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
+    //     console.log('app', wx.imageQuality)
+    //   }
+    // })
     if (process.env.NODE_ENV === 'development') { // http://testapi.gdlwzn.com
       this.globalData.baseUrl = 'http://testapi.gdlwzn.com'
     } else {
@@ -248,9 +250,9 @@ export default class extends wepy.app {
   }
   onLaunch () {
     wx.hideTabBar()
-    if (!this.globalData.userId) {
-      http.login()
-    }
+    // if (!this.globalData.userId) {
+    //   http.login()
+    // }
   }
 }
 </script>

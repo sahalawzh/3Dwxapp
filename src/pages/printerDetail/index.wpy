@@ -58,7 +58,7 @@
       <view class="font-size--26 wow-pt-30">还没有打印任务，适度工作有益身心健康哦~</view>
     </view>
 
-    <navigator url="/pages/printerBuy/index" class="footer">
+    <navigator url="/pages/printerBuy/index?printerSerialNumber={{ printerSerialNumber }}" class="footer" wx:if="{{ isLeaseShow }}">
       <view class="footer-btn font-size--28">续费/5折买断</view>
     </navigator>
   </view>
@@ -112,7 +112,9 @@
       printerState: '',
       userId: '',
       title: '',
-      colorImage: ''
+      colorImage: '',
+      printerSerialNumber: '',
+      isLeaseShow: false
     }
     methods = {
       hanldeToSet (printerState, item, index) {
@@ -242,15 +244,30 @@
         wx.hideLoading()
       }
     }
+    async getLeaseDay () {
+      try {
+        const { printerSerialNumber } = this
+        const opts = {
+          printerSerialNumber
+        }
+        const { data } = await printerApis.getLeaseDay(opts)
+        this.isLeaseShow = data.isShow === 1
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
     onLoad (options) {
       this.printerId = decodeURIComponent(options.printerId)
       this.title = decodeURIComponent(options.printerAlias)
       this.printerTypeName = decodeURIComponent(options.printerTypeName)
-      this.userId = wepy.$instance.globalData.userId || wx.getStorageSync('wow').userId
+      this.printerSerialNumber = options.printerSerialNumber
+      this.userId = wepy.$instance.globalData.userId
       wx.setNavigationBarTitle({
         title: this.title
       })
       this.getMyPrinter()
+      this.getLeaseDay()
     }
   }
 </script>

@@ -69,6 +69,9 @@
         <image class="icon" src="../../images/printer/btn_printlist_add_printer.png" mode="aspectFill"></image>
         <view class="font-size--28">添加打印机</view>
       </button>
+      
+      <view wx:if="{{userId}}" class="font-size--24 printer-renew" @tap.stop="handleToScanPay">打印机续费（点此处扫描打印机上二维码）</view>
+      <button wx:else data-type="scanpay" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--24 printer-renew open-type-btn" @tap.stop="handleToScan">打印机续费（点此处扫描打印机上二维码）</button>
 
       <view wx:if="{{userId}}" class="printer-content__module wow-flex is-align-middle is-justify-center" @tap.stop="handleToModel">
         <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
@@ -92,7 +95,7 @@
       </view>
     </view>
 
-    <custom-tabbar tabbar="{{tabbar}}"></custom-tabbar>
+    <custom-tabbar tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
   </view>
 </template>
 
@@ -121,6 +124,7 @@
       video: Video
     }
     data = {
+      isModelIPX: false,
       isFirst: true,
       tabbar: {},
       printerList: [],
@@ -203,16 +207,21 @@
         wxutils.backOrNavigate('/pages/model/index')
       },
       handleToDetail (item) {
-        const { printerId, printerAlias, printerTypeName } = item
+        const { printerId, printerAlias, printerTypeName, printerSerialNumber } = item
         const opts = {
           printerId,
           printerAlias,
-          printerTypeName
+          printerTypeName,
+          printerSerialNumber
         }
+        console.log(param(opts))
         wxutils.backOrNavigate('/pages/printerDetail/index?' + param(opts))
       },
       handleToScan () {
         this.getScanCode()
+      },
+      handleToScanPay () {
+        this.getScanPay()
       }
     }
     async getCountQueue () {
@@ -244,10 +253,31 @@
         }
       })
     }
+    getScanPay () {
+      // 允许从相机和相册扫码
+      wx.scanCode({
+        success(res) {
+          const { errMsg, result } = res
+          if (errMsg === 'scanCode:ok') {
+            const scanArr = result.split('=')
+            wxutils.backOrNavigate('/pages/printerBuy/index?printerSerialNumber=' + scanArr[1])
+          }
+        },
+        fail (error) {
+          console.log(error)
+        }
+      })
+    }
     handleScan (e) {
       this.userId = e
       wx.nextTick(() => {
         this.getScanCode()
+      })
+    }
+    handleScanPay (e) {
+      this.userId = e
+      wx.nextTick(() => {
+        this.getScanPay()
       })
     }
     computed = {
@@ -349,7 +379,9 @@
       this.getTopic()
       this.getCountQueue()
       wepy.$instance.globalData.subpub.on('scan', this.handleScan, this)
+      wepy.$instance.globalData.subpub.on('scanpay', this.handleScanPay, this)
       wx.hideShareMenu()
+      this.isModelIPX = wepy.$instance.globalData.isModelIPX
     }
     onShow () {
       if (wepy.$instance.globalData.userId) {

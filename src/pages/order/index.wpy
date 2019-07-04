@@ -9,8 +9,12 @@
             <view class="wow-background-image order-img"
             style="background-image: url({{goodItem.image || 'https://wxsw.oss-cn-hangzhou.aliyuncs.com/video/model/pic/ad0a2217-5dd5-4482-b5a8-d63f36834e1b.jpg'}})"></view>
             <view class="order-info">
-              <wow-elip line="2" class="order-info__title font-size--26">{{goodItem.title}}</wow-elip>
-              <view class="order-info__sku font-size--24">{{commonwxs.specStr(goodItem)}}</view>
+              <view class="order-info__title font-size--26">
+                <wow-elip line="2">{{goodItem.title}}</wow-elip>
+              </view>
+              <view class="order-info__sku font-size--24">
+                <wow-elip line="1">{{commonwxs.specStr(goodItem)}}</wow-elip>
+              </view>
               <view class="order-info__bootom wow-flex is-justify-space-between is-align-middle">
                 <view class="color-price font-size--28"><text class="font-size--22">￥</text>{{goodItem.price}}</view>
                 <view class="font-size--24 num">数量 {{goodItem.num}}</view>

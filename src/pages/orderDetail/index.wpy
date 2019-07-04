@@ -48,7 +48,9 @@
             <view class="wow-background-image order-img" style="background-image: url({{item.image}})"></view>
             <view class="order-info">
               <wow-elip line="2" class="order-info__title font-size--28">{{item.title}}</wow-elip>
-              <view class="order-info__sku font-size--24">{{commonwxs.specStr(item)}}</view>
+              <view class="order-info__sku font-size--24">
+                <wow-elip line="1">{{commonwxs.specStr(item)}}</wow-elip>
+              </view>
               <view class="order-info__price font-size--28 wow-flex is-justify-space-between">
                 <view class="color-price">￥{{item.price}}</view>
                 <view class="num font-size--26">数量 {{item.num}}</view>

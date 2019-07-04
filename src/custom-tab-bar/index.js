@@ -3,8 +3,12 @@ Component({
     addGlobalClass: true
   },
   properties: {
+    isModelIPX: Boolean,
     tabbar: {
-      type: Object,
+      type: {
+        type: Boolean,
+        value: false
+      },
       value: {
         backgroundColor: '#ffffff',
         color: '#9b9b9b',
