@@ -12,12 +12,11 @@
         title="{{info.title}}"
         initial-time="{{initTime}}"
         bindtimeupdate="handleRecordTime"
-      ></video>
-      <cover-view>
+      >
         <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
           <cover-image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></cover-image>
         </navigator>
-      </cover-view>
+      </video>
     </view>
 
     <view class="video-resource wow-flex is-justify-end is-align-middle" wx:if="{{ info.play.length }}">

@@ -18,29 +18,20 @@
         </view>
       </view>
 
-      <view class="printer-rent__record" wx:if="{{ false }}">
+      <view class="printer-rent__record" wx:if="{{ orderLeaseList.length }}">
         <view class="title font-size--32">续租记录</view>
         <view class="tip font-size--26">
           <view>续费逾期共{{ allOverdue }}天</view>
           <view class="tip-desc">(请及时续费，每延期1天需支付当日租金+应支付金额的日千分之三违约金，延期总计超30天，将不返还押金)</view>
         </view>
         <view class="record-list">
-          <view class="record-list__item">
-            <view class="record-time font-size--28">4月</view>
-            <view class="record-desc font-size--26">已付费15天，还需25天。本次续费预期1天</view>
-            <view class="record-item">
-              <view class="font-size--30">续租30天</view>
-              <view class="font-size--26 record-item__time">04月22日</view>
-              <view class="font-size--30 record-item__price">122</view>
-            </view>
-          </view>
-          <view class="record-list__item">
-            <view class="record-time font-size--28">4月</view>
-            <view class="record-desc font-size--26">已付费15天，还需25天。本次续费预期1天</view>
-            <view class="record-item">
-              <view class="font-size--30">续租30天</view>
-              <view class="font-size--26 record-item__time">04月22日</view>
-              <view class="font-size--30 record-item__price">122</view>
+          <view class="record-list__item" wx:for="{{ orderLeaseList }}" wx:key="index">
+            <view class="record-time font-size--28"><text wx:if="{{ currentYear !== item.year }}">{{ item.year + '年' }}</text>{{ item.month + '月' }}</view>
+            <view class="record-desc font-size--26">本月续租{{ item.payDay }}天，还需{{ item.remainingDay }}天。<text class="warn-info" wx:if="{{ item.overdue }}">本月有续费逾期{{ item.overdue }}天</text></view>
+            <view class="record-item" wx:for="{{ item.record }}" wx:key="*this" wx:for-item="_item">
+              <view class="font-size--30">续租{{ _item.leaseDay }}天</view>
+              <view class="font-size--26 record-item__time">{{ _item.dateFormat }}</view>
+              <view class="font-size--30 record-item__price">{{ _item.price }}</view>
             </view>
           </view>
         </view>
@@ -68,10 +59,14 @@
       currentItem: {},
       priceDay: '',
       payInfo: '',
-      orderLeaseDOList: [],
+      orderLeaseList: [],
       allOverdue: ''
     }
     computed = {
+      currentYear () {
+        let date = new Date()
+        return date.getFullYear()
+      },
       selectedLeasePrice () {
         return isEmpty(this.currentItem) ? 0 : this.currentItem.price
       }
@@ -134,12 +129,12 @@
           printerSerialNumber
         }
         const { data } = await printerApis.getRenewalInformation(opts)
-        const { priceDay, allOverdue, printerAlias, payDay, remainingDay, orderLeaseDOList } = data
+        const { priceDay, allOverdue, printerAlias, payDay, remainingDay, orderLeaseList } = data
         this.priceDay = priceDay
-        this.payInfo = `已为${printerAlias}付费${payDay}天，再续费${remainingDay}天，${printerAlias}就将永久属于您~`
+        this.payInfo = `已为${printerAlias || ''}（${printerSerialNumber}）付费${payDay}天，再续费${remainingDay}天，它就将永久属于您~`
         console.log(data)
         this.allOverdue = allOverdue
-        this.orderLeaseDOList = orderLeaseDOList
+        this.orderLeaseList = orderLeaseList
         this.$apply()
         wx.hideLoading()
       } catch (error) {

@@ -15,7 +15,7 @@ export default class http {
   }
   
   static checkNeedLogin () {
-    return !this.getConfig('Token')
+    return !this.getConfig('isReady')
   }
 
   static checkUrlIsLogin (url) {
@@ -35,16 +35,18 @@ export default class http {
       } catch (e) {
         console.log(e)
       }
-      const { token, userId, userDO } = d.data
+      const { token, userId, userDO, isReady } = d.data
       this.setConfig('Token', token)
       this.setConfig('userId', userId)
       this.setConfig('userDO', userDO)
+      this.setConfig('isReady', isReady === 1)
       wx.setStorage({
         key: 'wow',
         data: {
           token,
           userId,
-          userDO
+          userDO,
+          isReady: isReady === 1
         }
       })
       if (url) {
@@ -103,12 +105,14 @@ export default class http {
       try {
         const { data: loginData } = await this.get(`${this.getConfig('loginUrl')}`, data)
         this.loginStatus = 0
-        const { token } = loginData
+        const { token, isReady } = loginData
         this.setConfig('Token', token)
+        this.setConfig('isReady', isReady === 1)
         wx.setStorage({
           key: 'wow',
           data: {
-            token
+            token,
+            isReady: isReady === 1
           }
         })
       } catch (e) {

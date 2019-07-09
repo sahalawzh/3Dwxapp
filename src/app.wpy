@@ -181,6 +181,7 @@ export default class extends wepy.app {
       this.globalData.Token = cacheWowInfo.token
       this.globalData.userId = cacheWowInfo.userId
       this.globalData.userDO = cacheWowInfo.userDO
+      this.globalData.isReady = cacheWowInfo.isReady
     }
     this.globalData.loginUrl = `${this.globalData.baseUrl}/api/user/wxLogin`
     // 拦截request请求进行操作

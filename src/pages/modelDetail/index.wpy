@@ -62,6 +62,7 @@
             opts.modelFileId = modelFileId
           }
           await printerApis.pushQueue(opts)
+          this.getCountQueue()
           wx.hideLoading()
           wx.nextTick(() => {
             wx.showToast({

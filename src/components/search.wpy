@@ -46,8 +46,8 @@
   padding: 30rpx 50rpx 0;
   box-sizing: border-box;
   .icon {
-    width: 54rpx;
-    height: 54rpx;
+    width: 56rpx;
+    height: 56rpx;
   }
   &__control {
     .search-icon {

@@ -333,8 +333,6 @@
       clearTimeout(sliceTimer)
     }
     onUnload () {
-      clearTimeout(queueTimer)
-      clearTimeout(sliceTimer)
     }
     onShow () {
       if (this.isFirst) {

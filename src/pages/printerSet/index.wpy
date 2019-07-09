@@ -5,12 +5,11 @@
       <image class="printer-header__img" src="{{colorImage}}" mode="aspectFill"></image>
       <view class="printer-header__info font-size--26">
         <view class="font-size--24">Makesome5.0</view>
-        <view class="item">热床温度<text class="exponent">{{bedtemperature.actual}}℃</text></view>
+        <view class="item">热床温度<text class="exponent">{{bedTemperature.actual}}℃</text></view>
         <view class="item">喷头温度<text class="exponent">{{toolTemperature.actual}}℃</text></view>
         <view class="font-size--30 printer-action" @tap.stop="hanldeUnBindPrinterModal">解绑</view>
       </view>
     </view>
-
     <view class="set-list">
       <view class="set-list__item wow-flex is-align-middle is-justify-space-between" @tap.stop="handleToggleMode({{0}})">
         <view class="font-size--28">均衡模式</view>
@@ -42,7 +41,6 @@
           </view>
         </view>
       </view>
-
       <navigator url="/pages/printerAdvanced/index?printerId={{printerId}}" class="set-list__item wow-flex is-align-middle is-justify-space-between">
         <view class="font-size--28">高级</view>
         <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>

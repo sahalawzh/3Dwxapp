@@ -21,8 +21,8 @@ export default class Person extends wepy.component {
 
 <style lang='postcss'>
   .person-icon {
-    width: 54rpx;
-    height: 54rpx;
+    width: 56rpx;
+    height: 56rpx;
     image {
       width: 100%;
       height: 100%;

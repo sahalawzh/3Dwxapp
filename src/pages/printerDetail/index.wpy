@@ -59,7 +59,7 @@
     </view>
 
     <navigator url="/pages/printerBuy/index?printerSerialNumber={{ printerSerialNumber }}" class="footer" wx:if="{{ isLeaseShow }}">
-      <view class="footer-btn font-size--28">续费/5折买断</view>
+      <view class="footer-btn font-size--28">续费</view>
     </navigator>
   </view>
 </template>
