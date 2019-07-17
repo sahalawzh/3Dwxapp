@@ -45,7 +45,7 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 1,
+			"current": 6,
 			"list": [
 				{
 					"id": 0,
@@ -93,7 +93,7 @@
 					"id": 6,
 					"name": "订单详情",
 					"pathName": "pages/orderDetail/index",
-					"query": "oid=100483201906251837137857",
+					"query": "oid=100916201907111633396706",
 					"scene": null
 				},
 				{

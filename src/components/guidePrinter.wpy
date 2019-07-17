@@ -1,0 +1,29 @@
+<template>
+  <view class="guide-printer" catchtouchmove="true">
+    <view class="guide-mask"></view>
+    <view class="guide-step">
+      <image class="printer_btn" src="../images/guide/printer_btn.png" mode="aspectFill" @tap.stop="handleEndStage"></image>
+      <image class="printer_sharp" src="../images/guide/printer_sharp.png" mode="aspectFill"></image>
+      <image class="printer_txt" src="../images/guide/printer_txt.png" mode="aspectFill"></image>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class guidePrinter extends wepy.component {
+  props = {
+    stage: {
+      type: Number
+    }
+  }
+  methods = {
+    handleEndStage () {
+      this.$emit('handleEndStage')
+    }
+  }
+}
+</script>
+
+<style lang='postcss'>
+@import 'src/styles/modules/guide.postcss';
+</style>

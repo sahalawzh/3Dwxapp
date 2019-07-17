@@ -1,0 +1,52 @@
+<template>
+  <block>
+    <view class="guide-index wow-flex is-align-middle is-justify-center" catchtouchmove="true" wx:if="{{isShowAd}}">
+      <view class="guide-mask"></view>
+      <view class="guide-ad">
+        <image class="index_ad" src="../images/guide/index_ad.png" mode="aspectFill" @tap.stop="handleToPriner"></image>
+        <view class="index_ad_hide">
+          <image src="../images/guide/index_ad_hide.png" mode="aspectFill" @tap.stop="handleHideAd"></image>
+        </view>
+      </view>
+    </view>
+    <view class="guide-side" wx:else>
+      <image src="../images/guide/index_ad_slide.png" animation="{{animation}}" @tap.stop="handleShowAd" class="index_ad_slide" mode="aspectFill"></image>
+      <image src="../images/guide/index_ad_close.png" @tap.stop="handleOutStage" class="index_ad_close" mode="aspectFill"></image>
+    </view>
+  </block>
+</template>
+<script>
+import wepy from 'wepy'
+export default class guideIndex extends wepy.component {
+  props = {
+    stage: {
+      type: Number,
+      twoWay: true
+    },
+    animation: {
+      type: Object
+    }
+  }
+  data = {
+    isShowAd: true
+  }
+  methods = {
+    handleToPriner () {
+      this.$emit('handleToPriner')
+    },
+    handleOutStage () {
+      this.$emit('handleOutStage')
+    },
+    handleShowAd () {
+      this.isShowAd = true
+    },
+    handleHideAd () {
+      this.isShowAd = false
+    }
+  }
+}
+</script>
+
+<style lang='postcss'>
+@import 'src/styles/modules/guide.postcss';
+</style>

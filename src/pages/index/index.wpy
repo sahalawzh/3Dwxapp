@@ -33,6 +33,9 @@
     <loading wx:if="{{hasMoreData}}"></loading>
 
     <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
+    
+    <guideIndex wx:if="{{stage}}" :animation.sync="animation" :stage.sync="stage"></guideIndex>
+
   </view>
 </template>
 
@@ -40,8 +43,10 @@
   import wepy from 'wepy'
   import VideoList from '../../components/videoList'
   import Loading from '../../components/loading'
+  import GuideIndex from '../../components/guideIndex'
   import videoApis from '../../api/video'
   import advertisementApis from '../../api/advertisement'
+  import guideApis from '../../api/guide'
   import CommonMixin from '../../mixins/common'
   export default class Index extends wepy.page {
     config = {
@@ -52,7 +57,8 @@
     }
     components = {
       videoList: VideoList,
-      loading: Loading
+      loading: Loading,
+      guideIndex: GuideIndex
     }
     mixins = [CommonMixin]
     data = {
@@ -64,7 +70,28 @@
       hasMoreData: false, // 默认不用拉数据
       cartNum: '',
       userId: '',
-      bannerAdv: ''
+      bannerAdv: '',
+      stage: 0,
+      animation: {}
+    }
+    events = {
+      handleToPriner () {
+        wx.switchTab({url: '/pages/index/printer'})
+        this.stage = 0
+      },
+      async handleOutStage () {
+        try {
+          const opts = {
+            stage: 0
+          }
+          await guideApis.updateByPrintGuide(opts)
+          this.stage = 0
+          wepy.$instance.globalData.stage = 0
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+        }
+      }
     }
     async getVideoList () {
       try {
@@ -104,6 +131,16 @@
         console.log(error)
       }
     }
+    async getPrintGuide () { // 获取引导信息
+      try {
+        const { data } = await guideApis.printGuide()
+        this.stage = data.stage
+        wepy.$instance.globalData.stage = data.stage
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
     async onLoad () {
       // 隐藏系统tabbar
       wx.hideTabBar()
@@ -111,6 +148,7 @@
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
       this.getVideoList()
       this.getAdvertisement()
+      this.getPrintGuide()
       this.$apply()
     }
     methods = {
@@ -134,6 +172,27 @@
       if (wepy.$instance.globalData.userId) {
         this.userId = wepy.$instance.globalData.userId
       }
+      // 1: 创建动画实例animation:
+      var animation = wx.createAnimation({
+        duration: 500,
+        timingFunction: 'ease'
+      })
+      // this.animation = animation
+      var next = true
+      // 连续动画关键步骤
+      setInterval(function () {
+        // 2: 调用动画实例方法来描述动画
+        if (next) {
+          animation.rotate(39).step()
+          next = !next
+        } else {
+          animation.rotate(19).step()
+          next = !next
+        }
+        // 3: 将动画export导出，把动画数据传递组件animation的属性
+        this.animation = animation.export()
+        this.$apply()
+      }.bind(this), 600)
     }
   }
 </script>

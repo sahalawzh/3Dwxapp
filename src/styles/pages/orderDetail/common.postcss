@@ -1,10 +1,12 @@
 
 .page-order {
-  position: absolute;
-  width:100%;
-  height:100%;
-  background-color:#f0f2f7;
-  padding-bottom: 400rpx;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f2f7;
+  padding-bottom: 100rpx;
   &-choice {
     height: 100rpx;
     line-height: 100rpx;
@@ -296,14 +298,8 @@
     }
   }
   .footer {
-    /* position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 99; */
     padding: 28rpx 50rpx 60rpx 36rpx;
-    /* background-color: #f0f2f7;
-    border-top: 1rpx solid #b7b7b7; */
+    flex-direction: row-reverse;
     &-btn {
       width: 272rpx;
       height: 72rpx;

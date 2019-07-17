@@ -1,0 +1,79 @@
+.guide-mask {
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1005;
+}
+.guide-index {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1006;
+  flex-direction: column;
+  .guide-ad {
+    position: relative;
+    z-index: 1007;
+    .index_ad {
+      width: 512rpx;
+      height: 668rpx;
+    }
+    .index_ad_hide {
+      margin-top: 58rpx;
+      text-align: right;
+      image {
+        width: 198rpx;
+        height: 56rpx;
+      }
+    }
+  }
+}
+.guide-printer {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1006;
+  .guide-step {
+    position: relative;
+    z-index: 1007;
+    .printer_btn {
+      width: 330rpx;
+      height: 96rpx;
+      display: block;
+      margin-top: 197rpx;
+      margin-left: 23rpx;
+    }
+    .printer_sharp {
+      width: 106rpx;
+      height: 92rpx;
+      display: block;
+      margin: 45rpx 0 36rpx 196rpx;
+    }
+    .printer_txt {
+      width: 464rpx;
+      height: 69rpx;
+      margin-left: 189rpx;
+    }
+  }
+}
+.guide-side {
+  position: fixed;
+  right: 0;
+  top: 126rpx;
+  z-index: 1006;
+  text-align: right;
+  .index_ad_slide {
+    width: 178rpx;
+    height: 214rpx;
+    display: block;
+    margin-right: -34rpx;
+  }
+  .index_ad_close {
+    width: 132rpx;
+    height: 83rpx;
+    margin-top: 13rpx;
+  }
+}

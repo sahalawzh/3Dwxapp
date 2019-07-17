@@ -71,7 +71,7 @@
       </button>
       
       <view wx:if="{{userId}}" class="font-size--24 printer-renew" @tap.stop="handleToScanPay">打印机续费（点此处扫描打印机上二维码）</view>
-      <button wx:else data-type="scanpay" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--24 printer-renew open-type-btn" @tap.stop="handleToScan">打印机续费（点此处扫描打印机上二维码）</button>
+      <button wx:else data-type="scanpay" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--24 printer-renew open-type-btn">打印机续费（点此处扫描打印机上二维码）</button>
 
       <view wx:if="{{userId}}" class="printer-content__module wow-flex is-align-middle is-justify-center" @tap.stop="handleToModel">
         <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
@@ -96,6 +96,9 @@
     </view>
 
     <custom-tabbar tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
+  
+    <guidePrinter wx:if="{{stage}}" :stage.sync="stage"></guidePrinter>
+
   </view>
 </template>
 
@@ -104,12 +107,14 @@
   import printerApis from '../../api/printer'
   import goodsApis from '../../api/goods'
   import videoApis from '../../api/video'
+  import guideApis from '../../api/guide'
   import wxutils from '../../utils/wxutils'
   import param from '../../utils/param'
   import CommonMixin from '../../mixins/common'
   import advertisementApis from '../../api/advertisement'
   import Recommend from './modules/recommend'
   import Video from './modules/video'
+  import GuidePrinter from '../../components/guidePrinter'
   export default class Printer extends wepy.page {
     config = {
       navigationBarTitleText: '打印机',
@@ -121,7 +126,8 @@
     mixins = [CommonMixin]
     components = {
       recommend: Recommend,
-      video: Video
+      video: Video,
+      guidePrinter: GuidePrinter
     }
     data = {
       isModelIPX: false,
@@ -160,7 +166,23 @@
       videoList: [],
       isShowPrinter: true,
       topicInfo: '',
-      num: ''
+      num: '',
+      stage: 0
+    }
+    events = {
+      async handleEndStage () {
+        try {
+          const opts = {
+            stage: 2
+          }
+          await guideApis.updateByPrintGuide(opts)
+          wxutils.backOrNavigate(`/pages/videoList/index?topicId=${this.topicInfo.id}&topicName=${this.topicInfo.topic}`)
+          this.stage = 0
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+        }
+      }
     }
     methods = {
       handleMoreGoods () {
@@ -349,7 +371,7 @@
       }
     }
     onPullDownRefresh () {
-      if (!this.userId) {
+      if (!this.userId || this.stage === 1) {
         wx.stopPullDownRefresh()
         return
       }
@@ -367,7 +389,7 @@
         console.log(error)
       }
     }
-    async onLoad () {
+    onLoad () {
       // 隐藏系统tabbar
       wx.hideTabBar()
       if (wepy.$instance.globalData.userId) {
@@ -378,6 +400,7 @@
       this.listPrintSpu()
       this.getTopic()
       this.getCountQueue()
+      this.stage = wepy.$instance.globalData.stage
       wepy.$instance.globalData.subpub.on('scan', this.handleScan, this)
       wepy.$instance.globalData.subpub.on('scanpay', this.handleScanPay, this)
       wx.hideShareMenu()

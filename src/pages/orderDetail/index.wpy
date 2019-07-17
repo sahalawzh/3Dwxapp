@@ -11,8 +11,8 @@
           <view class="font-size--42 font-size--white header-status__txt">过期</view>
         </block>
         <block wx:if="{{orderData.orderStatus === 2}}">
-          <view class="font-size--42 font-size--white header-status__txt">买家已付款</view>
-          <view class="font-size--28 font-size--white">您的订单即将发货，请不要着急哦</view>
+          <view class="font-size--42 font-size--white header-status__txt">{{ refundDetail ? refundStatusTag[refundDetail.refundStatus] : '待发货' }}</view>
+          <view class="font-size--28 font-size--white">{{ refundDetail && refundDetail.remark ? refundDetail.remark : '您的订单即将发货，请不要着急哦'}}</view>
         </block>
         <block wx:if="{{orderData.orderStatus === 3}}">
           <view class="font-size--42 font-size--white header-status__txt">您的宝贝已经发货</view>
@@ -22,8 +22,12 @@
           <view class="font-size--42 font-size--white header-status__txt">交易成功</view>
           <view class="font-size--28 font-size--white">来评价一下你的宝贝吧~</view>
         </block>
+        <block wx:if="{{orderData.orderStatus === 5}}">
+          <view class="font-size--42 font-size--white header-status__txt">待审核</view>
+        </block>
         <block wx:if="{{orderData.orderStatus === 9}}">
-          <view class="font-size--42 font-size--white header-status__txt">已取消</view>
+          <view class="font-size--42 font-size--white header-status__txt">订单取消成功</view>
+          <view class="font-size--28 font-size--white" wx:if="{{ refundDetail && refundDetail.refundStatus === 1 }}">退款将在3个工作日内原路返回</view>
         </block>
       </view>
       <navigator wx:if="{{orderData.orderStatus === 3 || orderData.orderStatus === 4}}" url="/pages/logistics/index?expCode={{orderData.expCode}}&expNo={{orderData.expNo}}" class="header-logistics font-size--28 wow-flex is-align-middle">
@@ -101,6 +105,27 @@
         <view class="label font-size--30">总计</view>
         <view class="color-price font-size--30"><text class="font-size--24">￥</text>{{orderData.totalFee}}</view>
       </View>
+      <view class="order-detailInfo__footer wow-flex is-justify-space-between is-align-middle" wx:if="{{!refundDetail}}">
+        <button class="wow-flex is-align-middle open-type-btn" open-type="contact">
+          <image class="icon" src="../../images/order/btn_Orderlist_service.png" mode="aspectFill"></image>
+          <view class="font-size--26">联系客服</view>
+        </button>
+
+        <view class="wow-flex is-align-middle" @tap.stop="hanldeToCall">
+          <image class="icon" src="../../images/order/btn_Order_details_phone.png" mode="aspectFill"></image>
+          <view class="font-size--26">拨打电话</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="order-detailInfo" wx:if="{{refundDetail}}">
+      <view class="order-detailInfo__content">
+        <view class="order-detailInfo__title font-size--30">退款信息</view>
+        <view class="order-detailInfo__item font-size--26">退款原因: {{refundDetail.refundDesc}}</view>
+        <view class="order-detailInfo__item font-size--26">退款金额: <text class="font-size--24">￥</text>{{refundDetail.refundFee}}</view>
+        <view class="order-detailInfo__item font-size--26">申请时间: {{refundDetail.createTime}}</view>
+        <view class="order-detailInfo__item font-size--26">退款编号: {{refundDetail.refundNo}}</view>
+      </view>
       <view class="order-detailInfo__footer wow-flex is-justify-space-between is-align-middle">
         <button class="wow-flex is-align-middle open-type-btn" open-type="contact">
           <image class="icon" src="../../images/order/btn_Orderlist_service.png" mode="aspectFill"></image>
@@ -114,32 +139,21 @@
       </view>
     </view>
 
-    <block wx:if="{{orderData.orderStatus === 0}}">
-      <view class="footer wow-clearfix">
-        <view class="wow-fl-l font-size--30" @tap.stop="handleCancelOrder">
-          <view class="footer-btn footer-btn__canel">取消订单</view>
-        </view>
-        <view class="wow-fl-r font-size--30">
+    <block wx:if="{{statusBtnTag}}">
+      <view class="footer wow-flex is-justify-space-between">
+        <view class="font-size--30" wx:if="{{orderData.orderStatus === 0}}">
           <view class="footer-btn font-color-white" @tap.stop="hanldeToPay">付款</view>
         </view>
-      </view>
-    </block>
 
-    <block wx:if="{{statusBtnTag}}">
-      <view class="footer wow-clearfix">
-        <view class="wow-fl-r font-size--30" @tap.stop="handleRemindGoods({{orderData.orderStatus}})">
+        <view class="font-size--30" @tap.stop="handleRemindGoods({{orderData.orderStatus}})">
           <view class="footer-btn footer-btn__canel">{{statusBtnTag}}</view>
+        </view>
+
+        <view class="font-size--30" wx:if="{{orderData.orderStatus === 2}}" @tap.stop="handleRemindGoods({{0}})">
+          <view class="footer-btn footer-btn__canel">取消订单</view>
         </view>
       </view>
     </block>
-
-    <!-- <block wx:if="{{orderData.orderStatus === 4}}">
-      <view class="footer wow-flex is-justify-end">
-        <navigator url="/pages/publishCommet/index" class="font-size--30 wow-ml-30">
-          <view class="footer-btn font-color-white">评价晒单</view>
-        </navigator>
-      </view>
-    </block> -->
     
     <wow-popup class="j_season season-picker" border-radius="false" full="false" gaps="{{[0]}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
       <view style="width: 750rpx" class="season-picker__box" @tap.stop="noop">
@@ -164,8 +178,10 @@
   import commonwxs from './wxs/common.wxs'
   import SecTime from '../../utils/secTime.js'
   import suggestionApis from '../../api/suggestion'
+  import refundApis from '../../api/refund'
   import wxutils from '../../utils/wxutils'
   const statusTag = {
+    0: '取消订单',
     2: '提醒发货',
     3: '确认收货',
     9: '删除订单'
@@ -188,7 +204,14 @@
       secTime: null,
       secs: {},
       statusBtnTag: '',
-      seasonList: ['不想买了', '信息填写错误，重新买', '其他']
+      seasonList: ['不想买了', '信息填写错误，重新买', '其他'],
+      indexs: [0],
+      refundDetail: '',
+      refundStatusTag: {
+        0: '申请中',
+        1: '退款成功',
+        2: '拒绝退款'
+      }
     }
     watch = {
       orderData (val) {
@@ -199,7 +222,14 @@
         } else {
           this.secTime && this.secTime.close()
         }
+        if (val.orderStatus === 2 || val.orderStatus === 5 || val.orderStatus === 9) {
+          this.getRefund()
+        }
       }
+    }
+    handleChangeArea (e) {
+      const { value } = e.detail
+      this.indexs = value
     }
     startSecTime (closeTime, sysTime) {
       let endTime = closeTime.replace(/-/g, '/')
@@ -300,6 +330,53 @@
         wx.hideLoading()
       }
     }
+    async applyRefund () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { seasonList, orderData, indexs } = this
+        const { orderNum, totalFee } = orderData
+        const opts = {
+          orderNo: orderNum,
+          refundDesc: seasonList[indexs.join('')],
+          refundFee: totalFee
+        }
+        await refundApis.insertApply(opts)
+        wx.hideLoading()
+        const that = this
+        wx.nextTick(() => {
+          wx.showToast({
+            title: '申请已提交，请等待客服审核',
+            success: function () {
+              setTimeout(() => {
+                wx.hideToast()
+                that.getOrderDetail()
+                that.getRefund()
+              }, 2000)
+            }
+          })
+        })
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getRefund () {
+      try {
+        const opts = {
+          orderNo: this.orderData.orderNum
+        }
+        const { data } = await refundApis.getRefund(opts)
+        this.refundDetail = data
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
     async handleDelOrder () {
       try {
         wx.showLoading({
@@ -320,6 +397,10 @@
         wx.hideLoading()
       }
     }
+    handleCancelOrder () {
+      let $popup = this.$wxpage.selectComponent('.j_season')
+      $popup && $popup.show()
+    }
     methods = {
       handleToCommet (item) {
         const { spuId, image, skuId } = item
@@ -333,26 +414,24 @@
         })
       },
       handleSelectedArea () {
-        const that = this
-        wx.showModal({
-          content: '确定要退出吗？',
-          success(res) {
-            if (res.confirm) {
-              that.removeOrder()
-            }
-          }
-        })
+        if (this.orderData.orderStatus === 0) { // 待付款取消订单
+          this.removeOrder()
+        }
+        if (this.orderData.orderStatus === 2) {
+          this.applyRefund()
+        }
+        let $popup = this.$wxpage.selectComponent('.j_season')
+        $popup && $popup.hide()
       },
       handleCancelArea () {
         let $popup = this.$wxpage.selectComponent('.j_season')
         $popup && $popup.hide()
       },
-      handleCancelOrder () {
-        let $popup = this.$wxpage.selectComponent('.j_season')
-        $popup && $popup.show()
-      },
       handleRemindGoods (orderStatus) {
         switch (orderStatus) {
+          case 0:
+            this.handleCancelOrder()
+            break
           case 2:
             wx.showToast({
               title: '我们已收到提醒',

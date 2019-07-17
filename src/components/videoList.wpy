@@ -5,7 +5,8 @@
       <view class="video-lists__item wow-background-image font-color-white"
         style="background-image: url({{item.image}})"
         @tap.stop="handleToDetail({{item.id}})">
-        <image class="bg-mask wow-background-image" src="../images/common/bg_indexvideotitle.png" mode="left top"></image>
+        <!--  src="../images/common/bg_indexvideotitle.png" mode="aspectFill" -->
+        <view class="bg-mask"></view>
         <view class="item">
           <view class="content">
             <view class="title font-size--34">{{item.title}}</view>
