@@ -38,6 +38,11 @@
         <view class="font-size--30">收货地址</view>
         <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
       </navigator>
+      <navigator url="/pages/invoiceList/index" class="person-items__item wow-flex is-align-middle">
+        <image class="icon" src="../../images/person/ico_invoice.png" mode="aspectFill"></image>
+        <view class="font-size--30">申请发票</view>
+        <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+      </navigator>
       <navigator url="/pages/collect/index" class="person-items__item wow-flex is-align-middle">
         <image class="icon" src="../../images/person/ico_mine_Collection.png" mode="aspectFill"></image>
         <view class="font-size--30">我的收藏夹</view>

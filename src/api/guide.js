@@ -2,7 +2,7 @@ import base from './base'
 /**
  * 引导页
  */
-export default class refund extends base {
+export default class guide extends base {
   /**
    * 修改引导状态
    */

@@ -56,6 +56,20 @@
 				},
 				{
 					"id": 1,
+					"name": "发票列表",
+					"pathName": "pages/invoiceList/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 1,
+					"name": "活动页面",
+					"pathName": "pages/activity/index",
+					"query": "spuId=1&title=首页浮起",
+					"scene": null
+				},
+				{
+					"id": 1,
 					"name": "添加打印机",
 					"pathName": "pages/printerAdd/index",
 					"query": "id=HJNLA0000c91608dbbc5",

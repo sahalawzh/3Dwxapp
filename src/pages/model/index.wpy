@@ -65,7 +65,6 @@
         }
         if (!item.children.length) { // 第三级
           const data = {
-            firstModelTypeId: this.firstModelTypeId,
             secondModelTypeId: item.id,
             name: item.name
           }

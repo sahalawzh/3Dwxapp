@@ -1,0 +1,299 @@
+
+.page-order {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f2f7;
+  &__pb {
+    padding-bottom: 220rpx;
+  }
+  .invoice-tip {
+    background-color: #faf2e0;
+    color: #e29c20;
+    padding: 30rpx 54rpx;
+    font-weight: 600;
+    &__title {
+      margin-bottom: 6rpx;
+    }
+  }
+  .invoice-status {
+    background-color: #faf2e0;
+    color: #e29c20;
+    height: 126rpx;
+    padding-left: 46rpx;
+    flex-direction: column;
+  }
+  .title-item {
+    padding-right: 52rpx;
+    .book {
+      color: #135ee1;
+      margin-left: 10rpx;
+    }
+  }
+  .order-lists {
+    .section {
+      margin-bottom: 18rpx;
+      background-color:#fff;
+      &-label {
+        width: 90rpx;
+      }
+    }
+    &-items__item {
+      position: relative;
+      margin-left: 14rpx;
+      margin-right: 14rpx;
+      padding: 34rpx 0 20rpx;
+      &::after {
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #f2f2f2;
+      }
+      .order-img {
+        width:190rpx;
+        height:156rpx;
+        margin-right:40rpx;
+        overflow:hidden;
+        border-radius:14rpx;
+        position:relative;
+        background-repeat:no-repeat;
+        background-position:center;
+        background-size:cover;
+      }
+      .order-info {
+        position: relative;
+        flex: 1;
+        overflow:hidden;
+        padding-top: 8rpx;
+        padding-right: 22rpx;
+        &__title {
+          color: #474747;
+          min-height: 68rpx;
+        }
+        &__sku {
+          padding-top: 8rpx;
+          color: #9b9b9b;
+        }
+        &__bootom {
+          margin-top: 10rpx;
+          .color-price {
+            font-weight: 600;
+          }
+          .num {
+            color: #9b9b9b;
+          }
+        }
+      }
+    }
+    &-items__status {
+      border-radius: 0 0 14rpx 14rpx;
+      padding: 16rpx 30rpx 16rpx 104rpx;
+      .pay-tips {
+        color: #474747;
+      }
+      .icon-status {
+        width: 150rpx;
+        height: 50rpx;
+      }
+      .logistics-tips {
+        color: #e19913;
+      }
+      .order-btn {
+        position: relative;
+        padding: 10rpx 34rpx;
+        border-radius: 32rpx;
+        &:not(:last-child) {
+          margin-right: 20rpx;
+        }
+        &__pay {
+          background-color: #fce7ef;
+          border: 2rpx solid #e1146c;
+          color: #e1146c;
+        }
+        &__affirm {
+          background-color: #e7f0ff;
+          border: 2rpx solid #8eb0ec;
+          color: #135ee1;
+        }
+        &__logistics {
+          border: 2rpx solid #9b9b9b;
+          color: #4a4a4a;
+        }
+      }
+    }
+  }
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    padding: 18rpx 52rpx 64rpx 38rpx;
+    background-color:#fff;
+    border-top: 1rpx solid #b4b4b4;
+    &-price, &-label {
+      padding-top: 20rpx;
+    }
+    &-price{
+      line-height: 1;
+    }
+    &-label {
+      margin-right: 30rpx;
+      .radio {
+        margin-right: 18rpx;
+      }
+    }
+    .pay-btn {
+      width: 276rpx;
+      height: 72rpx;
+      line-height: 72rpx;
+      text-align: center;
+      background-color: #1360e1;
+      border-radius: 54rpx;
+      &.btn-disabled {
+        background-color: #ccc;
+        pointer-events: none;
+      }
+    }
+  }
+  .order-empty {
+    min-height: 100vh;
+    background-color: #fff;
+    color: #4a4a4a;
+    text-align: center;
+    .icon {
+      width: 136rpx;
+      height: 136rpx;
+      margin-top: 52rpx;
+      margin-bottom: 56rpx;
+    }
+  }
+  .invoice-form {
+    padding-left: 46rpx;
+    color: #494949;
+    .title {
+      padding-top: 74rpx;
+      padding-bottom: 46rpx;
+    }
+    &__item {
+      .items {
+        flex-wrap: wrap;
+        padding-bottom: 58rpx;
+        .item {
+          padding: 12rpx 36rpx;
+          margin-top: 24rpx;
+          color: #4b4b4b;
+          border: 1rpx solid #ccc;
+          border-radius: 30rpx;
+          margin-right: 18rpx;
+          &.active {
+            background-color: #dde8f5;
+            color: #6594e9;
+            border: 1rpx solid #8bb2f0;
+          }
+        }
+      }
+      .control {
+        padding: 28rpx 52rpx 48rpx 0;
+        &-item + .control-item {
+          margin-top: 12rpx;
+        }
+        &-item {
+          border-radius: 32rpx;
+          height: 66rpx;
+          line-height: 66rpx;
+          background-color: #ededed;
+          padding: 0 32rpx;
+        }
+      }
+      .invoice-info {
+        color: #373737;
+        font-weight: 600;
+        margin-top: 36px;
+        padding-bottom: 16rpx;
+      }
+      .invoice-address {
+        position: relative;
+        color: #494949;
+        margin: 0 50rpx 58rpx 0;
+        .default {
+          position: absolute;
+          left: 0;
+          font-size: 20rpx;
+          color: #fff;
+          border-radius: 30rpx;
+          background-color: #135ee1;
+          display: inline-block;
+          width: 68rpx;
+          height: 32rpx;
+          line-height: 32rpx;
+          text-align: center;
+          margin-right: 16rpx;
+        }
+        .address-detail {
+          max-width: 360rpx;
+          overflow: hidden;
+        }
+        .arrow {
+          position: absolute;
+          top: 0;
+          right: 52rpx;
+          width: 32rpx;
+          height: 32rpx;
+        }
+      }
+    }
+  }
+  .ico_invoiced {
+    position: absolute;
+    top: 20rpx;
+    right: 22rpx;
+    width: 192rpx;
+    height: 192rpx;
+    z-index: 2;
+  }
+  .email-box {
+    background-color: #d8d8d8;
+    padding: 72rpx 48rpx;
+    border-radius: 22rpx;
+    width: 650rpx;
+    overflow: hidden;
+    box-sizing: border-box;
+    &__item {
+      border-radius: 38rpx;
+      height: 82rpx;
+      line-height: 82rpx;
+      padding-left: 36rpx;
+      background-color: #fff;
+    }
+    &__btn {
+      height: 82rpx;
+      border-radius: 38rpx;
+      margin-top: 22rpx;
+      overflow: hidden;
+      .email-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 4rpx;
+      }
+      .btn-canel {
+        color: #4a4a4a;
+        background-color: #fff;
+      }
+      .btn-send {
+        color: #fff;
+        background-color: #1360e1;
+        border-radius:0;
+        padding: 0;
+      }
+    }
+  }
+}

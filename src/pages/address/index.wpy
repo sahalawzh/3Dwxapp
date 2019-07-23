@@ -263,7 +263,7 @@
       wx.navigateBack()
     }
     onLoad () {
-      this.userId = wx.getStorageSync('wow').userId
+      this.userId = wepy.$instance.globalData.userId
       this.getAddressList()
     }
     methods = {

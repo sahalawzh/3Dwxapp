@@ -28,6 +28,12 @@
       </button>
     </view>
 
+    <view class="adv-float" catchtouchmove="true" wx:if="{{floatAdv && isShowFloatAdv && !stage}}">
+      <view class="adv-mask"></view>
+      <image src="{{floatAdv.image}}" @tap.stop="handleGoAdv" class="adv-img" mode="aspectFill"></image>
+      <icon type="cancel" size="24" color="#fff" class="adv-close" @tap.stop="handleCloseAdv"/>
+    </view>
+
     <videoList :lists.sync="lists"></videoList>
 
     <loading wx:if="{{hasMoreData}}"></loading>
@@ -48,6 +54,7 @@
   import advertisementApis from '../../api/advertisement'
   import guideApis from '../../api/guide'
   import CommonMixin from '../../mixins/common'
+  import wxutils from '../../utils/wxutils'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -72,7 +79,9 @@
       userId: '',
       bannerAdv: '',
       stage: 0,
-      animation: {}
+      animation: {},
+      floatAdv: '',
+      isShowFloatAdv: true
     }
     events = {
       handleToPriner () {
@@ -125,7 +134,8 @@
     async getAdvertisement () { // 广告位接口
       try {
         const { data: advData } = await advertisementApis.queryAdvertisements()
-        this.bannerAdv = advData.filter(item => item.advertisementType === 4)[0]
+        this.bannerAdv = advData.filter(item => item.advertisementType === 4)[0] // 顶部banner
+        this.floatAdv = advData.filter(item => item.advertisementType === 1)[0] // 浮动banner
         this.$apply()
       } catch (error) {
         console.log(error)
@@ -152,6 +162,13 @@
       this.$apply()
     }
     methods = {
+      handleGoAdv () {
+        const { spuId } = this.floatAdv
+        wxutils.backOrNavigate(`/pages/activity/index?spuId=${spuId}`)
+      },
+      handleCloseAdv () {
+        this.isShowFloatAdv = false
+      }
     }
     onShareAppMessage () {
       return {

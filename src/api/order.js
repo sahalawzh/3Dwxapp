@@ -65,4 +65,11 @@ export default class order extends base {
   static deleteOrder (opts) {
     return this.get(`api/order/deleteOrder`, opts)
   }
+  /**
+   * 发票列表
+   * @param {object} opts 参数
+   */
+  static listInvoiceOrder (opts) {
+    return this.get(`api/order/listInvoiceOrder`, opts)
+  }
 }

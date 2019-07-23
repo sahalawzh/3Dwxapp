@@ -1,0 +1,332 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-activity">
+    <view class="activity-banner">
+      <image class="icon-banner" src="{{ activityData.imageUrl }}" mode="aspectFill"></image>
+    </view>
+    <view class="activity-section">
+      <image class="icon-section" bindload="handleLoadContent" style="width: {{imageContentWidth}}px; height: {{imageContentHeight}}px" src="{{ activityData.content }}" mode="aspectFill"></image>
+    </view>
+    <view class="controls wow-flex is-justify-space-between">
+      <image @tap.stop="handleShowCommetInput" class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      <!-- <button wx:else data-type="videoCommet" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+        <image class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      </button> -->
+      <view class="wow-flex">
+        <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
+        <view class="btn-box">
+          <button wx:if="{{userId}}" @tap.stop="handleToSend" class="part-btn open-type-btn font-size--36">我要参与</button>
+          <button
+            wx:else
+            data-type="activity"
+            open-type="getPhoneNumber"
+            bindgetphonenumber="getPhoneNumber"
+            class="part-btn open-type-btn font-size--36">我要参与</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 动态表单 -->
+    <view class="form-box" catchtouchmove="true" wx:if="{{isShowForm}}">
+      <view class="form-mask"></view>
+      <view class="form-content font-size--30" wx:if="{{controlList.length}}">
+        <form bindsubmit="formSubmitSend">
+          <scroll-view class="scroll-view_H" scroll-y style="max-height:{{controlHeight}}px">
+            <input
+              type="{{ item.controlKey === 'phone' ? 'number' : 'text' }}"
+              wx:for="{{controlList}}"
+              wx:key="item"
+              data-require="{{item.isRequire}}"
+              class="form-content__item"
+              name="{{item.isRequire === 1 ? item.controlKey : ''}}"
+              bindinput="handleBindinput({{index}})"
+              @tap.stop="handleShowPopup({{item}}, {{index}})"
+              disabled="{{ item.controlType === 1 ? false : true }}"
+              value="{{item.value ? item.value : ''}}"
+              placeholder="{{item.tips}}">
+                <image class="arrow_down" wx:if="{{item.controlType === 2}}" src="../../images/common/arrow_down.png" mode="aspectFill"></image>
+              </input>
+          </scroll-view>
+        <button class="form-content__btn font-size--28" form-type="submit">我要参与</button>
+        </form>
+      </view>
+      <view class="wow-ta-c">
+        <icon type="cancel" size="24" color="#fff" class="form-close" @tap.stop="handleCloseForm"/>
+      </view>
+    </view>
+
+    <!-- 分享 -->
+    <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
+      <view class="share-box">
+        <view class="share-box__item" @tap.stop="handleSharePoster">
+          <image class="ico_share_img" src="../../images/common/ico_share_img.png" mode="aspectFill"></image>
+          <view class="font-size--28">生成分享海报</view>
+        </view>
+        <view class="share-box__item">
+          <button open-type="share" class="open-type-btn">
+            <view class="font-size--28">转发</view>
+          </button>
+        </view>
+      </view>
+    </wow-popup>
+
+    <!-- 选择 -->
+    <wow-popup class="j_select popup-picker" border-radius="false" full="false" gaps="{{[0]}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
+      <view style="width: 750rpx" class="popup-picker__box" @tap.stop="noop">
+        <view class="popup-picker__toolbar jfk-flex is-justify-space-between font-size--32">
+          <text class="font-color-extra-light-gray" @tap.stop="handleCancelArea">取消</text>
+          <text @tap.stop="handleSelectedArea">完成</text>
+        </view>
+        <picker-view indicator-style="height: 50px" style="height: 180px; width: 100%;" mask-class="address-picker__mask" indicator-class="address-picker__indicator" @change="handleChangeArea" class="font-size--28 address-picker__view" value="{{indexs}}">
+          <picker-view-column>
+            <view class="popup-picker__item" wx:for="{{currentValues}}" wx:key="index" style="line-height: 50px">{{item}}</view>
+          </picker-view-column>
+        </picker-view>
+      </view>
+    </wow-popup>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  import activityApis from '../../api/activity'
+  import shareApis from '../../api/share'
+  import CommonMixin from '../../mixins/common'
+  import imageUtil from '../../utils/image'
+  export default class activity extends wepy.page {
+    data = {
+      userId: '',
+      spuId: '',
+      controlList: [],
+      activityData: '',
+      isShowForm: false,
+      indexs: [0],
+      currentValues: [],
+      currentIndex: 0,
+      verifyData: {},
+      imageContentWidth: '',
+      imageContentHeight: ''
+    }
+    mixins = [CommonMixin]
+    config = {
+      navigationBarTitleText: '',
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    onLoad ({spuId, title}) {
+      this.spuId = spuId
+      this.advDetail()
+    }
+    computed = {
+      controlHeight () {
+        let maxHeight = ''
+        wx.getSystemInfo({
+          success: function (res) {
+            let windowHeight = res.windowHeight
+            maxHeight = windowHeight - 30 - 12 - 18 - 24 - 26 - 38
+          }
+        })
+        return maxHeight
+      }
+    }
+    handleToActivity (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+      this.isShowForm = true
+      this.$apply()
+    }
+    async advDetail () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const opts = {
+          id: this.spuId
+        }
+        const { data } = await activityApis.detail(opts)
+        this.activityData = data
+        this.controlList = data.formInfo.controlList
+        this.controlList.forEach(item => {
+          this.verifyData = {
+            ...this.verifyData,
+            [item.controlKey]: item.title
+          }
+        })
+        wepy.$instance.globalData.subpub.on('activity', this.handleToActivity, this)
+        wx.setNavigationBarTitle({
+          title: decodeURIComponent(data.title)
+        })
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onShareAppMessage () {
+      const { id, title, content } = this.activityData
+      this.$wxpage.selectComponent('.wow_share').hide()
+      return {
+        title,
+        imageUrl: content,
+        path: 'pages/videoDetail/index?id=' + id
+      }
+    }
+    verification (formData) {
+      const errVaild = {
+        vaild: true,
+        msg: ''
+      }
+      /* eslint-disable */
+      const mailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
+      /* eslint-disable */
+      for (let key in formData) {
+        if (!formData[key]) {
+          errVaild.vaild = false
+          errVaild.msg = this.verifyData[key] + '不能为空'
+          return errVaild
+        }
+        if (key === 'phone' && !/^1\d{10}$/.test(formData[key])) {
+          errVaild.vaild = false
+          errVaild.msg = this.verifyData[key] + '格式错误'
+          return errVaild
+        }
+        if (key === 'email' && !mailReg.test(formData[key])) {
+          errVaild.vaild = false
+          errVaild.msg = this.verifyData[key] + '格式错误'
+          return errVaild
+        }
+      }
+      return errVaild
+    }
+    methods = {
+      handleLoadContent (e) {
+        const { width, height } = e.detail
+        let imageSize = imageUtil.imageZoomHeightUtil(width, height)
+        this.imageContentWidth = imageSize.imageWidth
+        this.imageContentHeight = imageSize.imageHeight
+      },
+      handleToSend () {
+        this.handleToActivity()
+      },
+      handleCloseForm () {
+        this.isShowForm = false
+      },
+      handleBindinput (index, e) {
+        const { value } = e.detail
+        this.controlList[index].value = value
+      },
+      async formSubmitSend (e) {
+        const formData = e.detail.value
+        const errVaild = this.verification(formData)
+        if (!errVaild.vaild) {
+          wx.showToast({
+            title: errVaild.msg,
+            icon: 'none'
+          })
+          return
+        }
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { activityData } = this
+          const content = []
+          for (let key in formData) {
+            content.push({
+              'key': key,
+              'value': formData[key]
+            })
+          }
+          const opts = {
+            id: activityData.formId, // 表单id
+            content // 表单内容(数组）
+          }
+          await activityApis.submit(opts)
+          // this.controlList.forEach(item => {
+          //   item.value = ''
+          // })
+          wx.switchTab({
+            url: '/pages/index/index',
+            success: function (e) {
+              let page = getCurrentPages().pop()
+              if (page === undefined || page === null) return
+              page.onLoad()
+            }
+          })
+          this.isShowForm = false
+          wx.hideLoading()
+          this.$apply()
+        } catch (e) {
+          console.log(e)
+          wx.hideLoading()
+        }
+      },
+      handleSelectedArea () {
+        this.controlList[this.currentIndex].value = this.currentValues[this.indexs.join('')]
+        let $popup = this.$wxpage.selectComponent('.j_select')
+        $popup && $popup.hide()
+      },
+      handleChangeArea (e) {
+        const { value } = e.detail
+        this.indexs = value
+      },
+      handleCancelArea () {
+        let $popup = this.$wxpage.selectComponent('.j_select')
+        $popup && $popup.hide()
+      },
+      handleShowPopup (item, index) {
+        if (item.controlType !== 2) return
+        this.currentIndex = index
+        this.currentValues = item.controlValues.split(',')
+        let $popup = this.$wxpage.selectComponent('.j_select')
+        $popup && $popup.show()
+      },
+      async handleSharePoster () {
+        try {
+          wx.showLoading({
+            title: '生成中',
+            mask: true
+          })
+          const { linkId, linkType } = this.activityData
+          const opts = {
+            type: 'activity',
+            id: this.spuId,
+            page: 'pages/detail/index',
+            scene: `id=${linkId}`
+          }
+          const { data } = await shareApis.createSharePoster(opts)
+          this.$wxpage.selectComponent('.wow_share').hide()
+          wx.previewImage({
+            current: data,
+            urls: [data]
+          })
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      handleShareItems () {
+        this.$wxpage.selectComponent('.wow_share').show()
+      },
+      handleShowCommetInput () {
+        wx.showToast({
+          title: '暂未开通此功能',
+          icon: 'none'
+        })
+      }
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+
+<style lang="postcss">
+@import 'src/styles/pages/activity/common.postcss';
+</style>

@@ -1,0 +1,634 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-order {{ list.length ? 'page-order__pb' : '' }}">
+    <view class="invoice-tip font-size--26">
+      <view class="invoice-tip__title">订单收货7天后，订单金额可开发票。</view>
+      <view>注：租赁打印机押金因2年后返还，开具押金单，不计入发票金额</view>
+    </view>
+    <view class="order-lists" wx:if="{{list.length}}">
+      <view class="order-lists-items">
+        <view class="section" wx:for="{{list}}" wx:key="{{idx}}" wx:for-item="item" wx:for-index="idx">
+          <view class="order-lists-items__item wow-flex"
+            wx:for="{{item.orderBOList}}" wx:key="{{index}}" wx:for-item="goodItem">
+            <image wx:if="{{item.invoiceStatus === 2}}" class="ico_invoiced" src='../../images/common/ico_Invoiced.png'></image>
+            <view class="section-label wow-flex is-justify-center is-align-middle" wx:if="{{ item.invoiceStatus === 0 }}" @tap.stop="handleCheckSingle({{goodItem}}, {{idx}}, {{index}})">
+              <view class="wow-radio radio-box font-size--26">
+                <lebel class="radio">
+                  <image hidden='{{!goodItem.checked}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                </lebel>
+              </view>
+            </view>
+            <view class="section-label" wx:else></view>
+            <view class="wow-background-image order-img"
+              @tap.stop="handleApplying({{ item }})"
+              style="background-image: url({{goodItem.image}})"></view>
+            <view class="order-info" @tap.stop="handleApplying({{ item }})">
+              <view class="order-info__title font-size--26">
+                <wow-elip line="2">{{goodItem.title}}</wow-elip>
+              </view>
+              <view class="order-info__sku font-size--24">
+                <wow-elip line="1">{{commonwxs.specStr(goodItem)}}</wow-elip>
+              </view>
+              <view class="order-info__bootom wow-flex is-justify-space-between is-align-middle">
+                <view class="color-price font-size--28"><text class="font-size--22">￥</text>{{goodItem.price}}</view>
+                <view class="font-size--24 num">数量 {{goodItem.num}}</view>
+              </view>
+            </view>
+          </view>
+          <view class="order-lists-items__status font-size--28 wow-flex is-align-middle {{ item.invoiceType === 2 && item.invoiceStatus === 2 ? 'is-justify-end' : 'is-justify-space-between'}}">
+            <view class="pay-tips font-size--24" wx:if="{{item.invoiceStatus === 0}}">可开发票金额</view>
+            <view class="order-btn order-btn__logistics" @tap.stop="handleApplying({{ item }})" wx:elif="{{item.invoiceStatus === 1}}">申请中</view>
+            <view class="wow-flex" wx:elif="{{item.invoiceStatus === 2 && item.invoiceType !== 2}}">
+              <view class="order-btn order-btn__logistics" @tap.stop="handleOpenDocument({{item.invoiceVO.imageUrl}})">查看发票</view>
+              <view class="order-btn order-btn__logistics" @tap.stop="handleOpenMail({{item.invoiceVO}})">发邮箱</view>
+            </view>
+            <view class="order-btn order-btn__logistics" @tap.stop="handleApplying({{ item }})" wx:elif="{{item.invoiceStatus === 3}}">已拒绝</view>
+            <view class="wow-flex is-align-middle font-size--26"><text class="font-size--24">￥</text>{{ item.totalFee }}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="footer wow-clearfix">
+        <view class="wow-fl-l wow-flex is-align-middle footer-label" @tap.stop="handleCheckAll">
+          <view class="wow-radio radio-box font-size--26">
+            <lebel class="radio">
+              <image hidden='{{!isCheckAll}}' class="ico_selected" src='../../images/common/ico_selected.png'></image>
+            </lebel>全选
+          </view>
+        </view>
+        <view class="wow-fl-l font-size--26 color-price footer-price">合计<text class="font-size--30">￥{{totalFee}}</text></view>
+        <view class="wow-fl-r font-size--26" @tap.stop="handleOpenSilder">
+          <view class="pay-btn font-color-white" :class="{'btn-disabled': !isDisabled}">去申请</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="order-empty" wx:else>
+      <image class="icon" src="../../images/order/ico_OrderList_default.png" mode="aspectFill"></image>
+      <view class="font-size--26">您还没有可以开票的订单哦~</view>
+    </view>
+
+    <!-- 发邮件 -->
+    <wow-popup class="wow_email" show-close="false" full="false" border-radius="28px">
+      <view class="email-box font-size--28">
+        <form bindsubmit="formSubmitSend">
+          <input type="text" class="email-box__item" value="{{ sendEmail }}" name="email" placeholder="请填写接收的邮箱">
+          <view class="email-box__btn wow-flex">
+            <view class="email-btn btn-canel" @tap.stop="handleCloseEmail">取消</view>
+            <button class="email-btn btn-send font-size--28" form-type="submit">发送</button>
+          </view>
+        </form>
+      </view>
+    </wow-popup>
+
+    <view class="float-box {{isSilder ? 'isRuleShow' : 'isRuleHide'}}" catchtouchmove="true">
+      <view class="float-box-mask" @tap.stop="handleClosePopup"></view>
+      <view class="float-box-wrap float-box-right">
+        <view class="animation-element">
+          <form bindsubmit="handleToSubmit">
+          <scroll-view scroll-y="true" class="float-box-scroll" style="max-height: {{slideHeight}}px">
+            <view class="invoice-status font-size--26 wow-flex is-justify-center" wx:if="{{ invoiceTag[currentInvoice.applicationStatus] }}">
+              <view>{{invoiceTag[currentInvoice.applicationStatus]}}</view>
+              <view wx:if="{{ currentInvoice.remark }}">{{ currentInvoice.remark }}</view>
+            </view>
+            <view class="invoice-form">
+              <view class="title font-size--28">发票</view>
+              <view class="invoice-form__item">
+                <view class="title-label font-size--28">发票类型</view>
+                <view class="items font-size--24 wow-flex">
+                  <view class="item" :class="{'active': type === 1}" @tap.stop="handleToggleType({{1}})">电子普通发票</view>
+                  <view class="item" :class="{'active': type === 2}" @tap.stop="handleToggleType({{2}})">增值税专用发票</view>
+                </view>
+              </view>
+              <block wx:if="{{type === 1}}">
+                <view class="invoice-form__item">
+                  <view class="title-label font-size--28">发票抬头</view>
+                  <view class="items font-size--24 wow-flex">
+                    <view class="item" :class="{'active': rise === 0}" @tap.stop="handleToggleRise({{0}})">个人</view>
+                    <view class="item" :class="{'active': rise === 1}" @tap.stop="handleToggleRise({{1}})">单位</view>
+                  </view>
+                </view>
+                <view class="invoice-form__item">
+                  <view class="title-label font-size--28">收票人信息</view>
+                  <view class="control font-size--24">
+                    <block wx:if="{{ rise === 0 }}">
+                      <input type="number" class="control-item" value="{{ currentInvoice.phone }}" name="phone" placeholder="请输入收票人手机" disabled="{{isDisabledStatus}}">
+                      <input type="text" class="control-item" value="{{ currentInvoice.email }}" name="email" placeholder="请输入接收电子发票邮件" disabled="{{isDisabledStatus}}">
+                    </block>
+                    <block wx:else>
+                      <input type="text" class="control-item" value="{{ currentInvoice.company }}" name="company" placeholder="请填写单位名称" disabled="{{isDisabledStatus}}">
+                      <input type="text" class="control-item" value="{{ currentInvoice.identificationNumber }}" name="identificationNumber" disabled="{{isDisabledStatus}}" placeholder="请填写纳税人识别号">
+                      <input type="text" class="control-item" value="{{ currentInvoice.email }}" name="email" placeholder="请填写接收发票邮箱" disabled="{{isDisabledStatus}}">
+                    </block>
+                  </view>
+                </view>
+                <view class="invoice-form__item">
+                  <view class="title-label font-size--28">发票内容</view>
+                  <view class="items font-size--24 wow-flex">
+                    <view class="item active">商品明细</view>
+                  </view>
+                </view>
+              </block>
+              <block wx:else>
+                <view class="invoice-form__item">
+                  <view class="title-label title-item wow-flex is-justify-space-between font-size--28">
+                    <view>开票信息</view>
+                    <view class="wow-radio radio-box font-size--26 book" @tap="handleToAffirm">
+                      <lebel class="radio">
+                        <image hidden="{{!isCheckAffirm}}" class="ico_selected" src='../../images/common/ico_selected.png'></image>
+                      </lebel><text class="book" @tap.stop="handleToWeb">已读《增票资质确认书》</text>
+                    </view>
+                  </view>
+                  <view class="control font-size--24">
+                    <input type="text" class="control-item" value="{{ currentInvoice.company }}" name="company" placeholder="请填写单位名称" disabled="{{isDisabledStatus}}">
+                    <input type="text" class="control-item" value="{{ currentInvoice.identificationNumber }}" name="identificationNumber" placeholder="请填写纳税人识别号" disabled="{{isDisabledStatus}}">
+                    <input type="text" class="control-item" value="{{ currentInvoice.bankName }}" name="bankName" placeholder="请填写开户行名称" disabled="{{isDisabledStatus}}">
+                    <input type="text" class="control-item" value="{{ currentInvoice.bankAccount }}" name="bankAccount" placeholder="请填写开户银行账号" disabled="{{isDisabledStatus}}">
+                    <input type="text" class="control-item" value="{{ currentInvoice.phone }}" name="phone" placeholder="请填写电话" disabled="{{isDisabledStatus}}">
+                    <input type="text" class="control-item" value="{{ currentInvoice.address }}" name="address" placeholder="请填写地址" disabled="{{isDisabledStatus}}">
+                  </view>
+                </view>
+                <view class="invoice-form__item">
+                  <view class="title-label font-size--28">发票内容</view>
+                  <view class="items font-size--24 wow-flex">
+                    <view class="item active">商品明细</view>
+                  </view>
+                </view>
+                <view class="invoice-form__item">
+                  <view class="title-label font-size--28">收票地址</view>
+                  <view @tap.stop="handleToAddress">
+                    <view class="invoice-info font-size--26">{{ currentInvoice.addressName }}<text class="wow-ml-30">{{ currentInvoice.addressPhone }}</text></view>
+                    <view class="invoice-address font-size--26">
+                      <!-- <view class="default" wx:if="{{ currentInvoice.isDefault === 0 }}">默认</view> -->
+                      <view class="address-detail"><wow-elip line="2">{{ currentInvoice.addressDetail }}</wow-elip></view>
+                      <image class="arrow" src="../../images/common/arrow.png" mode="aspectFill"></image>
+                    </view>
+                  </view>
+                </view>
+                <view class="invoice-form__item">
+                  <view class="title-label font-size--28">快递费</view>
+                  <view class="items font-size--24 wow-flex">
+                    <view class="item" :class="{'active': shippingType === 0}" @tap.stop="handleToggleShipping({{0}})">顺丰到付</view>
+                    <view class="item" :class="{'active': shippingType === 1}" @tap.stop="handleToggleShipping({{1}})">在线支付20元</view>
+                  </view>
+                </view>
+              </block>
+            </view>
+          </scroll-view>
+          <view class="btn-wrap">
+            <button class="btn font-size--26" form-type="submit" :class="{'btn-disabled': isDisabledStatus}">确定</button>
+          </view>
+        </form>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import orderApis from '../../api/order'
+  import invoiceApis from '../../api/invoice'
+  import commonwxs from './wxs/common.wxs'
+  import wxutils from '../../utils/wxutils'
+  import { accAdd } from '../../utils/arithmetic'
+  import addressApis from '../../api/address'
+  import isEmpty from '../../utils/isEmpty'
+  export default class InvoiceList extends wepy.page {
+    config = {
+      navigationBarTitleText: '申请发票',
+      usingComponents: {
+        'wow-radio': '../../packages/radio/index',
+        'wow-elip': '../../packages/elip/index',
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    data = {
+      userId: '',
+      list: [],
+      isCheckAll: false,
+      isSilder: false,
+      orderNo: [],
+      currentInvoice: {},
+      invoiceTag: {
+        1: '申请中',
+        3: '已拒绝'
+      },
+      type: 1, // 普通，增值
+      rise: 0, // 发票抬头个人和单位
+      shippingType: 0, // 物流
+      webView: 'https://api.gdlwzn.com/LeasingAgreement.html',
+      sendEmail: '',
+      pdfFile: '',
+      isCheckAffirm: false
+    }
+    wxs = {
+      commonwxs: commonwxs
+    }
+    watch = {
+      type (val) {
+        if (val === 2 && isEmpty(this.currentInvoice)) { // 增值税
+          this.getAddressList()
+        }
+      }
+    }
+    pickedAddress (item) {
+      const {recipient, phone, address, addressDetail} = item
+      this.currentInvoice.addressName = recipient
+      this.currentInvoice.addressPhone = phone
+      this.currentInvoice.addressDetail = address + addressDetail
+    }
+    async getAddressList () {
+      try {
+        const { data } = await addressApis.getAddress({id: this.userId})
+        let currentAddress = data.filter(item => item.isDefault === 0)[0]
+        const { recipient, phone, address, addressDetail } = currentAddress
+        this.currentInvoice.addressName = recipient
+        this.currentInvoice.addressPhone = phone
+        this.currentInvoice.addressDetail = address + addressDetail
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async invoiceList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { data } = await orderApis.listInvoiceOrder()
+        data.forEach(item => {
+          if (item.invoiceStatus === 0) {
+            item.orderBOList.forEach(_item => {
+              _item.checked = false
+            })
+          }
+        })
+        this.list = data
+        wepy.$instance.globalData.subpub.on('afterPickedAddress', this.pickedAddress, this)
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onLoad () {
+      this.userId = wepy.$instance.globalData.userId
+      this.invoiceList()
+    }
+    computed = {
+      isDisabledStatus () { // 申请中禁止输入
+        return !isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus === 1
+      },
+      slideHeight () {
+        let maxHeight = ''
+        wx.getSystemInfo({
+          success: function (res) {
+            let windowHeight = res.windowHeight
+            maxHeight = windowHeight - 12 - 30 - 36
+          }
+        })
+        return maxHeight
+      },
+      totalFee () {
+        let sum = 0
+        this.list.length && this.list.forEach(item => {
+          if (item.orderBOList[0].checked) {
+            sum = accAdd(sum, item.totalFee)
+          }
+        })
+        return sum || '0.00'
+      },
+      isDisabled () {
+        return this.list.length && this.list.some(item => {
+          return item.orderBOList.some(_item => _item.checked)
+        })
+      }
+    }
+    getOrderNo () {
+      let orderNo = []
+      this.list.forEach(item => {
+        item.orderBOList.forEach(_item => {
+          if (_item.checked) {
+            orderNo.push(item.orderNo)
+          }
+        })
+      })
+      return orderNo
+    }
+    verification (verifyData) {
+      const { phone, email, company, identificationNumber, bankName, bankAccount, address } = verifyData
+      const { rise, type } = this
+      const errVaild = {
+        vaild: true,
+        msg: ''
+      }
+      /* eslint-disable */
+      const mailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
+      /* eslint-disable */
+      if (type === 1 && rise === 0) { // 电子个人
+        if (!phone) {
+          errVaild.vaild = false
+          errVaild.msg = '手机号码不能为空'
+          return errVaild
+        } else if (!/^1\d{10}$/.test(phone)) {
+          errVaild.vaild = false
+          errVaild.msg = '手机号码格式有误'
+          return errVaild
+        }
+        if (!email) {
+          errVaild.vaild = false
+          errVaild.msg = '邮箱不能为空'
+          return errVaild
+        } else if (!mailReg.test(email)) {
+          errVaild.vaild = false
+          errVaild.msg = '邮箱格式有误'
+          return errVaild
+        }
+      } else if (type === 1 && rise === 1) { // 电子单位
+        if (!company) {
+          errVaild.vaild = false
+          errVaild.msg = '单位名称不能为空'
+          return errVaild
+        }
+        if (!identificationNumber) {
+          errVaild.vaild = false
+          errVaild.msg = '纳税人识别号不能为空'
+          return errVaild
+        }
+      } else {
+        if (!company) {
+          errVaild.vaild = false
+          errVaild.msg = '单位名称不能为空'
+          return errVaild
+        }
+        if (!identificationNumber) {
+          errVaild.vaild = false
+          errVaild.msg = '纳税人识别号不能为空'
+          return errVaild
+        }
+        if (!bankName) {
+          errVaild.vaild = false
+          errVaild.msg = '开户行名称不能为空'
+          return errVaild
+        }
+        if (!bankAccount) {
+          errVaild.vaild = false
+          errVaild.msg = '开户银行账号不能为空'
+          return errVaild
+        }
+        if (!phone) {
+          errVaild.vaild = false
+          errVaild.msg = '电话不能为空'
+          return errVaild
+        }
+        if (!address) {
+          errVaild.vaild = false
+          errVaild.msg = '地址不能为空'
+          return errVaild
+        }
+      }
+      return errVaild
+    }
+    verificationMail (formData) {
+      const { email } = formData
+      /* eslint-disable */
+      const mailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
+      /* eslint-disable */
+      const errVaild = {
+        vaild: true,
+        msg: ''
+      }
+      if (!email) {
+        errVaild.vaild = false
+        errVaild.msg = '邮箱不能为空'
+        return errVaild
+      }
+      if (!mailReg.test(email)) {
+        errVaild.vaild = false
+        errVaild.msg = '邮箱格式错误'
+        return errVaild
+      }
+      return errVaild
+    }
+    methods = {
+      handleToAffirm () {
+        this.isCheckAffirm = !this.isCheckAffirm
+      },
+      handleOpenDocument (pdfFile) {
+        wx.showLoading({
+          title: '打开中',
+          mask: true
+        })
+        wx.downloadFile({
+          url: pdfFile,
+          success: function (res) {
+            const filePath = res.tempFilePath
+            wx.openDocument({
+              filePath: filePath,
+              success: function (res) {
+                wx.hideLoading()
+              }
+            })
+          }
+        })
+      },
+      handleOpenMail (invoiceVO) {
+        const { email, imageUrl } = invoiceVO
+        this.sendEmail = email
+        this.pdfFile = imageUrl
+        this.$wxpage.selectComponent('.wow_email').show()
+      },
+      handleCloseEmail () {
+        this.$wxpage.selectComponent('.wow_email').hide()
+      },
+      async formSubmitSend (e) {
+        const formData = e.detail.value
+        const errVaild = this.verificationMail(formData)
+        if (!errVaild.vaild) {
+          wx.showToast({
+            title: errVaild.msg,
+            icon: 'none'
+          })
+          return
+        }
+        try {
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const opts = {
+            email: formData.email,
+            imageUrl: this.pdfFile
+          }
+          await invoiceApis.sendAttachmentMail(opts)
+          this.$wxpage.selectComponent('.wow_email').hide()
+          wx.hideLoading()
+          wx.nextTick(() => {
+            wx.showToast({
+              title: '发送已成功',
+              icon: 'none',
+              success: function () {
+                setTimeout(() => {
+                  wx.hideToast()
+                }, 200)
+              }
+            })
+          })
+        } catch (e) {
+          console.log(e)
+          wx.hideLoading()
+        }
+      },
+      handleToWeb () {
+        wxutils.backOrNavigate('/pages/webView/index?webUrl=' + encodeURIComponent(this.webView))
+      },
+      handleToAddress () {
+        wxutils.backOrNavigate('/pages/address/index')
+      },
+      handleApplying (item) {
+        if (item.invoiceStatus === 1 || item.invoiceType === 3) {
+          this.currentInvoice = item.invoiceVO
+          this.type = item.invoiceVO.invoiceType
+          this.rise = item.invoiceVO.invoiceRise
+          this.shippingType = item.invoiceVO.shippingType
+          this.orderNo = [item.orderNo]
+          this.isSilder = true
+          this.isCheckAffirm = true
+        } else if (item.invoiceStatus === 2 && item.invoiceType === 2) { // 增值税成功
+          wxutils.backOrNavigate(`/pages/logistics/index?expCode=${item.logisticsCode}&expNo=${item.logisticsNo}`)
+        }
+      },
+      async handleToSubmit (e) {
+        try {
+          if (this.type === 2 && !this.isCheckAffirm) {
+            wx.showModal({
+              title: '提示',
+              content: '请勾选已阅增票资质确认书',
+              showCancel: false
+            })
+            return
+          }
+          let verifyData = e.detail.value
+          const errVaild = this.verification(verifyData)
+          if (!errVaild.vaild) {
+            wx.showToast({
+              title: errVaild.msg,
+              icon: 'none'
+            })
+            return
+          }
+          wx.showLoading({
+            title: '加载中',
+            mask: true
+          })
+          const { phone, email, company, identificationNumber, bankName, bankAccount, address } = verifyData
+          const { rise, type, orderNo, currentInvoice, shippingType } = this
+          const opts = {
+            applicationStatus: 1,
+            invoiceContent: 0, // 商品明细
+            invoiceRise: rise,
+            invoiceType: type,
+            orderNo
+          }
+          if (rise === 0 && type === 1) { // 个人普通
+            opts.email = email
+            opts.phone = phone
+          } else if (rise === 1 && type === 1) { // 企业普通
+            opts.company = company
+            opts.identificationNumber = identificationNumber
+            opts.email = email
+          } else { // 增值
+            opts.company = company
+            opts.identificationNumber = identificationNumber
+            opts.bankName = bankName
+            opts.bankAccount = bankAccount
+            opts.bankName = bankName
+            opts.phone = phone
+            opts.addressDetail = currentInvoice.addressDetail
+            opts.address = address
+            opts.addressName = currentInvoice.addressName
+            opts.addressPhone = currentInvoice.addressPhone
+            opts.shippingType = shippingType
+          }
+          const { data } = await invoiceApis.wxInsertInvoice(opts)
+          if (shippingType === 1) {
+            wxutils.wxPay(data).then(() => {
+              this.invoiceList()
+            })
+          } else {
+            this.invoiceList()
+          }
+          this.isSilder = false
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+          wx.hideLoading()
+        }
+      },
+      handleToggleShipping (type) { // 运费
+        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus) {
+          return this.currentInvoice.applicationStatus === 1
+        }
+        this.shippingType = type
+      },
+      handleToggleType (type) { // 增值税 : 电子
+        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus) {
+          return this.currentInvoice.applicationStatus === 1
+        }
+        this.type = type
+      },
+      handleToggleRise (rise) { // 单位 : 个人
+        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus) {
+          return this.currentInvoice.applicationStatus === 1
+        }
+        this.rise = rise
+      },
+      handleOpenSilder () {
+        if (!this.isDisabled) return
+        this.isSilder = true
+        this.isCheckAffirm = false
+        this.currentInvoice = {}
+      },
+      handleClosePopup () {
+        this.isSilder = false
+      },
+      handleCheckSingle (goodItem, idx, index) { // 单选
+        if (this.list[idx].orderBOList.length) {
+          this.list[idx].orderBOList.forEach((item, _index) => {
+            item.checked = !goodItem.checked
+          })
+        }
+        const arr = this.list.filter(item => item.invoiceStatus === 0)
+        this.isCheckAll = arr.every(item => {
+          return item.orderBOList.every(_item => _item.checked)
+        })
+        this.orderNo = this.getOrderNo()
+      },
+      handleCheckAll () {
+        this.isCheckAll = !this.isCheckAll
+        this.list.forEach(item => { // 全选
+          if (item.invoiceStatus === 0) {
+            item.orderBOList.forEach(_item => {
+              _item.checked = this.isCheckAll
+            })
+          }
+        })
+        this.orderNo = this.getOrderNo()
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/invoiceList/common.postcss';
+</style>

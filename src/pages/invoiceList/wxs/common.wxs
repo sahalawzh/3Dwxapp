@@ -1,0 +1,5 @@
+module.exports = {
+  specStr: function (item) {
+    return item.spec + (item.isPackage === 1 ? '，礼盒包装' : '') + (item.card_text ? '，item.card_text' : '')
+  }
+}

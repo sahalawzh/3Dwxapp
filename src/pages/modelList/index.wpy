@@ -42,7 +42,6 @@
     }
     data = {
       lists: [],
-      firstModelTypeId: '',
       secondModelTypeId: '',
       start: 1,
       limits: 20,
@@ -58,9 +57,8 @@
           title: '加载中',
           mask: true
         })
-        let { firstModelTypeId, secondModelTypeId, start, limits, lists } = this
+        let { secondModelTypeId, start, limits, lists } = this
         const opts = {
-          firstModelTypeId,
           secondModelTypeId,
           start,
           limits
@@ -84,8 +82,7 @@
       }
     }
     onLoad (options) {
-      const { name, firstModelTypeId, secondModelTypeId } = options
-      this.firstModelTypeId = firstModelTypeId
+      const { name, secondModelTypeId } = options
       this.secondModelTypeId = secondModelTypeId
       wx.setNavigationBarTitle({
         title: decodeURIComponent(name)

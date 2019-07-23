@@ -129,13 +129,6 @@
       </view>
     </wow-popup>
 
-    <!-- 分享 -->
-    <wow-popup class="wow_poster" componentTheme="light" show-close="false">
-      <view class="poster-box">
-        <poster :posterInfo.sync="info" :id.sync="id"></poster>
-      </view>
-    </wow-popup>
-
   </view>
 </template>
 
@@ -148,7 +141,6 @@
   import Commet from '../../components/commet'
   import CommonMixin from '../../mixins/common'
   import { timeHandle } from '../../utils/commentTimeHandle'
-  import Poster from './modules/poster'
   import { parseQueryString } from '../../utils/utils'
   export default class VideoDetail extends wepy.page {
     config = {
@@ -160,8 +152,7 @@
     }
     mixins = [CommonMixin]
     components = {
-      commet: Commet,
-      poster: Poster
+      commet: Commet
     }
     data = {
       id: '',
@@ -280,7 +271,7 @@
     }
     onShareAppMessage () {
       const { id, info } = this
-      this.$wxpage.selectComponent('.wow_poster').hide()
+      this.$wxpage.selectComponent('.wow_share').hide()
       this.getShareNum()
       return {
         title: info.title,

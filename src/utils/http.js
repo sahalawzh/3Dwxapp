@@ -179,12 +179,13 @@ export default class http {
    * 判断请求是否成功
    */
   static isSuccess (res) {
-    const wxCode = res.statusCode
+    console.log(res)
+    const wxCode = res.data.status
     // 微信请求错误
-    if (wxCode !== 200) {
-      return false
-    }
-    const wxData = res.data && !res.data.code
+    // if (wxCode !== 200) {
+    //   return false
+    // }
+    const wxData = wxCode && wxCode === 200 ? res.data : res
     return wxData
   }
   /**
