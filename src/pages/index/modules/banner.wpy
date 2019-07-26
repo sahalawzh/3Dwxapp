@@ -11,16 +11,15 @@
       next-margin="{{swiperOptions.nextMargin}}"
       previous-margin="{{swiperOptions.previousMargin}}"
       circular="{{swiperOptions.circular}}">
-        <swiper-item wx:for="{{bannerAdv}}" wx:key="item" class="swiper-item">
-          <navigator url="/pages/detail/index?id={{item.spuId}}">
-            <view style="background-image: url('{{item.image}}')" class="swiper-bg"></view>
-          </navigator>
+        <swiper-item wx:for="{{bannerAdv}}" wx:key="item" class="swiper-item" @tap.stop="handleToDetail({{item}})">
+          <view style="background-image: url('{{item.image}}')" class="swiper-bg"></view>
         </swiper-item>
     </swiper>
   </view>
 </template>
 <script>
   import wepy from 'wepy'
+  import wxutils from '../../../utils/wxutils'
   export default class Banner extends wepy.component {
     props = {
       bannerAdv: [Object, Array]
@@ -44,6 +43,11 @@
     }
 
     methods = {
+      handleToDetail (item) {
+        const { spuId, linkId, marketingType } = item
+        let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
+        wxutils.backOrNavigate(link)
+      },
       swiperChange (e) {
         let index = e.detail.current
         this.current = index

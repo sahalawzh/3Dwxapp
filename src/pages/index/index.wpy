@@ -2,9 +2,9 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-index">
 
-    <navigator wx:if="{{bannerAdv}}" url="/pages/detail/index?id={{bannerAdv.spuId}}" class="page-index__advertising">
+    <view wx:if="{{bannerAdv}}" @tap.stop="handleGoAdv({{bannerAdv}})" class="page-index__advertising">
       <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
-    </navigator>
+    </view>
 
     <view class="page-index__position">
       <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-icon open-type-btn">
@@ -30,7 +30,7 @@
 
     <view class="adv-float" catchtouchmove="true" wx:if="{{floatAdv && isShowFloatAdv && !stage}}">
       <view class="adv-mask"></view>
-      <image src="{{floatAdv.image}}" @tap.stop="handleGoAdv" class="adv-img" mode="aspectFill"></image>
+      <image src="{{floatAdv.image}}" @tap.stop="handleGoAdv({{floatAdv}})" class="adv-img" mode="aspectFill"></image>
       <icon type="cancel" size="24" color="#fff" class="adv-close" @tap.stop="handleCloseAdv"/>
     </view>
 
@@ -162,9 +162,11 @@
       this.$apply()
     }
     methods = {
-      handleGoAdv () {
-        const { spuId } = this.floatAdv
-        wxutils.backOrNavigate(`/pages/activity/index?spuId=${spuId}`)
+      handleGoAdv (item) {
+        const { spuId, linkId, marketingType } = item
+        let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
+        wxutils.backOrNavigate(link)
+        this.isShowFloatAdv = false
       },
       handleCloseAdv () {
         this.isShowFloatAdv = false

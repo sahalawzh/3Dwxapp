@@ -3,6 +3,9 @@
     <view class="activity-banner">
       <image class="icon-banner" src="{{ activityData.imageUrl }}" mode="aspectFill"></image>
     </view>
+    <navigator url="/pages/index/mall" hover-class="none" open-type="switchTab" class="icon-mall">
+      <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
+    </navigator>
     <view class="activity-section">
       <image class="icon-section" bindload="handleLoadContent" style="width: {{imageContentWidth}}px; height: {{imageContentHeight}}px" src="{{ activityData.content }}" mode="aspectFill"></image>
     </view>
@@ -91,10 +94,11 @@
   import shareApis from '../../api/share'
   import CommonMixin from '../../mixins/common'
   import imageUtil from '../../utils/image'
+  import { parseQueryString } from '../../utils/utils'
   export default class activity extends wepy.page {
     data = {
       userId: '',
-      spuId: '',
+      linkId: '',
       controlList: [],
       activityData: '',
       isShowForm: false,
@@ -112,8 +116,13 @@
         'wow-popup': '../../packages/popup/index'
       }
     }
-    onLoad ({spuId, title}) {
-      this.spuId = spuId
+    onLoad (options) {
+      if (options.scene) {
+        let sceneObj = decodeURIComponent(options.scene)
+        let urlObj = 'url?' + sceneObj
+        options = parseQueryString(urlObj)
+      }
+      this.linkId = options.linkId
       this.advDetail()
     }
     computed = {
@@ -141,7 +150,7 @@
           mask: true
         })
         const opts = {
-          id: this.spuId
+          id: this.linkId
         }
         const { data } = await activityApis.detail(opts)
         this.activityData = data
@@ -164,12 +173,12 @@
       }
     }
     onShareAppMessage () {
-      const { id, title, content } = this.activityData
+      const { title, imageUrl } = this.activityData
       this.$wxpage.selectComponent('.wow_share').hide()
       return {
         title,
-        imageUrl: content,
-        path: 'pages/videoDetail/index?id=' + id
+        imageUrl: imageUrl,
+        path: 'pages/activity/index?linkId=' + this.linkId
       }
     }
     verification (formData) {
@@ -244,19 +253,21 @@
             content // 表单内容(数组）
           }
           await activityApis.submit(opts)
-          // this.controlList.forEach(item => {
-          //   item.value = ''
-          // })
-          wx.switchTab({
-            url: '/pages/index/index',
-            success: function (e) {
-              let page = getCurrentPages().pop()
-              if (page === undefined || page === null) return
-              page.onLoad()
-            }
+          wx.hideLoading()
+          this.controlList.forEach(item => {
+            item.value = ''
           })
           this.isShowForm = false
-          wx.hideLoading()
+          wx.nextTick(() => {
+            wx.showToast({
+              title: '提交成功',
+              success: function () {
+                setTimeout(() => {
+                  wx.hideToast()
+                }, 200)
+              }
+            })
+          })
           this.$apply()
         } catch (e) {
           console.log(e)
@@ -292,9 +303,9 @@
           const { linkId, linkType } = this.activityData
           const opts = {
             type: 'activity',
-            id: this.spuId,
-            page: 'pages/detail/index',
-            scene: `id=${linkId}`
+            id: this.linkId,
+            page: 'pages/activity/index',
+            scene: `linkId=${linkId}`
           }
           const { data } = await shareApis.createSharePoster(opts)
           this.$wxpage.selectComponent('.wow_share').hide()
@@ -314,7 +325,7 @@
       },
       handleShowCommetInput () {
         wx.showToast({
-          title: '暂未开通此功能',
+          title: '抱歉，暂未开通此功能',
           icon: 'none'
         })
       }

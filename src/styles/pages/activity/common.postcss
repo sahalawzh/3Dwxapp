@@ -1,5 +1,16 @@
 .page-activity {
   background-color: #f0f2f7;
+  .icon-mall {
+    position: absolute;
+    top: 24rpx;
+    right: 48rpx;
+    width: 54rpx;
+    height: 54rpx;
+    .icon {
+      width: 100%;
+      height: 100%;
+    }
+  }
   .controls {
     position: fixed;
     left: 46rpx;
@@ -36,6 +47,9 @@
       padding: 30rpx 0;
       text-align: center;
       color: #4a4a4a;
+      button {
+        color: #4a4a4a;
+      }
       &:not(:last-child)::after{
         position: absolute;
         content: "";
@@ -55,12 +69,11 @@
   }
   .icon-banner {
     width: 100%;
-    height: 300rpx;
+    height: 632rpx;
   }
   .activity-section {
     background-color: #fff;
     margin-top: 16rpx;
-    padding: 18rpx 30rpx 0;
     .icon-section {
       position: relative;
       display: block;

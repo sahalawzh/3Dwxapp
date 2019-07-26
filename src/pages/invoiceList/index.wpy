@@ -35,9 +35,10 @@
               </view>
             </view>
           </view>
-          <view class="order-lists-items__status font-size--28 wow-flex is-align-middle {{ item.invoiceType === 2 && item.invoiceStatus === 2 ? 'is-justify-end' : 'is-justify-space-between'}}">
+          <view class="order-lists-items__status font-size--28 wow-flex is-align-middle is-justify-space-between">
             <view class="pay-tips font-size--24" wx:if="{{item.invoiceStatus === 0}}">可开发票金额</view>
             <view class="order-btn order-btn__logistics" @tap.stop="handleApplying({{ item }})" wx:elif="{{item.invoiceStatus === 1}}">申请中</view>
+            <view class="order-btn order-btn__logistics" @tap.stop="handleApplying({{ item }})" wx:elif="{{item.invoiceStatus === 2 && item.invoiceType === 2}}">查看物流</view>
             <view class="wow-flex" wx:elif="{{item.invoiceStatus === 2 && item.invoiceType !== 2}}">
               <view class="order-btn order-btn__logistics" @tap.stop="handleOpenDocument({{item.invoiceVO.imageUrl}})">查看发票</view>
               <view class="order-btn order-btn__logistics" @tap.stop="handleOpenMail({{item.invoiceVO}})">发邮箱</view>
@@ -217,7 +218,7 @@
       type: 1, // 普通，增值
       rise: 0, // 发票抬头个人和单位
       shippingType: 0, // 物流
-      webView: 'https://api.gdlwzn.com/LeasingAgreement.html',
+      webView: 'https://api.gdlwzn.com/Confirmation.html',
       sendEmail: '',
       pdfFile: '',
       isCheckAffirm: false
@@ -227,7 +228,7 @@
     }
     watch = {
       type (val) {
-        if (val === 2 && isEmpty(this.currentInvoice)) { // 增值税
+        if (val === 2) { // 增值税
           this.getAddressList()
         }
       }
@@ -490,16 +491,16 @@
         wxutils.backOrNavigate('/pages/address/index')
       },
       handleApplying (item) {
-        if (item.invoiceStatus === 1 || item.invoiceType === 3) {
+        if (item.invoiceStatus === 1 || item.invoiceStatus === 3) {
           this.currentInvoice = item.invoiceVO
           this.type = item.invoiceVO.invoiceType
           this.rise = item.invoiceVO.invoiceRise
           this.shippingType = item.invoiceVO.shippingType
           this.orderNo = [item.orderNo]
           this.isSilder = true
-          this.isCheckAffirm = true
+          this.isCheckAffirm = item.invoiceStatus === 3 && this.type === 1 ? false : true
         } else if (item.invoiceStatus === 2 && item.invoiceType === 2) { // 增值税成功
-          wxutils.backOrNavigate(`/pages/logistics/index?expCode=${item.logisticsCode}&expNo=${item.logisticsNo}`)
+          wxutils.backOrNavigate(`/pages/logistics/index?expCode=${item.invoiceVO.logisticsCode}&expNo=${item.invoiceVO.logisticsNo}`)
         }
       },
       async handleToSubmit (e) {
@@ -571,20 +572,20 @@
         }
       },
       handleToggleShipping (type) { // 运费
-        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus) {
-          return this.currentInvoice.applicationStatus === 1
+        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus === 1) {
+          return
         }
         this.shippingType = type
       },
       handleToggleType (type) { // 增值税 : 电子
-        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus) {
-          return this.currentInvoice.applicationStatus === 1
+        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus === 1) {
+          return
         }
         this.type = type
       },
       handleToggleRise (rise) { // 单位 : 个人
-        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus) {
-          return this.currentInvoice.applicationStatus === 1
+        if (!isEmpty(this.currentInvoice) && this.currentInvoice.applicationStatus === 1) {
+          return
         }
         this.rise = rise
       },

@@ -179,7 +179,6 @@ export default class http {
    * 判断请求是否成功
    */
   static isSuccess (res) {
-    console.log(res)
     const wxCode = res.data.status
     // 微信请求错误
     // if (wxCode !== 200) {
