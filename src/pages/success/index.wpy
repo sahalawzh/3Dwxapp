@@ -6,7 +6,7 @@
         <image class="icon" src="../../images/common/ico_Successfulpayment.png" mode="aspectFill"></image>
         <view class="font-size--40 text">支付成功</view>
       </view>
-      <view class="font-size--30 success-header__price">实付 ￥{{totalFee}}</view>
+      <view class="font-size--30 success-header__price">实付 ￥{{actualFee}}</view>
       <view class="success-header__btn wow-flex">
         <navigator url="/pages/index/mall" open-type="switchTab" class="success-btn font-size--26">返回首页</navigator>
         <navigator url="/pages/orderDetail/index?oid={{oid}}" class="success-btn font-size--26">查看订单</navigator>
@@ -66,7 +66,7 @@
         }
         const { data } = await orderApis.getPayMsg(opts)
         this.oid = data.oid
-        this.totalFee = data.totalFee
+        this.actualFee = data.actualFee
         wx.hideLoading()
         this.$apply()
       } catch (error) {
@@ -87,7 +87,7 @@
       lists: [],
       hasMoreData: false,
       oid: '',
-      totalFee: ''
+      actualFee: ''
     }
     onHide () {
     }

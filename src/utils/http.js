@@ -22,7 +22,7 @@ export default class http {
     return url === this.getConfig('loginUrl')
   }
 
-  static async authLogin (config, { url, authType }) {
+  static async authLogin (config, { url, authType, id }) {
     try {
       const {code} = await wepy.login()
       const data = {
@@ -52,7 +52,7 @@ export default class http {
       if (url) {
         wxutils.backOrNavigate(url)
       } else {
-        wepy.$instance.globalData.subpub.emit(authType, userId)
+        wepy.$instance.globalData.subpub.emit(authType, userId, id)
       }
     } catch (e) {
       console.log(e)
@@ -179,11 +179,12 @@ export default class http {
    * 判断请求是否成功
    */
   static isSuccess (res) {
-    const wxCode = res.data.status
+    const statusCode = res.statusCode // 旧接口
+    const wxCode = res.data.status // 新接口
     // 微信请求错误
-    // if (wxCode !== 200) {
-    //   return false
-    // }
+    if (statusCode !== 200 || wxCode && wxCode !== 200) {
+      return false
+    }
     const wxData = wxCode && wxCode === 200 ? res.data : res
     return wxData
   }

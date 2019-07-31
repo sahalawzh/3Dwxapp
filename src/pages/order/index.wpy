@@ -21,6 +21,10 @@
               </view>
             </view>
           </view>
+          <view class="order-lists-items__total font-size--28 wow-flex is-justify-space-between is-align-middle">
+            <view class="label">合计</view>
+            <view>￥{{item.actualFee}}</view>
+          </view>
           <view class="order-lists-items__status font-size--28 wow-flex is-justify-space-between is-align-middle">
             <block wx:if="{{item.orderStatus === 0}}">
               <!-- <image class="icon-status" src="../../images/order/ico_PendingPayment.png" mode="aspectFill"></image> -->

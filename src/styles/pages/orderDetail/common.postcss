@@ -250,8 +250,8 @@
     }
     &__total {
       position: relative;
-      height: 104rpx;
-      padding: 0 30rpx;
+      padding: 30rpx 40rpx 30rpx 32rpx;
+      color: #9a9a9a;
       &::after {
         position: absolute;
         content: "";
@@ -263,8 +263,18 @@
         background-color: #DEDEE4;
       }
       .label {
-        color: #373737;
-        font-weight: 600;
+        position: relative;
+        margin-bottom: 10rpx;
+        &-cont {
+          color: #373737;
+          font-weight: 600;
+        }
+        .actualFee {
+          position: absolute;
+          right: 0;
+          top: 0;
+          font-weight: 600;
+        }
       }
     }
     &__item {

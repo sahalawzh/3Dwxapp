@@ -11,7 +11,8 @@ export default class CommonMixin extends wepy.mixin {
     userId: '',
     authType: '',
     userInfo: wepy.$instance.globalData.userInfo || '',
-    target: ''
+    target: '',
+    id: ''
   }
   async getCartNum () { // 获取购物车数量
     const { data } = await cartApis.cartNum({userId: this.userId})
@@ -28,12 +29,12 @@ export default class CommonMixin extends wepy.mixin {
     }
   }
   async login () {
-    const { encryptedData, iv, url, authType } = this
+    const { encryptedData, iv, url, authType, id } = this
     const config = {
       encryptedData,
       iv
     }
-    await http.authLogin(config, { url, authType })
+    await http.authLogin(config, { url, authType, id })
   }
   async getUserInfo () {
     try {
@@ -70,10 +71,11 @@ export default class CommonMixin extends wepy.mixin {
     getPhoneNumber (e) {
       const { errMsg, encryptedData, iv } = e.detail
       if (errMsg === 'getPhoneNumber:ok') {
-        const { url, type } = e.target.dataset
+        const { url, type, id } = e.target.dataset
         this.url = url
         this.authType = type
         this.encryptedData = encryptedData
+        this.id = id
         this.iv = iv
         this.login()
       }

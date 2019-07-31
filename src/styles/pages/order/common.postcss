@@ -62,6 +62,24 @@
         }
       }
     }
+    &-items__total {
+      position: relative;
+      margin: 0 30rpx 0 40rpx;
+      padding: 30rpx 0;
+      &::after{
+        position: absolute;
+        content: "";
+        height: 1rpx;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+        transform: scaleY(0.5);
+        background-color: #ededed;
+      }
+      .label {
+        color: #4a4a4a;
+      }
+    }
     &-items__status {
       border-radius: 0 0 14rpx 14rpx;
       padding: 16rpx 30rpx 16rpx 40rpx;

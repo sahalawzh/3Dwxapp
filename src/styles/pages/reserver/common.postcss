@@ -177,8 +177,14 @@
     background-color: #fff;
     border-top: 1rpx solid #b7b7b7;
     &-info {
-      line-height: 72rpx;
       font-weight: 600;
+      &__line {
+        line-height: 72rpx;
+      }
+    }
+    .discount-price {
+      color: #494949;
+      margin-top: 8rpx;
     }
     .pay-btn {
       width: 272rpx;
@@ -187,6 +193,24 @@
       text-align: center;
       background-color: #135ee1;
       border-radius: 32rpx;
+    }
+  }
+  .item-card {
+    margin-top: 36rpx;
+    height: 82rpx;
+    padding: 0 30rpx 0 42rpx;
+    background-color: #fff;
+    border-radius: 18rpx;
+    .label {
+      color: #494949;
+    }
+    .value, .value-placeholder {
+      color: #888;
+      text-align: right;
+    }
+    .remark {
+      color: #9b9b9b;
+      text-align: right;
     }
   }
 }

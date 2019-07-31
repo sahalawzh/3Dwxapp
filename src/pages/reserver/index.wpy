@@ -53,14 +53,26 @@
 
         </view>
       </view>
+      <view class="wow-flex is-align-middle is-justify-space-between item-card" wx:if="{{isShow}}">
+        <view class="label font-size--26">优惠码</view>
+        <input type="text" class="value font-size--26" bindblur="handleDiscountPrice" placeholder-class="value-placeholder" placeholder="请输入优惠码">
+      </view>
+      <view class="wow-flex is-align-middle is-justify-space-between item-card">
+        <view class="label font-size--26">备注</view>
+        <input type="text" class="font-size--26 remark" bindblur="handleRemark" placeholder="请输入备注信息">
+      </view>
     </view>
 
     <view class="footer wow-clearfix">
-      <view class="wow-fl-l font-size--30 color-price footer-info">合计: ￥{{price}}</view>
+      <view class="wow-fl-l footer-info {{reducePrice ? '' : 'footer-info__line'}}">
+        <view class="color-price font-size--30">合计: ￥{{price}}</view>
+        <view class="font-size--26 discount-price" wx:if="{{reducePrice}}">优惠减: ￥{{reducePrice}}</view>
+      </view>
       <view class="wow-fl-r font-size--30">
         <view class="pay-btn font-color-white" @tap.stop="hanldeToPay">提交订单</view>
       </view>
     </view>
+
   </view>
 </template>
 
@@ -84,13 +96,16 @@
       addressVO: {},
       cartDetailList: [],
       price: '',
-      userId: ''
+      userId: '',
+      code: '',
+      reducePrice: 0,
+      remark: '',
+      isShow: false
     }
     wxs = {
       commonwxs: commonwxs
     }
     pickedAddress (item) {
-      console.log(item)
       const {recipient, phone, area, address, isDefault, addressDetail, id} = item
       this.addressVO = {
         recipient,
@@ -107,15 +122,22 @@
           title: '加载中',
           mask: true
         })
+        const { userId, cartId, code } = this
         const opts = {
-          userId: this.userId,
-          ids: this.cartId
+          userId,
+          ids: cartId
+        }
+        if (code) {
+          opts.code = code
         }
         const { data } = await goodsApi.settlement(opts)
-        this.addressVO = data.address
-        this.cartDetailList = data.cartDetailListVO
-        this.price = data.price
-        this.checks = data.checks
+        const { address, cartDetailListVO, isShow, actualPrice, checks, reducePrice } = data
+        this.addressVO = address
+        this.cartDetailList = cartDetailListVO
+        this.price = actualPrice
+        this.checks = checks
+        this.reducePrice = reducePrice
+        this.isShow = isShow === 1
         wepy.$instance.globalData.subpub.on('afterPickedAddress', this.pickedAddress, this)
         wx.hideLoading()
         this.$apply()
@@ -130,6 +152,17 @@
       this.settlement()
     }
     methods = {
+      handleRemark (e) {
+        const { value } = e.detail
+        this.remark = value
+      },
+      handleDiscountPrice (e) {
+        const { value } = e.detail
+        this.code = value
+        if (this.code) {
+          this.settlement()
+        }
+      },
       async hanldeToPay () {
         if (isEmpty(this.addressVO)) {
           wx.showModal({
@@ -144,12 +177,13 @@
             title: '提交订单',
             mask: true
           })
-          const { checks, addressVO, userId, cartId } = this
+          const { checks, addressVO, userId, cartId, remark } = this
           const opts = {
             userId,
             checks,
             addressId: addressVO.id,
-            ids: cartId
+            ids: cartId,
+            remark
           }
           const { data } = await orderApis.wxInsertOrder(opts)
           const { appId, nonceStr, package: packageId, paySign, signType, timeStamp, total_fee, Order } = data
@@ -163,12 +197,10 @@
             total_fee
           }
           wxutils.wxPay(payParam).then(function () {
-            console.log(Order)
             wx.redirectTo({
               url: '/pages/success/index?oid=' + Order.orderNum
             })
           }).catch(function (e) {
-            console.log(e)
             wx.redirectTo({
               url: '/pages/orderDetail/index?oid=' + Order.orderNum
             })

@@ -50,7 +50,7 @@
       navigationBarTitleText: '模型库'
     }
     data = {
-      isFist: true,
+      isFirst: true,
       activeIndex: 0,
       toView: '',
       list: [],
@@ -80,7 +80,7 @@
     async getModelList () {
       const res = await modelApis.listModelTypes()
       this.list = res
-      this.isFist = false
+      this.isFirst = false
       this.$apply()
     }
     onLoad () {
@@ -90,7 +90,7 @@
     onHide () {
     }
     onShow () {
-      if (!this.isFist) {
+      if (!this.isFirst) {
         this.getModelList()
       }
     }

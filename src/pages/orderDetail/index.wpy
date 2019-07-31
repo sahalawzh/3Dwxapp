@@ -101,9 +101,10 @@
         <view class="order-detailInfo__item font-size--26" wx:if="{{orderData.signTime && orderData.orderStatus !== 3}}">签收日期: {{orderData.signTime}}</view>
         <view class="font-size--26 copy" @tap.stop="handleToCopy({{orderData.orderNum}})">复制</view>
       </view>
-      <View class="order-detailInfo__total wow-flex is-align-middle is-justify-space-between">
-        <view class="label font-size--30">总计</view>
-        <view class="color-price font-size--30"><text class="font-size--24">￥</text>{{orderData.totalFee}}</view>
+      <View class="order-detailInfo__total">
+        <view class="label font-size--30"><text class="label-cont">总计</text><view wx:if="{{orderData.reduceFee}}" class="actualFee font-size--28 color-price"><text class="font-size--24">￥</text>{{orderData.actualFee}}</view></view>
+        <view class="font-size--26">原价：<text class="font-size--24">￥</text>{{orderData.totalFee}}</view>
+        <view class="font-size--26" wx:if="{{orderData.reduceFee}}">优惠减：<text class="font-size--24">￥</text>{{orderData.reduceFee}}</view>
       </View>
       <view class="order-detailInfo__footer wow-flex is-justify-space-between is-align-middle" wx:if="{{!refundDetail}}">
         <button class="wow-flex is-align-middle open-type-btn" open-type="contact">

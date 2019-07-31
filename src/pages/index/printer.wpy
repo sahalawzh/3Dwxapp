@@ -73,15 +73,15 @@
       <view wx:if="{{userId}}" class="font-size--24 printer-renew" @tap.stop="handleToScanPay">打印机续费（点此处扫描打印机上二维码）</view>
       <button wx:else data-type="scanpay" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--24 printer-renew open-type-btn">打印机续费（点此处扫描打印机上二维码）</button>
 
-      <view wx:if="{{userId}}" class="printer-content__module wow-flex is-align-middle is-justify-center" @tap.stop="handleToModel">
+      <view class="printer-content__module wow-flex is-align-middle is-justify-center" @tap.stop="handleToModel">
         <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
         <view class="font-size--36">模型库</view>
       </view>
 
-      <button wx:else data-url="/pages/model/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="printer-content__module open-type-btn wow-flex is-align-middle is-justify-center">
+      <!-- <button wx:else data-url="/pages/model/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="printer-content__module open-type-btn wow-flex is-align-middle is-justify-center">
         <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
         <view class="font-size--36">模型库</view>
-      </button>
+      </button> -->
     
       <view class="printer-content__videos">
         <view class="title wow-flex is-justify-space-between font-size--26">
