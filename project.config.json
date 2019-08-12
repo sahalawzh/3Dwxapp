@@ -62,10 +62,10 @@
 					"scene": null
 				},
 				{
-					"id": 1,
+					"id": 2,
 					"name": "活动页面",
 					"pathName": "pages/activity/index",
-					"query": "spuId=1&title=首页浮起",
+					"query": "linkId=1",
 					"scene": null
 				},
 				{
@@ -202,10 +202,10 @@
 					"scene": null
 				},
 				{
-					"id": 1,
+					"id": 22,
 					"name": "搜索",
 					"pathName": "pages/search/index",
-					"query": "",
+					"query": "form=index",
 					"scene": null
 				},
 				{

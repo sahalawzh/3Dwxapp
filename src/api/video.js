@@ -46,6 +46,32 @@ export default class video extends base {
    * 视频打印机商品
    */
   static getPrintByVideoId (opts) {
-    return this.get(`/api/video/getPrintByVideoId`, opts)
+    return this.get(`api/video/getPrintByVideoId`, opts)
+  }
+  /**
+   * 首页接口
+   */
+  static listVideoActivity (opts) {
+    return this.get(`api/video/listVideoActivity`, opts)
+  }
+  /**
+   * 视频接口
+   */
+  static listVideoVO (opts) {
+    return this.get(`/api/video/listVideoVO`, opts)
+  }
+    /**
+   * 商品搜索记录
+   * @param {object} opts 参数
+   */
+  static getVideoHistorySearch (opts) {
+    return this.get(`api/video/getHistorySearch`, opts)
+  }
+  /**
+   * 热门搜索记录
+   * @param {object} opts 参数
+   */
+  static getVideoHeatSearch (opts) {
+    return this.get(`api/video/getHeatSearch`, opts)
   }
 }

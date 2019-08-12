@@ -2,27 +2,29 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain pages-search">
     <view class="opertion-box">
-      <view class="search-sign">
-        <view class="search-sign__control">
-          <input type="text"
-            confirm-type="search"
-            placeholder="搜索一下"
-            auto-focus
-            placeholder-class="font-size--28"
-            bindconfirm="handleToSearch"
-            value="{{searchVal}}"
-            class="control font-size--28"/>   
+      <view class="search-sign wow-flex is-align-middle">
+        <view class="font-size--28 drop-box" wx:if="{{lastpage === 'index'}}" @tap.stop="handleToggleDrop">{{dropVal.val}}<text class="down"></text></view>
+        <view class="select-box font-size--28" wx:if="{{isShowDrop}}">
+          <view class="select-item" wx:for="{{arr}}" wx:key="index" @tap.stop="handleSelectItem({{item}})">{{item.val}}<text class="down" wx:if="{{index === 0}}"></text></view>
         </view>
+        <input type="text"
+          confirm-type="search"
+          placeholder="搜索一下"
+          auto-focus
+          bindconfirm="handleToSearch"
+          value="{{searchVal}}"
+          class="control font-size--28"/>  
       </view>
     </view> 
 
     <view class="goods" wx:if="{{lists.length}}">
-      <goodList :list.sync="lists"></goodList>
+      <videoList :lists.sync="lists" wx:if="{{lastpage === 'index'}}"></videoList>
+      <goodList :list.sync="lists" wx:else></goodList>
     </view>
 
     <block wx:else>
       <view class="history-box">
-        <view class="font-size--28 history-box__empty" wx:if="{{searchVal}}">没有找到相关商品</view>
+        <view class="font-size--28 history-box__empty" wx:if="{{searchVal}}">没有找到相关{{lastpage === 'index' ? '视频' : '商品'}}</view>
         <view class="title font-size--28" wx:if="{{searchList.length}}">
           <text>历史搜索</text>
           <image class="btn-delete" src="../../images/common/btn_delete.png" mode="aspectFill" @tap.stop="handleDelHistory()"></image>
@@ -46,6 +48,8 @@
   import wepy from 'wepy'
   import goodsApis from '../../api/goods'
   import GoodList from '../../components/goodList'
+  import VideoList from '../../components/videoList'
+  import videoApis from '../../api/video'
   export default class Search extends wepy.page {
     config = {
       navigationBarTitleText: '搜索',
@@ -54,7 +58,8 @@
       }
     }
     components = {
-      goodList: GoodList
+      goodList: GoodList,
+      videoList: VideoList
     }
     data = {
       searchVal: '',
@@ -63,7 +68,27 @@
       lists: [],
       hasMoreData: false, // 默认不用拉数据
       searchList: [],
-      hotList: []
+      hotList: [],
+      lastpage: '',
+      arr: [
+        {
+          id: -1,
+          val: '全部'
+        },
+        {
+          id: 0,
+          val: '创意'
+        },
+        {
+          id: 1,
+          val: '课程'
+        }
+      ],
+      dropVal: {
+        id: -1,
+        val: '全部'
+      },
+      isShowDrop: false
     }
     handleToSearch (e) {
       const { value } = e.detail
@@ -81,22 +106,27 @@
           title: '加载中...',
           mask: true
         })
-        let { start, limits, lists } = this
+        let { start, limits, lists, lastpage, dropVal } = this
         const opts = {
           start,
           limits
         }
         opts.key = this.searchVal
-        const { data: goodsData } = await goodsApis.queryShoppingByName(opts)
-        const { data, total } = goodsData
+        let searchData
+        if (lastpage === 'index') {
+          opts.videoType = dropVal.id
+          const { data: videoData } = await videoApis.listVideoVO(opts)
+          searchData = videoData.data
+        } else {
+          const { data: goodData } = await goodsApis.queryShoppingByName(opts)
+          searchData = goodData.data
+        }
         if (start === 1) {
           lists = []
         }
-        data.forEach(item => {
-          item.finishLoadFlag = false
-        })
-        this.lists = lists.concat(data)
-        if (total < limits) {
+        this.lists = lists.concat(searchData)
+        console.log(this.lists)
+        if (searchData.length < limits) {
           this.hasMoreData = false
         } else {
           this.hasMoreData = true
@@ -111,7 +141,14 @@
     }
     async getHistorySearch () {
       try {
-        const { data } = await goodsApis.getHistorySearch()
+        let data
+        if (this.lastpage === 'index') {
+          const { data: videoData } = await videoApis.getVideoHistorySearch()
+          data = videoData
+        } else {
+          const { data: goodData } = await goodsApis.getHistorySearch()
+          data = goodData
+        }
         this.searchList = data
         this.$apply()
       } catch (error) {
@@ -120,8 +157,14 @@
     }
     async getHeatSearch () {
       try {
-        const { data } = await goodsApis.getHeatSearch()
-        console.log(data)
+        let data
+        if (this.lastpage === 'index') {
+          const { data: videoHeatData } = await videoApis.getVideoHeatSearch()
+          data = videoHeatData
+        } else {
+          const { data: goodHeatData } = await goodsApis.getHistorySearch()
+          data = goodHeatData
+        }
         this.hotList = data
         this.$apply()
       } catch (error) {
@@ -138,6 +181,13 @@
       }
     }
     methods = {
+      handleSelectItem (item) {
+        this.dropVal = item
+        this.isShowDrop = false
+      },
+      handleToggleDrop () {
+        this.isShowDrop = true
+      },
       handleDelHistory () {
         const that = this
         wx.showModal({
@@ -157,7 +207,8 @@
         }
       }
     }
-    onLoad () {
+    onLoad ({ form }) {
+      this.lastpage = form
       if (wepy.$instance.globalData.Token) {
         this.getHistorySearch()
       }

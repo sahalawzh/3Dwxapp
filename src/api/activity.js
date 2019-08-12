@@ -15,4 +15,10 @@ export default class activity extends base {
   static submit (opts) {
     return this.post(`api/form/submit`, opts)
   }
+  /**
+   * 提交表单 
+   */
+  static listActivity (opts) {
+    return this.get(`api/activity/listActivity`, opts)
+  }
 }

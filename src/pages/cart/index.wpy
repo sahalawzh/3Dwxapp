@@ -149,7 +149,8 @@
     }
     computed = {
       isAllEnble () {
-        return this.lists.length && this.lists.every(item => item.isEnable === 0)
+        console.log(this.goods.length && this.goods.every(item => item.isEnable === 0))
+        return this.goods.length && this.goods.every(item => item.isEnable === 0)
       },
       slideHeight () {
         let maxHeight = ''
@@ -509,7 +510,9 @@
         if (this.isAllEnble && !this.isEdit) return
         this.isCheckAll = !this.isCheckAll
         this.goods.forEach(element => { // 全选
-          element.checked = this.isCheckAll
+          if (element.isEnable === 1) {
+            element.checked = this.isCheckAll
+          }
         })
         this.getCountPrice()
       }

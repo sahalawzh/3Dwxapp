@@ -109,6 +109,7 @@
   export default class Detail extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
+      enablePullDownRefresh: true,
       usingComponents: {
         'wow-popup': '../../packages/popup/index',
         'wow-stepper': '../../packages/stepper/index'
@@ -219,15 +220,13 @@
         console.log(error)
       }
     }
-    async getRelatedProducts () {
+    async getRelatedProducts () { 
       try {
         let opts = {
-          start: 1,
-          limits: 100,
-          id: this.pid
+          spuId: this.pid
         }
         const { data: relatedData } = await goodsApis.relatedProducts(opts, {REJECTERRORCONFIG: true})
-        this.relatedProducts = relatedData.data
+        this.relatedProducts = relatedData
         this.$apply()
       } catch (error) {
         console.log(error)
@@ -370,6 +369,15 @@
       handleShareItems () {
         this.$wxpage.selectComponent('.wow_share').show()
       }
+    }
+    onPullDownRefresh () {
+      this.getProductDetail()
+      this.getRelatedProducts()
+      this.getSpuCollectionNum()
+      this.getTheSpuCollection()
+      wx.nextTick(() => {
+        wx.stopPullDownRefresh()
+      })
     }
     onLoad (options) {
       if (options.scene) {

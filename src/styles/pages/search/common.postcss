@@ -13,16 +13,60 @@
     background-color: #f3f3f3;
   }
   .search-sign {
-    &__control {
+    position: relative;
+    height: 88rpx;
+    margin: 0 54rpx 0 52rpx;
+    color: #979797;
+    .drop-box {
       position: relative;
-      margin: 20rpx 52rpx 32rpx 66rpx;
-      .control {
-        flex: 1;
-        height: 62rpx;
-        margin-right: 42rpx;
-        padding-left: 26rpx;
-        background-color: #fff;
-        border-radius: 26rpx;
+      width: 146rpx;
+      height: 60rpx;
+      line-height: 60rpx;
+      text-align: center;
+      background-color: #fff;
+      border-radius: 26rpx;
+      .down {
+        width: 0;
+        height: 0;
+        border-left: 10rpx solid transparent;
+        border-right: 10rpx solid transparent;
+        border-top: 16rpx solid #979797;
+        font-size: 0;
+        line-height: 0;
+        margin-left: 10rpx;
+      }
+    }
+    .control {
+      flex: 1;
+      height: 60rpx;
+      padding-left: 26rpx;
+      margin-left: 14rpx;
+      background-color: #fff;
+      border-radius: 26rpx;
+    }
+    .select-box {
+      position: absolute;
+      top: 14rpx;
+      width: 146rpx;
+      padding-top: 6rpx;
+      background-color: #fff;
+      z-index: 99;
+      border-radius: 26rpx 26rpx 12rpx 12rpx;
+      box-shadow: 0 0 6rpx #ccc;
+      .select-item {
+        margin-bottom: 16rpx;
+        padding-left: 32rpx;
+        box-sizing: border-box;
+      }
+      .down {
+        width: 0;
+        height: 0;
+        border-left: 10rpx solid transparent;
+        border-right: 10rpx solid transparent;
+        border-top: 16rpx solid #979797;
+        font-size: 0;
+        line-height: 0;
+        margin-left: 10rpx;
       }
     }
   }
@@ -138,5 +182,8 @@
   }
   .goods {
     padding: 160rpx 52rpx 0;
+  }
+  .video-item {
+    margin: 0 0 64rpx;
   }
 }

@@ -1,8 +1,28 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-index">
+    <view class="page-index__bg"></view>
 
-    <view wx:if="{{bannerAdv}}" @tap.stop="handleGoAdv({{bannerAdv}})" class="page-index__advertising">
+    <view class="page-index__nav wow-flex is-justify-space-around">
+      <view class="nav-item wow-flex is-align-middle" @tap.stop="handleToSearch">
+        <image class="icon" src="../../images/common/btn_bar_search_black.png" mode="aspectFill"></image>
+        <view class="value font-size--30">搜索<view class="active-bar"></view></view>
+      </view>
+      <view class="nav-item wow-flex is-align-middle {{navType === -1 ? 'active' : ''}}" @tap.stop="handleNav({{-1}})">
+        <image class="icon" src="../../images/common/ico_index.png" mode="aspectFill"></image>
+        <view class="value font-size--30">发现<view class="active-bar"></view></view>
+      </view>
+      <view class="nav-item wow-flex is-align-middle {{navType === 1 ? 'active' : ''}}" @tap.stop="handleNav({{1}})">
+        <image class="ico_free" src="../../images/common/ico_free.png" mode="aspectFill"></image>
+        <image class="icon" src="../../images/common/ico_class.png" mode="aspectFill"></image>
+        <view class="value font-size--30">课程<view class="active-bar"></view></view>
+      </view>
+      <view class="nav-item wow-flex is-align-middle {{navType === 'act' ? 'active' : ''}}" @tap.stop="handleNav({{'act'}})">
+        <image class="icon" src="../../images/common/ico_activity.png" mode="aspectFill"></image>
+        <view class="value font-size--30">话题<view class="active-bar"></view></view>
+      </view>
+    </view>
+    <view wx:if="{{bannerAdv && navType === -1}}" @tap.stop="handleGoAdv({{bannerAdv}})" class="page-index__advertising">
       <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
     </view>
 
@@ -34,10 +54,10 @@
       <icon type="cancel" size="24" color="#fff" class="adv-close" @tap.stop="handleCloseAdv"/>
     </view>
 
-    <videoList :lists.sync="lists"></videoList>
-
+    <activityList :activityList.sync="activityList" wx:if="{{navType === 'act' && activityList.length}}"></activityList>
+    <videoList :lists.sync="videoActivityList" wx:if="{{videoActivityList.length}}"></videoList>
     <loading wx:if="{{hasMoreData}}"></loading>
-
+    <view class="empty-list font-size--26" wx:if="{{!hasData}}">暂无相关数据~</view>
     <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
     
     <guideIndex wx:if="{{stage}}" :animation.sync="animation" :stage.sync="stage"></guideIndex>
@@ -53,11 +73,14 @@
   import videoApis from '../../api/video'
   import advertisementApis from '../../api/advertisement'
   import guideApis from '../../api/guide'
+  import activityApis from '../../api/activity'
   import CommonMixin from '../../mixins/common'
   import wxutils from '../../utils/wxutils'
+  import ActivityList from '../../components/activityList'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
+      enablePullDownRefresh: true,
       usingComponents: {
         'custom-tabbar': '../../custom-tab-bar/index'
       }
@@ -65,15 +88,26 @@
     components = {
       videoList: VideoList,
       loading: Loading,
-      guideIndex: GuideIndex
+      guideIndex: GuideIndex,
+      activityList: ActivityList
+    }
+    computed = {
+      hasData (val) {
+        if (this.navType === 'act') {
+          return this.activityList.length
+        } else {
+          return this.videoActivityList.length
+        }
+      }
     }
     mixins = [CommonMixin]
     data = {
       isModelIPX: false,
       tabbar: '',
       start: 1,
-      limits: 20,
-      lists: [],
+      limits: 4,
+      activityList: [],
+      videoActivityList: [],
       hasMoreData: false, // 默认不用拉数据
       cartNum: '',
       userId: '',
@@ -81,7 +115,11 @@
       stage: 0,
       animation: {},
       floatAdv: '',
-      isShowFloatAdv: true
+      isShowFloatAdv: process.env.NODE_ENV === 'development' ? false : true,
+      navType: -1, // -1 全部 1 课程  act 话题活动
+      actStart: 1,
+      actLimit: 5,
+      hasActMoreData: false
     }
     events = {
       handleToPriner () {
@@ -102,23 +140,29 @@
         }
       }
     }
-    async getVideoList () {
+    async getListVideoActivity () {
       try {
         wx.showLoading({
           title: '加载中',
           mask: true
         })
-        let { start, limits, lists } = this
+        let { start, limits, navType, videoActivityList } = this
         const opts = {
           start,
-          limits
+          limits,
+          videoType: navType
         }
-        let { data: videoData } = await videoApis.list(opts)
+        let { data: indexData } = await videoApis.listVideoActivity(opts)
+        const { videoDOList, activityVOList, total } = indexData
         if (start === 1) {
-          lists = []
+          videoActivityList = []
         }
-        this.lists = lists.concat(videoData.data)
-        if (videoData.data.length < limits) {
+        if (navType === -1) {
+          this.videoActivityList = [...videoActivityList, ...activityVOList, ...videoDOList]
+        } else {
+          this.videoActivityList = [...videoActivityList, ...videoDOList]
+        }
+        if (this.videoActivityList.length >= total) {
           this.hasMoreData = false
         } else {
           this.hasMoreData = true
@@ -151,17 +195,77 @@
         console.log(error)
       }
     }
+    async getListActivity () { // 获取活动数据
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { actStart, actLimit, activityList } = this
+        const opts = {
+          start: actStart,
+          limit: actLimit
+        }
+        const { data: actData } = await activityApis.listActivity(opts)
+        if (actStart === 1) {
+          activityList = []
+        }
+        this.activityList = activityList.concat(actData.data)
+        if (actData.data.length < actLimit) {
+          this.hasActMoreData = false
+        } else {
+          this.hasActMoreData = true
+          this.actStart ++
+        }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
     async onLoad () {
       // 隐藏系统tabbar
       wx.hideTabBar()
       wepy.$instance.editTabbar()
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
-      this.getVideoList()
+      this.getListVideoActivity()
       this.getAdvertisement()
       this.getPrintGuide()
       this.$apply()
     }
+    resetData () {
+      this.start = 1
+      this.actStart = 1
+      this.hasMoreData = false
+      this.hasActMoreData = false
+      this.activityList = []
+      this.videoActivityList = []
+    }
+    onPullDownRefresh () {
+      this.resetData()
+      if (this.navType === 'act') {
+        this.getListActivity()
+      } else {
+        this.getListVideoActivity()
+      }
+      wx.nextTick(() => {
+        wx.stopPullDownRefresh()
+      })
+    }
     methods = {
+      handleNav (type) {
+        this.navType = type
+        this.resetData()
+        if (this.navType === 'act') {
+          this.getListActivity()
+        } else {
+          this.getListVideoActivity()
+        }
+      },
+      handleToSearch () {
+        wxutils.backOrNavigate('/pages/search/index?form=index')
+      },
       handleGoAdv (item) {
         const { spuId, linkId, marketingType } = item
         let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
@@ -180,7 +284,7 @@
     }
     onReachBottom () {
       if (this.hasMoreData) {
-        this.getVideoList()
+        this.getListVideoActivity()
       }
     }
     onUnload () {

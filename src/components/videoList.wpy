@@ -1,34 +1,41 @@
 <template>
   <view class="video-lists">
     <view class="video-item" wx:for="{{lists}}" wx:key="item">
-      <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
-      <view class="video-lists__item wow-background-image font-color-white"
-        style="background-image: url({{item.image}})"
-        @tap.stop="handleToDetail({{item.id}})">
-        <!--  src="../images/common/bg_indexvideotitle.png" mode="aspectFill" -->
-        <view class="bg-mask"></view>
-        <view class="item">
-          <view class="content">
-            <view class="title font-size--34">{{item.title}}</view>
-            <view class="wow-flex video-lists__item_bottom">
-              <view class="wow-flex">
-                <image class="icon" lazy-load="true" src="../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
-                <text class="font-size--28">{{item.hot}}</text>
-              </view>
-              <view class="wow-flex duration">
-                <image class="icon" src="../images/index/ico_homevideolist_Duration.png" mode="aspectFill"></image>
-                <text class="font-size--28">{{item.duration}}</text>
-              </view>
-            </view>
+      <view class="item">
+        <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
+        <view class="video-lists__item wow-background-image font-color-white"
+          style="background-image: url({{item.homePageType === 1 ? item.imageUrl : item.image}})"
+          @tap.stop="handleToDetail({{item}})">
+          <view class="bg-mask"></view>
+
+          <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}" wx:if="{{item.homePageType === 1}}">{{status[item.dateType]}}</view>
+          <view class="wow-flex is-align-middle viewtimes" wx:else>
+            <image class="icon" lazy-load="true" src="../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
+            <text class="font-size--24">{{item.hot}}</text>
           </view>
+
         </view>
       </view>
+      <view class="title font-size--36">{{item.title}}</view>
+
+      <view class="activity-desc wow-flex is-align-middle is-justify-space-between font-size--24" wx:if="{{item.homePageType === 1}}">
+        <view class="wow-flex is-align-middle">
+          <image class="ico_duration" src="../images/common/ico_duration.png" mode="aspectFill"></image>
+          <view>{{item.beginTime + '-' + item.endTime}}</view>
+        </view>
+        <view class="wow-flex is-align-middle">
+          <image class="ico_applicants" src="../images/common/ico_applicants.png" mode="aspectFill"></image>
+          <view>{{item.member}}</view>
+        </view>
+      </view>
+      <view class="desc font-size--26" wx:else>{{ item.videoType === 0 ? '创意' : '课程' }}<text class="desc-duration">{{item.duration}}</text></view>
     </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
 import wxUtils from '../utils/wxutils'
+// homePageType 1 活动 0 视频
 export default class VideoList extends wepy.component {
   props = {
     lists: {
@@ -37,10 +44,16 @@ export default class VideoList extends wepy.component {
     }
   }
   data = {
+    status: {
+      0: '未开始',
+      1: '进行中',
+      2: '已结束'
+    }
   }
   methods = {
-    handleToDetail (id) {
-      wxUtils.backOrNavigate('/pages/videoDetail/index?id=' + id)
+    handleToDetail (item) {
+      const url = item.homePageType === 1 ? '/pages/activity/index?linkId=' + item.id : '/pages/videoDetail/index?id=' + item.id
+      wxUtils.backOrNavigate(url)
     }
   }
 }

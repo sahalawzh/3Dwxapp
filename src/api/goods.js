@@ -25,7 +25,7 @@ export default class goods extends base {
    * @param {string} opts.id 详情id
    */
   static relatedProducts (opts, config) {
-    return this.get(`api/spu/listRelatedSpu`, opts, config)
+    return this.get(`api/spu/relatedSpu`, opts, config)
   }
   /**
    * 话题接口

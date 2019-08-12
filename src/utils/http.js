@@ -180,12 +180,19 @@ export default class http {
    */
   static isSuccess (res) {
     const statusCode = res.statusCode // 旧接口
-    const wxCode = res.data.status // 新接口
+    const wxStatus = res.data.status // 新接口
+    const wxcode = res.data.code // 新接口
     // 微信请求错误
-    if (statusCode !== 200 || wxCode && wxCode !== 200) {
+    if (statusCode !== 200) {
       return false
     }
-    const wxData = wxCode && wxCode === 200 ? res.data : res
+    if (wxStatus && wxStatus !== 200) {
+      return false
+    }
+    if (wxcode && wxcode !== 0) {
+      return false
+    }
+    const wxData = wxStatus && wxStatus === 200 ? res.data : res
     return wxData
   }
   /**

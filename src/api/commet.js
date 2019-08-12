@@ -43,4 +43,25 @@ export default class commet extends base {
   static getSpuComment (opts) {
     return this.get(`api/comment/getSpuComment`, opts)
   }
+  /**
+   * 获取活动评论
+   * @param {object} opts 参数
+   */
+  static getActivityComment (opts) {
+    return this.get(`api/comment/getActivityComment`, opts)
+  }
+  /**
+   * 添加活动评论
+   * @param {object} opts 参数
+   */
+  static insertActivityComment (opts) {
+    return this.post(`api/comment/insertActivityComment`, opts)
+  }
+  /**
+   * 添加活动评论数量
+   * @param {object} opts 参数
+   */
+  static getActivityCommentNum (opts) {
+    return this.get(`api/comment/getActivityCommentNum`, opts)
+  }
 }

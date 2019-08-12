@@ -27,17 +27,17 @@
             <view class="order-info">
               <wow-elip line="2" class="order-info__title font-size--28">{{item.title}}</wow-elip>
               <wow-elip line="1" class="order-info__sku font-size--24">{{commonwxs.specStr(item)}}</wow-elip>
-              <view class="order-info__price font-size--28 wow-flex is-justify-space-between">
+              <view class="order-info__price font-size--28 wow-flex is-justify-space-between is-align-middle">
                 <view class="color-price">￥{{item.price}}</view>
                 <view class="num font-size--26">数量 {{item.num}}</view>
               </view>
             </view>
           </view>
 
-          <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
+          <!-- <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
             <view>配送方式</view>
             <view>快递 包邮</view>
-          </view>
+          </view> -->
           <block wx:if="{{false}}">
             <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
               <view>发票</view>
@@ -61,12 +61,29 @@
         <view class="label font-size--26">备注</view>
         <input type="text" class="font-size--26 remark" bindblur="handleRemark" placeholder="请输入备注信息">
       </view>
+      <view class="detail-box font-size--26">
+        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between">
+          <view>商品金额</view>
+          <view>￥{{ bill.spuPrice}}</view>
+        </view>
+        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between">
+          <view>运费</view>
+          <view class="color-price">+￥{{ bill.totalMailing }}</view>
+        </view>
+        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between" wx:if="{{!bill.mailing}}">
+          <view>满200包邮</view>
+          <view class="color-price">-￥{{ bill.totalMailing }}</view>
+        </view>
+        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between" wx:if="{{bill.reducePrice}}">
+          <view>优惠减</view>
+          <view class="color-price">-￥{{ bill.reducePrice }}</view>
+        </view>
+      </view>
     </view>
 
     <view class="footer wow-clearfix">
-      <view class="wow-fl-l footer-info {{reducePrice ? '' : 'footer-info__line'}}">
+      <view class="wow-fl-l footer-info">
         <view class="color-price font-size--30">合计: ￥{{price}}</view>
-        <view class="font-size--26 discount-price" wx:if="{{reducePrice}}">优惠减: ￥{{reducePrice}}</view>
       </view>
       <view class="wow-fl-r font-size--30">
         <view class="pay-btn font-color-white" @tap.stop="hanldeToPay">提交订单</view>
@@ -98,9 +115,9 @@
       price: '',
       userId: '',
       code: '',
-      reducePrice: 0,
       remark: '',
-      isShow: false
+      isShow: false,
+      bill: ''
     }
     wxs = {
       commonwxs: commonwxs
@@ -131,13 +148,19 @@
           opts.code = code
         }
         const { data } = await goodsApi.settlement(opts)
-        const { address, cartDetailListVO, isShow, actualPrice, checks, reducePrice } = data
+        const { address, cartDetailListVO, isShow, actualPrice, checks, reducePrice, spuPrice, mailing, totalMailing } = data
         this.addressVO = address
         this.cartDetailList = cartDetailListVO
         this.price = actualPrice
         this.checks = checks
-        this.reducePrice = reducePrice
         this.isShow = isShow === 1
+        this.bill = {
+          spuPrice,
+          mailing: Number(mailing),
+          totalMailing,
+          reducePrice
+        }
+        console.log(this.bill)
         wepy.$instance.globalData.subpub.on('afterPickedAddress', this.pickedAddress, this)
         wx.hideLoading()
         this.$apply()
