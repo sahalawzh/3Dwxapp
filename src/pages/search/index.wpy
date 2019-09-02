@@ -18,7 +18,10 @@
     </view> 
 
     <view class="goods" wx:if="{{lists.length}}">
-      <videoList :lists.sync="lists" wx:if="{{lastpage === 'index'}}"></videoList>
+      <block wx:if="{{lastpage === 'index'}}">
+        <videoList :lists.sync="lists" wx:if="{{dropVal.id !== -2}}"></videoList>
+        <forumList :lists.sync="lists" wx:else></forumList>
+      </block>
       <goodList :list.sync="lists" wx:else></goodList>
     </view>
 
@@ -49,6 +52,7 @@
   import goodsApis from '../../api/goods'
   import GoodList from '../../components/goodList'
   import VideoList from '../../components/videoList'
+  import ForumList from '../../components/forumList'
   import videoApis from '../../api/video'
   export default class Search extends wepy.page {
     config = {
@@ -59,7 +63,8 @@
     }
     components = {
       goodList: GoodList,
-      videoList: VideoList
+      videoList: VideoList,
+      forumList: ForumList
     }
     data = {
       searchVal: '',
@@ -72,8 +77,8 @@
       lastpage: '',
       arr: [
         {
-          id: -1,
-          val: '全部'
+          id: -2,
+          val: '话题'
         },
         {
           id: 0,
@@ -85,8 +90,8 @@
         }
       ],
       dropVal: {
-        id: -1,
-        val: '全部'
+        id: -2,
+        val: '话题'
       },
       isShowDrop: false
     }
@@ -94,13 +99,13 @@
       const { value } = e.detail
       this.searchVal = value
       if (this.searchVal) {
-        this.getGoodsList()
+        this.getSearchData()
         this.start = 1
       } else {
         this.lists = []
       }
     }
-    async getGoodsList () {
+    async getSearchData () {
       try {
         wx.showLoading({
           title: '加载中...',
@@ -184,6 +189,10 @@
       handleSelectItem (item) {
         this.dropVal = item
         this.isShowDrop = false
+        if (this.searchVal) {
+          this.start = 1
+          this.getSearchData()
+        }
       },
       handleToggleDrop () {
         this.isShowDrop = true
@@ -203,7 +212,7 @@
       handleToFind (val) {
         if (val) {
           this.searchVal = val
-          this.getGoodsList()
+          this.getSearchData()
         }
       }
     }
@@ -217,7 +226,7 @@
 
     onReachBottom () {
       if (this.hasMoreData) {
-        this.getGoodsList()
+        this.getSearchData()
       }
     }
     onShow () {

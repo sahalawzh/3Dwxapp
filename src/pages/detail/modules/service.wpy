@@ -1,5 +1,5 @@
 <template>
-  <view class="good-line">
+  <view class="good-line" wx:if="{{good.serve}}">
     <view class="font-size--28 good-line-items">
       <view class="wow-flex is-align-middle font-size--24 good-line-item">
         <view class="good-line-item__label">服务</view>

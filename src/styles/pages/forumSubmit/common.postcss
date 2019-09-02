@@ -1,0 +1,89 @@
+.forum-submit {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 220rpx;
+  background-color: #f0f2f7;
+  position: relative;
+  .forum-main {
+    position: relative;
+    min-height: 100vh;
+    padding: 0 52rpx;
+    margin-top: 22rpx;
+    background-color: #fff;
+  }
+  .title {
+    padding: 24rpx 0;
+    border-bottom: 1rpx solid #969696;
+    &-input {
+      font-weight: 600;
+      letter-spacing: 2rpx;
+      color: #494949;
+      &__placeholder {
+        color: #9c9c9c;
+      }
+    }
+  }
+  .main {
+    padding-top: 30rpx;
+    &-container {
+      min-height: 500rpx;
+      height: auto;
+      color: #494949;
+      font-style: normal;
+    }
+  }
+  .tip {
+    color: #494949;
+    padding-top: 20rpx;
+    padding-bottom: 20rpx;
+    border-bottom: 1rpx solid #969696;
+  }
+  .container-part {
+    padding-top: 30rpx;
+    min-height: 500rpx;
+    height: auto;
+    color: #494949;
+    font-style: normal;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    border-top: 1rpx solid #b3b3b3;
+    padding: 34rpx 0 82rpx;
+    box-sizing: border-box;
+    z-index: 99;
+    .save-btn {
+      color: #353535;
+      margin-right: 60rpx;
+      .ico_edit {
+        width: 44rpx;
+        height: 36rpx;
+        margin-left: 8rpx;
+      }
+    }
+    .submit-btn {
+      color: #295ec3;
+      padding-right: 52rpx;
+      .ico_send {
+        width: 48rpx;
+        height: 48rpx;
+        margin-left: 8rpx;
+      }
+    }
+    .edit-box {
+      padding-left: 52rpx;
+      .icon {
+        width: 54rpx;
+        height: 54rpx;
+        margin-right: 46rpx;
+      }
+    }
+  }
+}

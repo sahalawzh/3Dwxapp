@@ -5,13 +5,36 @@
     <view class="commet-box" wx:if="{{commetList.length}}">
       <view class="title">{{commetTotal}}条评论</view>
       <view class="commet-items">
-        <view class="wow-flex commet-items_item" wx:for="{{commetList}}" wx:key="item">
+        <view wx:for="{{commetList}}" wx:key="item" class="wow-flex commet-items_item {{item.isShowMenu && menuShow ? 'active' : ''}}" @tap.stop="handleShowMenu({{index}})">
+          <view class="menu-box wow-flex" wx:if="{{item.isShowMenu && menuShow}}">
+            <view wx:if="{{userId}}" class="menu-box__item" @tap.stop="handleMenu({{index}}, {{'reply'}})">
+              <image class="menu-icon" src="../images/common/btn_comment_white.png" mode="aspectFill"></image>
+              <view class="font-size--24">回复</view>
+            </view>
+            <button wx:else data-url="/pages/forumCommet/index?forumId={{item.id}}&nickname={{item.nickname}}&parentId={{item.commetId}}&replyId={{item.replyId}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="open-type-btn menu-box__item">
+              <image class="menu-icon" src="../images/common/btn_comment_white.png" mode="aspectFill"></image>
+              <view class="font-size--24">回复</view>
+            </button>
+            <view class="menu-box__item" @tap.stop="handleMenu({{index}}, {{'copy'}})">
+              <image class="menu-icon" src="../images/common/btn_copy.png" mode="aspectFill"></image>
+              <view class="font-size--24">复制</view>
+            </view>
+            <view class="menu-box__item" wx:if="{{userId}}" @tap.stop="handleMenu({{index}}, {{'report'}})">
+              <image class="menu-icon" src="../images/common/btn_report.png" mode="aspectFill"></image>
+              <view class="font-size--24">举报</view>
+            </view>
+          </view>
+          
           <image class="head" src="{{item.smallAvator}}" mode="aspectFill"></image>
           <view class="content">
             <view class="name">{{item.nickname}}</view>
             <view class="time">{{item.createTime}}<text class="content-sku" wx:if="{{ item.spec }}">{{item.spec}}</text></view>
             <view class="{{lastpage === 'detail' ? 'commet-detail' : ''}}">
-              <view class="message">{{item.content}}</view>
+              <view class="forum-reply" wx:if="{{item.forumReplyVO}}">
+                <view class="forum-reply__title font-size--30">回复：{{item.forumReplyVO.nickname}}</view>
+                <view class="forum-reply__content font-size--30">{{item.forumReplyVO.content}}</view>
+              </view>
+              <view class="message">{{lastpage === 'forum' ? item.commentContent : item.content}}</view>
               <view class="commet-img wow-flex" wx:if="{{item.image.length}}">
                 <image class="commet-img__upload" wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="imageItem" wx:key="" @tap.stop="handleImagePreview({{item.image}}, {{idx}})" src="{{imageItem}}" mode="aspectFill"></image>
               </view>
@@ -29,6 +52,7 @@
       <image class="icon" src="../images/common/ico_comment_empty.png" mode="aspectFill"></image>
       <view class="tip font-size--30">暂时还没有评价，快来做第一个吧~</view>
     </view>
+
     <view class="commet-wrap__apply" wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}">
       <view class="commet-wrap__apply_input">
         <input
@@ -61,10 +85,18 @@ export default class Commet extends wepy.component {
       type: [String, Number],
       twoWay: true
     },
-    commetList: [Array],
+    commetList: {
+      type: [Array],
+      twoWay: true
+    },
     commetTotal: [String, Number],
     isShowCommetInput: {
       type: Boolean,
+      twoWay: true
+    },
+    menuShow: {
+      type: Boolean,
+      default: false,
       twoWay: true
     }
   }
@@ -84,6 +116,22 @@ export default class Commet extends wepy.component {
     }
   }
   methods = {
+    handleMenu (index, type) {
+      const current = {
+        index,
+        type
+      }
+      this.$emit('handleMenu', current)
+    },
+    handleShowMenu (index) {
+      if (this.lastpage === 'forum') {
+        this.commetList.forEach(item => {
+          item.isShowMenu = false
+        })
+        this.commetList[index].isShowMenu = true
+        this.menuShow = true
+      }
+    },
     handleCloseCommetMask () {
       this.$emit('handleCloseCommetMask')
     },
@@ -105,141 +153,5 @@ export default class Commet extends wepy.component {
 </script>
 
 <style lang='postcss'>
-  .commet-wrap {
-    padding-top: 12rpx;
-    .mask {
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 100%;
-      z-index: 99;
-    }
-    .title {
-      color: #737373;
-      font-size: 32rpx;
-      height: 100rpx;
-      line-height: 100rpx;
-      padding-left: 46rpx;
-    }
-    .commet-items {
-      padding-left: 46rpx;
-      padding-right: 42rpx;
-      &_item {
-        position: relative;
-        padding-top: 32rpx;
-        padding-bottom: 48rpx;
-        &::after{
-          position: absolute;
-          content: "";
-          height: 1rpx;
-          width: 100%;
-          left: 0;
-          top: 0;
-          transform: scaleY(0.5);
-          background-color: #979797;
-        }
-        .head {
-          width: 84rpx;
-          height: 84rpx;
-          border-radius: 50%;
-          background-color: royalblue;
-          margin-right: 24rpx;
-        }
-        .content {
-          position: relative;
-          font-size: 28rpx;
-          flex: 1;
-          .name {
-            font-size: 32rpx;
-            color: #4a4a4a;
-          }
-          &-sku {
-            margin-left: 30rpx;
-          }
-          .time {
-            font-size: 24rpx;
-            color: #9e9e9e;
-            margin-top: 10rpx;
-          }
-          .message {
-            color: #727272;
-            margin-top: 28rpx;
-          }
-          .reply-message {
-            margin-top: 14rpx;
-            color: #9e9e9e;
-            &__info {
-              margin-top: 8rpx;
-            }
-          }
-        }
-      }
-      .commet-detail {
-        margin-left: -108rpx;
-      }
-      .commet-img {
-        flex-wrap: wrap;
-        margin-top: 30rpx;
-        &__upload {
-          width: 30.33%;
-          height: 206rpx;
-          border-radius: 8rpx;
-          margin-right: 10rpx;
-          margin-bottom: 10rpx;
-          overflow: hidden;
-        }
-      }
-    }
-    &__apply {
-      position:fixed;
-      left:0;
-      bottom:0;
-      width:100%;
-      box-sizing:border-box;
-      padding: 46rpx 38rpx 52rpx 28rpx;
-      background-color: #fff;
-      box-shadow: 0px -1rpx 4rpx #ccc;
-      z-index: 100;
-      &_input {
-        .placeholder-input {
-          color: #9a9a9a;
-        }
-        input {
-          border-radius: 6rpx;
-          padding: 4rpx 10rpx 4rpx 20rpx;
-          height: 100%;
-          color: #4a4a4a;
-        }
-      }
-      .send-box {
-        text-align: center;
-        margin-top: 50rpx;
-        .send-btn {
-          color: #145ee1;
-          font-size: 30rpx;
-          margin: 0 auto;
-          width: 164rpx;
-        }
-        .icon {
-          width: 48rpx;
-          height: 48rpx;
-          margin-left: 8rpx;
-        }
-      }
-    }
-    .commet-empty {
-      padding-top: 122rpx;
-      padding-bottom: 100rpx;
-      text-align: center;
-      .icon {
-        width: 196rpx;
-        height: 196rpx;
-      }
-      .tip {
-        color: #9a9a9a;
-        margin-top: 54rpx;
-      }
-    }
-  }
+  @import 'src/styles/modules/commet.postcss';
 </style>

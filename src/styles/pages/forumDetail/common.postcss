@@ -1,0 +1,103 @@
+
+.forum-detail {
+  background-color: #f0f2f7;
+  .article {
+    padding: 52rpx 52rpx 46rpx;
+    background-color: #fff;
+    &-header {
+      position: relative;
+      margin-bottom: 32rpx;
+      .header {
+        width: 48rpx;
+        height: 48rpx;
+        border-radius: 50%;
+        margin-right: 14rpx;
+      }
+      .nickname {
+        color: #464646;
+        font-weight: 600;
+        margin-right: 20rpx;
+      }
+      .time {
+        position: absolute;
+        right: 88rpx;
+        color: #bdbfc6;
+      }
+      .icon {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 56rpx;
+        height: 56rpx;
+      }
+      .follow-btn {
+        position: relative;
+        line-height: 34rpx;
+        padding: 2rpx 16rpx;
+        color: #c6840f;
+        background-color: #fbf2de;
+        margin: 0;
+        &-on {
+          color: #9a9a9a;
+          background-color: #f1f1f1;
+        }
+      }
+    }
+    &-content {
+      .title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 28rpx;
+      }
+      .content-hide {
+        margin-top: 26rpx;
+        color: #bdbfc6;
+        display: inline-flex;
+        align-items: center;
+        .tip {
+          color: #295ec3;
+          display: inline-block;
+          font-size: 28rpx;
+        }
+      }
+    }
+  }
+  .controls {
+    position: fixed;
+    left: 20rpx;
+    right: 52rpx;
+    bottom: 108rpx;
+    .icon {
+      width: 120rpx;
+      height: 120rpx;
+    }
+    .auth-btn {
+      margin: 0;
+    }
+    .ico_share {
+      margin-right: 20rpx;
+    }
+    .collect-box {
+      position: relative;
+      .collect-num {
+        position: absolute;
+        top: -4rpx;
+        right: 10rpx;
+        padding: 2rpx 8rpx;
+        min-width: 22rpx;
+        background-color: #6594E9;
+        color: #fff;
+        border-radius: 22rpx;
+        text-align: center;
+        z-index: 2;
+      }
+    }
+  }
+  .commet-box {
+    margin-top: 14rpx;
+    .commet-wrap {
+      padding-bottom: 220rpx;
+      background-color: #fff;
+    }
+  }
+}

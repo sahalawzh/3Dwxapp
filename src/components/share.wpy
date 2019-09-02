@@ -1,0 +1,36 @@
+<template>
+  <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
+    <view class="share-box">
+      <view class="share-box__item" @tap.stop="handleSharePoster">
+        <image class="ico_share_img" src="../images/common/ico_share_img.png" mode="aspectFill"></image>
+        <view class="font-size--28">生成分享海报</view>
+      </view>
+      <view class="share-box__item">
+        <button open-type="share" class="open-type-btn">
+          <view class="font-size--28">转发</view>
+        </button>
+      </view>
+    </view>
+  </wow-popup>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Share extends wepy.component {
+  props = {
+  }
+  data = {
+  }
+  events = {
+    handleShowSharePopup () {
+      this.$wxpage.selectComponent('.wow_share').show()
+    }
+  }
+  methods = {
+    handleSharePoster () {
+      this.$emit('handleSharePoster')
+    }
+  }
+}
+</script>
+<style lang="postcss">
+</style>

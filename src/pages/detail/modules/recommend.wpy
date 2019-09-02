@@ -7,16 +7,15 @@
       <view class="mall-scroll-content">
         <scroll-view 
           class="mall-scroll"
+          lower-threshold="52"
           scroll-x="true">
-          <navigator class="scroll-view-item" wx:for="{{relatedProducts}}" wx:key="item" url="/pages/detail/index?id={{item.id}}">
+          <navigator class="scroll-view-item" wx:for="{{relatedProducts}}" wx:key="item" hover-class="none" url="/pages/detail/index?id={{item.id}}">
             <view class="product-item">
               <view class="product-item__img">
                 <image mode="aspectFill" src="{{item.image}}"></image>
               </view>
               <view class="product-item__info">
-                <view class="product-name font-size--30">
-                  <view class="elip">{{item.title}}</view>
-                </view>
+                <wow-elip class="font-size--28">{{item.title}}</wow-elip>
                 <view class="product-price font-size--26 color-price">￥{{item.recommendedPrice}}</view>
               </view>
             </view>

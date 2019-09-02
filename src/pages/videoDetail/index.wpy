@@ -115,19 +115,7 @@
     </view>
 
     <!-- 分享 -->
-    <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
-      <view class="share-box">
-        <view class="share-box__item" @tap.stop="handleSharePoster">
-          <image class="ico_share_img" src="../../images/common/ico_share_img.png" mode="aspectFill"></image>
-          <view class="font-size--28">生成分享海报</view>
-        </view>
-        <view class="share-box__item">
-          <button open-type="share" class="open-type-btn">
-            <view class="font-size--28">转发</view>
-          </button>
-        </view>
-      </view>
-    </wow-popup>
+    <share></share>
 
   </view>
 </template>
@@ -139,6 +127,7 @@
   import commetApis from '../../api/commet'
   import shareApis from '../../api/share'
   import Commet from '../../components/commet'
+  import Share from '../../components/share'
   import CommonMixin from '../../mixins/common'
   import { timeHandle } from '../../utils/commentTimeHandle'
   import { parseQueryString } from '../../utils/utils'
@@ -152,7 +141,8 @@
     }
     mixins = [CommonMixin]
     components = {
-      commet: Commet
+      commet: Commet,
+      share: Share
     }
     data = {
       id: '',
@@ -203,37 +193,40 @@
         this.handleCollect()
       },
       handleShareItems () {
-        this.$wxpage.selectComponent('.wow_share').show()
-      },
-      async handleSharePoster () {
-        try {
-          wx.showLoading({
-            title: '生成中',
-            mask: true
-          })
-          const opts = {
-            type: 'video',
-            id: this.id,
-            page: 'pages/videoDetail/index',
-            scene: `id=${this.id}`
-          }
-          const { data } = await shareApis.createSharePoster(opts)
-          this.poster = data
-          this.$wxpage.selectComponent('.wow_share').hide()
-          this.posterStatus = true
-          wx.previewImage({
-            current: data,
-            urls: [data]
-          })
-          wx.hideLoading()
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-          wx.hideLoading()
+        this.$broadcast('handleShowSharePopup')
+      }
+    }
+    async getSharePoster () {
+      try {
+        wx.showLoading({
+          title: '生成中',
+          mask: true
+        })
+        const opts = {
+          type: 'video',
+          id: this.id,
+          page: 'pages/videoDetail/index',
+          scene: `id=${this.id}`
         }
+        const { data } = await shareApis.createSharePoster(opts)
+        this.poster = data
+        this.$wxpage.selectComponent('.wow_share').hide()
+        this.posterStatus = true
+        wx.previewImage({
+          current: data,
+          urls: [data]
+        })
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
       }
     }
     events = {
+      handleSharePoster () {
+        this.getSharePoster()
+      },
       handleCloseCommetMask () {
         this.isShowCommetInput = false
         this.isShowControls = true

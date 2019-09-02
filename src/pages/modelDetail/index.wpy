@@ -9,7 +9,7 @@
           </swiper-item>
         </block>
       </swiper>
-      <navigator url="/pages/index/printer" hover-class="none" class="icon-mall">
+      <navigator open-type="switchTab" url="/pages/index/printer" hover-class="none" class="icon-mall">
         <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
       </navigator>
     </view>

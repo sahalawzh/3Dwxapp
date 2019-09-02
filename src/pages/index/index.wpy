@@ -3,64 +3,73 @@
   <view class="page-contain page-index">
     <view class="page-index__bg"></view>
 
-    <view class="page-index__nav wow-flex is-justify-space-around">
-      <view class="nav-item wow-flex is-align-middle" @tap.stop="handleToSearch">
-        <image class="icon" src="../../images/common/btn_bar_search_black.png" mode="aspectFill"></image>
-        <view class="value font-size--30">搜索<view class="active-bar"></view></view>
-      </view>
-      <view class="nav-item wow-flex is-align-middle {{navType === -1 ? 'active' : ''}}" @tap.stop="handleNav({{-1}})">
-        <image class="icon" src="../../images/common/ico_index.png" mode="aspectFill"></image>
-        <view class="value font-size--30">发现<view class="active-bar"></view></view>
-      </view>
-      <view class="nav-item wow-flex is-align-middle {{navType === 1 ? 'active' : ''}}" @tap.stop="handleNav({{1}})">
-        <image class="ico_free" src="../../images/common/ico_free.png" mode="aspectFill"></image>
-        <image class="icon" src="../../images/common/ico_class.png" mode="aspectFill"></image>
-        <view class="value font-size--30">课程<view class="active-bar"></view></view>
-      </view>
-      <view class="nav-item wow-flex is-align-middle {{navType === 'act' ? 'active' : ''}}" @tap.stop="handleNav({{'act'}})">
-        <image class="icon" src="../../images/common/ico_activity.png" mode="aspectFill"></image>
-        <view class="value font-size--30">话题<view class="active-bar"></view></view>
-      </view>
-    </view>
-    <view wx:if="{{bannerAdv && navType === -1}}" @tap.stop="handleGoAdv({{bannerAdv}})" class="page-index__advertising">
-      <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
-    </view>
+    <nav :navType.sync="navType"></nav>
 
-    <view class="page-index__position">
-      <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-icon open-type-btn">
-        <image src="../../images/common/btn_cart_default.png" mode="aspectFill"></image>
-        <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
-      </navigator>
-      <button wx:else data-url="/pages/cart/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="cart-icon open-type-btn">
-        <image src="../../images/common/btn_cart_default.png" mode="aspectFill"></image>
-        <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
-      </button>
-      
-      <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon open-type-btn">
-        <image src="../../images/common/btn_user_normal.png" mode="aspectFill"></image>
-      </navigator>
-      <button wx:else data-url="/pages/person/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="person-icon open-type-btn">
-        <image src="../../images/common/btn_user_normal.png" mode="aspectFill"></image>
-      </button>
+    <advertising
+      :floatAdv.sync="floatAdv"
+      :bannerAdv.sync="bannerAdv"
+      :navType.sync="navType"
+      :isShowFloatAdv.sync="isShowFloatAdv"
+      :stage.sync="stage"
+    ></advertising>
 
-      <button open-type="share" hover-class="none" class="share-icon open-type-btn">
-        <image src="../../images/index/btn_index_share.png" mode="aspectFill"></image>
-      </button>
-    </view>
+    <!-- 发现滚动活动 -->
+    <activityScroll
+      wx:if="{{activityList.length && navType === -1}}"
+      :activityList.sync="activityList"
+    ></activityScroll>
 
-    <view class="adv-float" catchtouchmove="true" wx:if="{{floatAdv && isShowFloatAdv && !stage}}">
-      <view class="adv-mask"></view>
-      <image src="{{floatAdv.image}}" @tap.stop="handleGoAdv({{floatAdv}})" class="adv-img" mode="aspectFill"></image>
-      <icon type="cancel" size="24" color="#fff" class="adv-close" @tap.stop="handleCloseAdv"/>
-    </view>
+    <topicNav
+      :actType.sync="actType"
+      :isShowRedPoint.sync="isShowRedPoint"
+      wx:if="{{navType === 'topic'}}"
+    ></topicNav>
+    
+    <block wx:if="{{actType === 'hot' || (actType === 'follow' && userId)}}">
+      <forumList
+        wx:if="{{forumList.length}}"
+        :lists.sync="forumList"
+      ></forumList>
+    </block>
 
-    <activityList :activityList.sync="activityList" wx:if="{{navType === 'act' && activityList.length}}"></activityList>
-    <videoList :lists.sync="videoActivityList" wx:if="{{videoActivityList.length}}"></videoList>
+    <activityList 
+      :activityList.sync="activityList"
+      wx:if="{{navType === 'topic' && activityList.length && actType === 'activity'}}"
+    ></activityList>
+    
+    <mine
+      :sendNum.sync="sendNum"
+      :saveNum.sync="saveNum"
+      :failNum.sync="failNum"
+      :mineList.sync="mineList"
+      wx:if="{{navType === 'topic' && actType === 'mine' && userId}}"
+    ></mine>
+
+    <block wx:if="{{!userId}}">
+      <button wx:if="{{actType === 'follow' || actType === 'mine'}}" data-type="auth" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--26 auth-btn open-type-btn">{{authButtonText}}</button>
+    </block>
+
+
+    <videoList 
+      :lists.sync="videoActivityList"
+      wx:if="{{videoActivityList.length}}"
+    ></videoList>
+    
     <loading wx:if="{{hasMoreData}}"></loading>
+    
     <view class="empty-list font-size--26" wx:if="{{!hasData}}">暂无相关数据~</view>
+
+    <forumBtn
+      :userId="userId"
+      wx:if="{{actType !== 'activity' && navType === 'topic'}}"
+    ></forumBtn>
+    
+    <silder :userId.sync="userId" :cartNum.sync="cartNum"></silder>
+
     <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
     
     <guideIndex wx:if="{{stage}}" :animation.sync="animation" :stage.sync="stage"></guideIndex>
+
 
   </view>
 </template>
@@ -74,9 +83,19 @@
   import advertisementApis from '../../api/advertisement'
   import guideApis from '../../api/guide'
   import activityApis from '../../api/activity'
-  import CommonMixin from '../../mixins/common'
-  import wxutils from '../../utils/wxutils'
+  import forumApis from '../../api/forum'
+  import commetApis from '../../api/commet'
   import ActivityList from '../../components/activityList'
+  import Silder from './modules/silder'
+  import ActivityScroll from './modules/activityScroll'
+  import ForumList from '../../components/forumList'
+  import Mine from './modules/mine'
+  import TopicNav from './modules/topicNav'
+  import Nav from './modules/nav'
+  import ForumBtn from './modules/forumBtn'
+  import Advertising from './modules/advertising'
+  import { timeHandle } from '../../utils/commentTimeHandle'
+  import CommonMixin from '../../mixins/common'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -85,22 +104,38 @@
         'custom-tabbar': '../../custom-tab-bar/index'
       }
     }
+    mixins = [CommonMixin]
     components = {
       videoList: VideoList,
       loading: Loading,
       guideIndex: GuideIndex,
-      activityList: ActivityList
+      activityList: ActivityList,
+      silder: Silder,
+      activityScroll: ActivityScroll,
+      forumList: ForumList,
+      mine: Mine,
+      topicNav: TopicNav,
+      nav: Nav,
+      advertising: Advertising,
+      forumBtn: ForumBtn
     }
     computed = {
       hasData (val) {
-        if (this.navType === 'act') {
-          return this.activityList.length
+        const { navType, activityList, videoActivityList, actType, forumList, mineList, userId } = this
+        if (navType === 'topic') {
+          if (actType === 'hot') {
+            return forumList.length
+          } else if (actType === 'follow') {
+            return forumList.length || !userId
+          } else if (actType === 'mine') {
+            return mineList.length || !userId
+          }
+          return activityList.length
         } else {
-          return this.videoActivityList.length
+          return videoActivityList.length
         }
       }
     }
-    mixins = [CommonMixin]
     data = {
       isModelIPX: false,
       tabbar: '',
@@ -119,9 +154,59 @@
       navType: -1, // -1 全部 1 课程  act 话题活动
       actStart: 1,
       actLimit: 5,
-      hasActMoreData: false
+      actType: 'hot', // hot 热门 follow 关注 activity 活动 mine 我的
+      forumStart: 1,
+      forumLimit: 7,
+      forumList: [],
+      mineStart: 1,
+      mineLimit: 7,
+      mineList: [],
+      nickname: '',
+      saveNum: '',
+      sendNum: '',
+      failNum: '',
+      isShowRedPoint: false, // 我的红圈
+      authButtonText: '请点这里登录查看'
+    }
+    watch = {
+      actType (val) {
+        this.resetData()
+        switch (val) {
+          case 'hot':
+          case 'follow':
+            if (val === 'follow' && !this.userId) return
+            this.getForumList()
+            break
+          case 'mine':
+            if (!this.userId) return
+            this.getMyForumReply()
+            break
+          case 'activity':
+            this.getListActivity()
+            break
+          default:
+            break
+        }
+      }
     }
     events = {
+      handleNav (type) {
+        this.navType = type
+        this.resetData()
+        if (this.navType === 'topic') {
+          this.getForumList()
+        } else if (this.navType === -1) {
+          this.getListActivity()
+          this.getListVideoActivity()
+        } else {
+          this.getListVideoActivity()
+        }
+      },
+      handleToActivityList () {
+        this.resetData()
+        this.navType = 'topic'
+        this.actType = 'activity'
+      },
       handleToPriner () {
         wx.switchTab({url: '/pages/index/printer'})
         this.stage = 0
@@ -140,6 +225,86 @@
         }
       }
     }
+    async getMyForumReply () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { data: pointDara } = await commetApis.getRedPoint()
+        this.isShowRedPoint = pointDara.isShow === 1
+        let { mineStart, mineLimit, mineList } = this
+        const opts = {
+          start: mineStart,
+          limit: mineLimit
+        }
+        let { data } = await commetApis.getMyForumReply(opts)
+        const { forumVOList, nickname, saveNum, sendNum, failNum } = data
+        if (mineStart === 1) {
+          mineList = []
+        }
+        forumVOList.data.forEach(item => {
+          item.time = timeHandle(item.createTime)
+        })
+        this.mineList = mineList.concat(forumVOList.data)
+        if (forumVOList.data.length < mineLimit) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.mineStart ++
+        }
+        this.nickname = nickname
+        this.saveNum = saveNum
+        this.sendNum = sendNum
+        this.failNum = failNum
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getForumList () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { forumStart, forumLimit, forumList, actType } = this
+        const opts = {
+          start: forumStart,
+          limits: forumLimit
+        }
+        const { data } = await commetApis.getRedPoint()
+        this.isShowRedPoint = data.isShow === 1
+        let result
+        if (actType === 'hot') {
+          const { data: hotData } = await forumApis.listHotForum(opts)
+          result = hotData
+        } else if (actType === 'follow') {
+          const { data: followData } = await forumApis.listFollowForum(opts)
+          result = followData
+        }
+        if (forumStart === 1) {
+          forumList = []
+        }
+        result.data.forEach(item => {
+          item.time = timeHandle(item.createTime)
+        })
+        this.forumList = forumList.concat(result.data)
+        if (this.forumList.length >= result.total) {
+          this.hasMoreData = false
+        } else {
+          this.hasMoreData = true
+          this.forumStart ++
+        }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
     async getListVideoActivity () {
       try {
         wx.showLoading({
@@ -152,13 +317,16 @@
           limits,
           videoType: navType
         }
-        let { data: indexData } = await videoApis.listVideoActivity(opts)
-        const { videoDOList, activityVOList, total } = indexData
+        let { data: indexData } = await videoApis.listVideoForum(opts)
+        const { videoDOList, total, forumVOList } = indexData
         if (start === 1) {
           videoActivityList = []
         }
+        forumVOList.forEach(item => {
+          item.time = timeHandle(item.createTime)
+        })
         if (navType === -1) {
-          this.videoActivityList = [...videoActivityList, ...activityVOList, ...videoDOList]
+          this.videoActivityList = [...videoActivityList, ...forumVOList, ...videoDOList]
         } else {
           this.videoActivityList = [...videoActivityList, ...videoDOList]
         }
@@ -212,9 +380,9 @@
         }
         this.activityList = activityList.concat(actData.data)
         if (actData.data.length < actLimit) {
-          this.hasActMoreData = false
+          this.hasMoreData = false
         } else {
-          this.hasActMoreData = true
+          this.hasMoreData = true
           this.actStart ++
         }
         wx.hideLoading()
@@ -224,57 +392,57 @@
         wx.hideLoading()
       }
     }
-    async onLoad () {
+    handleAuth (userId) {
+      wepy.$instance.globalData.userId = this.userId = userId
+      if (this.actType === 'follow') {
+        this.getForumList()
+      }
+      if (this.actType === 'mine') {
+        this.getMyForumReply()
+      }
+    }
+    onLoad () {
       // 隐藏系统tabbar
       wx.hideTabBar()
       wepy.$instance.editTabbar()
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
       this.getListVideoActivity()
+      this.getListActivity()
       this.getAdvertisement()
       this.getPrintGuide()
+      wepy.$instance.globalData.subpub.on('auth', this.handleAuth, this)
       this.$apply()
     }
     resetData () {
       this.start = 1
       this.actStart = 1
+      this.forumStart = 1
+      this.mineStart = 1
       this.hasMoreData = false
-      this.hasActMoreData = false
       this.activityList = []
       this.videoActivityList = []
+      this.mineList = []
+      this.forumList = []
     }
     onPullDownRefresh () {
       this.resetData()
-      if (this.navType === 'act') {
-        this.getListActivity()
+      if (this.navType === 'topic') {
+        if (this.actType === 'hot' || this.actType === 'follow') {
+          this.getForumList()
+        } else if (this.actType === 'mine') {
+          this.getMyForumReply()
+        } else {
+          this.getListActivity()
+        }
       } else {
         this.getListVideoActivity()
+        this.getListActivity()
       }
       wx.nextTick(() => {
         wx.stopPullDownRefresh()
       })
     }
     methods = {
-      handleNav (type) {
-        this.navType = type
-        this.resetData()
-        if (this.navType === 'act') {
-          this.getListActivity()
-        } else {
-          this.getListVideoActivity()
-        }
-      },
-      handleToSearch () {
-        wxutils.backOrNavigate('/pages/search/index?form=index')
-      },
-      handleGoAdv (item) {
-        const { spuId, linkId, marketingType } = item
-        let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
-        wxutils.backOrNavigate(link)
-        this.isShowFloatAdv = false
-      },
-      handleCloseAdv () {
-        this.isShowFloatAdv = false
-      }
     }
     onShareAppMessage () {
       return {
@@ -284,7 +452,17 @@
     }
     onReachBottom () {
       if (this.hasMoreData) {
-        this.getListVideoActivity()
+        if (this.navType === 'topic') {
+          if (this.actType === 'hot' || this.actType === 'follow') {
+            this.getForumList()
+          } else if (this.actType === 'mine') {
+            this.getMyForumReply()
+          } else {
+            this.getListActivity()
+          }
+        } else {
+          this.getListVideoActivity()
+        }
       }
     }
     onUnload () {

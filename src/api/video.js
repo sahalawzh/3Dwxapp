@@ -55,6 +55,12 @@ export default class video extends base {
     return this.get(`api/video/listVideoActivity`, opts)
   }
   /**
+   * 首页热门话题+视频接口
+   */
+  static listVideoForum (opts) {
+    return this.get(`api/video/listVideoForum`, opts)
+  }
+  /**
    * 视频接口
    */
   static listVideoVO (opts) {

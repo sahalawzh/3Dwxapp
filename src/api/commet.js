@@ -64,4 +64,45 @@ export default class commet extends base {
   static getActivityCommentNum (opts) {
     return this.get(`api/comment/getActivityCommentNum`, opts)
   }
+  /**
+     * 获取我的红点
+    */
+  static getRedPoint (opts) {
+    return this.get(`api/comment/getRedPoint`, opts)
+  }
+  /**
+   * 我的回复
+  */
+  static getMyForumReply (opts) {
+    return this.get(`api/comment/getMyForumReply`, opts)
+  }
+  /**
+   * 话题评论
+  */
+  static getForumComment (opts) {
+    return this.get(`api/comment/getForumComment`, opts)
+  }
+  /**
+   * 话题评论
+   {
+      "commentType": 0,
+      "content": "string",
+      "forumId": 0,
+      "imageIndex": "string",
+      "isEnable": 0,
+      "parentId": 0,
+      "replyId": 0,
+    }
+   */
+  static insertForumComment (opts) {
+    return this.post(`api/comment/insertForumComment`, opts)
+  }
+  /**
+   * {
+      "forumCommentId": 1
+    }
+   */
+  static insertForumCommentReport (opts) {
+    return this.post(`api/comment/insertForumCommentReport`, opts)
+  }
 }

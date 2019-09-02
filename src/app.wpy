@@ -58,7 +58,11 @@ export default class extends wepy.app {
       'pages/publishCommet/index',
       'pages/webView/index',
       'pages/invoiceList/index',
-      'pages/activity/index'
+      'pages/activity/index',
+      'pages/forumDetail/index',
+      'pages/forumPerson/index',
+      'pages/forumSubmit/index',
+      'pages/forumCommet/index'
     ],
     tabBar: {
       backgroundColor: '#ffffff',

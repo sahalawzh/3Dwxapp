@@ -1,0 +1,347 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain forum-detail">
+    <view class="article">
+      <view class="article-header wow-flex is-align-middle">
+        <image src="{{detail.smallAvator}}" class="header" mode="aspectFill"></image>
+        <text class="nickname font-size--32">{{detail.nickname}}</text>
+        <block wx:if="{{!detail.followYourself}}">
+          <button wx:if="{{userId}}" loading="{{isFollowLoading}}" class="open-type-btn follow-btn font-size--24 {{detail.isFollow ? 'follow-btn-on' : '' }}" @tap.stop="handleFollowBtn">{{btnText}}</button>
+          <button wx:else loading="{{isFollowLoading}}" data-type="follow" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="open-type-btn follow-btn font-size--24 {{detail.isFollow ? 'follow-btn-on' : '' }}">{{btnText}}</button>
+        </block>
+        </button>
+        <text class="time font-size--26">{{detail.time}}</text>
+        <navigator url="/pages/index/index" hover-class="none" open-type="switchTab">
+          <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
+        </navigator>
+      </view>
+      <view class="article-content">
+
+        <view class="title font-size--36" wx:if="{{detail.title}}">{{ detail.title }}</view>
+
+        <rich-text nodes="{{detail.content}}"></rich-text>
+
+        <block wx:if="{{detail.hiddenType === 1}}">
+
+          <rich-text wx:if="{{detail.hiddenContent}}" nodes="{{detail.hiddenContent}}"></rich-text>
+          <view class="content-hide font-size--28" wx:else>
+            <text>有隐藏信息，</text>
+            <navigator wx:if="{{ userId }}" url="/pages/forumCommet/index?forumId={{id}}">
+              <text class="tip">回复后可见</text>
+            </navigator>
+            <button wx:else data-url="/pages/forumCommet/index?forumId={{id}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="tip open-type-btn">回复后可见</button>
+          </view>
+        
+        </block>
+
+      </view>
+    </view>
+
+    <!-- 评论 -->
+    <view class="commet-box">
+      <commet
+        :lastpage.sync="lastpage"
+        :isShowCommetInput.sync="isShowCommetInput"
+        :userId.sync="userId"
+        :menuShow.sync="menuShow"
+        :commetList.sync="commetList"
+        :commetTotal.sync="commetTotal"
+      ></commet>
+    </view>
+
+    <view class="controls wow-flex is-justify-space-between">
+      <navigator wx:if="{{ userId }}" url="/pages/forumCommet/index?forumId={{id}}&replyId={{detail.followId}}">
+        <image class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      </navigator>
+      <button wx:else data-url="/pages/forumCommet/index?forumId={{id}}&replyId={{detail.followId}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+        <image class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      </button>
+      <view class="wow-flex">
+        <image @tap.stop="handleShareItems" class="icon ico_share" src="../../images/common/ico_share.png" mode="aspectFill"></image>
+        <view class="collect-box">
+          <view class="collect-num font-size--24" wx:if="{{collectionNum}}">{{collectionNum}}</view>
+          <image wx:if="{{userId}}" @tap.stop="handleToCollect" class="icon" src="../../images/common/btn_collection{{ isCollection === 1 ? '_on' : ''}}.png" mode="aspectFill"></image>
+          <button wx:else data-type="collect" data-id="{{id}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+            <image class="icon" src="../../images/common/btn_collection.png" mode="aspectFill"></image>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <share></share>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import forumApis from '../../api/forum'
+  import commetApis from '../../api/commet'
+  import collectApis from '../../api/collect'
+  import { timeHandle } from '../../utils/commentTimeHandle'
+  import CommonMixin from '../../mixins/common'
+  import Commet from '../../components/commet'
+  import Share from '../../components/share'
+  import wxutils from '../../utils/wxutils'
+  import shareApis from '../../api/share'
+  export default class ForumDetail extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      enablePullDownRefresh: true,
+      usingComponents: {
+        'wow-popup': '../../packages/popup/index'
+      }
+    }
+    data = {
+      lastpage: 'forum',
+      userId: '',
+      id: '',
+      detail: '',
+      isFollowLoading: false,
+      collectionNum: '',
+      commetList: [],
+      commetTotal: '',
+      isShowCommetInput: false,
+      isShowControls: true,
+      isCollection: false,
+      sendInfo: '',
+      menuShow: false
+    }
+    mixins = [CommonMixin]
+    components = {
+      commet: Commet,
+      share: Share
+    }
+    computed = {
+      btnText () {
+        return this.detail.isFollow === 1 ? '已关注' : '关注'
+      }
+    }
+    onPageScroll (e) {
+      if (!this.menuShow) return
+      this.menuShow = false
+      this.$apply()
+    }
+    onShareAppMessage () {
+      const { id, detail } = this
+      this.$wxpage.selectComponent('.wow_share').hide()
+      return {
+        title: detail.title,
+        path: 'pages/forumDetail/index?id=' + id
+      }
+    }
+    events = {
+      handleSharePoster () {
+        this.getSharePoster()
+      },
+      handleMenu (current) {
+        const { type, index } = current
+        const { id, commetList } = this
+        const { nickname, id: commetId, content, replyId } = commetList[index]
+        switch (type) {
+          case 'reply':
+            wxutils.backOrNavigate(`/pages/forumCommet/index?forumId=${id}&nickname=${nickname}&parentId=${commetId}&replyId=${replyId}`)
+            this.menuShow = false
+            this.$apply()
+            break
+          case 'copy':
+            const that = this
+            wx.setClipboardData({
+              data: content,
+              success(res) {
+                wx.getClipboardData({
+                  success(res) {
+                    that.menuShow = false
+                    wx.showToast({
+                      title: '复制成功'
+                    })
+                    that.$apply()
+                  }
+                })
+              }
+            })
+            break
+          case 'report':
+            this.handleCommetReport(commetId)
+            break
+          default:
+            break
+        }
+      }
+    }
+    async getSharePoster () {
+      try {
+        wx.showLoading({
+          title: '生成中',
+          mask: true
+        })
+        const opts = {
+          type: 'forum',
+          id: this.id,
+          page: 'pages/forumDetail/index',
+          scene: `id=${this.id}`
+        }
+        const { data } = await shareApis.createSharePoster(opts)
+        this.$wxpage.selectComponent('.wow_share').hide()
+        wx.previewImage({
+          current: data,
+          urls: [data]
+        })
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async handleCommetReport (commetId) {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const that = this
+        const opts = {
+          forumCommentId: commetId
+        }
+        await commetApis.insertForumCommentReport(opts)
+        wx.hideLoading()
+        wx.nextTick(() => {
+          wx.showToast({
+            title: `举报成功`,
+            success: function () {
+              setTimeout(() => {
+                that.menuShow = false
+                that.$apply()
+                wx.hideToast()
+              }, 1000)
+            }
+          })
+        })
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    async getForumDetail () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const opts = {
+          forumId: this.id
+        }
+        const { data: commetData } = await commetApis.getForumComment(opts)
+        commetData.data.length && commetData.data.forEach(item => {
+          item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
+        })
+        commetData.data.forEach(item => {
+          item.isShowMenu = false
+        })
+        this.commetList = commetData.data
+        this.commetTotal = commetData.total
+        const { data } = await forumApis.getForumDetail(opts)
+        let content = data.content
+        let hiddenContent = data.hiddenContent
+        const formatHtml = function (html) {
+          let result = html
+          if (/<ul><li>(.*?)<\/li><\/ul>/gi.test(result)) {
+            result = html.replace(/<ul><li>(.*?)<\/li><\/ul>/gi, function (match, capture) {
+              return `<h4 style="font-size:16px;margin-top:8px;">· ${capture}</h4>`
+            })
+          }
+          if (/<p/gi.test(result)) {
+            result = result.replace(/<p/gi, '<p style="color:#373737;text-align:justify;"')
+          }
+          if (/<img/gi.test(result)) {
+            result = result.replace(/<img/gi, '<img style="width:100%;height:auto;margin-top:9px;margin-bottom:9px;"').replace(/<img[^>]*>/gi, function (match, capture) {
+              return `<br/>${match}`
+            })
+          }
+          return result
+        }
+        data.content = formatHtml(content)
+        data.hiddenContent = formatHtml(hiddenContent)
+        data.time = timeHandle(data.createTime)
+        this.detail = data
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    async handleCollect (userId, id) {
+      try {
+        wepy.$instance.globalData.userId = this.userId = userId
+        const { id: forumId } = this
+        this.id = id || forumId
+        const opts = {
+          forumId: this.id
+        }
+        const { data, msg } = await collectApis.insertForumCollection(opts)
+        this.isCollection = data.isCollection
+        this.collectionNum = data.num
+        wx.showToast({
+          title: msg,
+          duration: 1000
+        })
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    onLoad ({id}) {
+      this.id = id
+      this.getForumDetail()
+      wepy.$instance.globalData.subpub.on('collect', this.handleCollect, this)
+      wepy.$instance.globalData.subpub.on('follow', this.handleFollow, this)
+    }
+    handleFollow (userId) {
+      wepy.$instance.globalData.userId = this.userId = userId
+      this.handleToFollow()
+    }
+    async handleToFollow () {
+      try {
+        const { detail } = this
+        if (this.isFollowLoading) return
+        this.isFollowLoading = true
+        const opts = {
+          followId: detail.followId
+        }
+        const { data } = await forumApis.insertFollow(opts)
+        setTimeout(() => {
+          this.detail.isFollow = data.isFollow
+          this.isFollowLoading = false
+          this.$apply()
+        }, 200)
+        wx.hideLoading()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    methods = {
+      handleShareItems () {
+        this.$broadcast('handleShowSharePopup')
+      },
+      handleToCollect () {
+        this.handleCollect()
+      },
+      handleFollowBtn () {
+        this.handleToFollow()
+      }
+    }
+    onPullDownRefresh () {
+      this.getForumDetail()
+      wx.nextTick(() => {
+        wx.stopPullDownRefresh()
+      })
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/forumDetail/common.postcss';
+</style>

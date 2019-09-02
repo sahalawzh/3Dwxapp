@@ -1,0 +1,46 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="activity-list">
+    <view class="activity-header wow-flex is-align is-justify-space-between">
+      <view class="title font-size--34">精选活动</view>
+      <view class="enter font-size--26" @tap.stop="handleToActivityList">所有活动</view>
+    </view>
+    <view class="activity-content">
+      <scroll-view class="activity-scroll" scroll-x="true">
+        <navigator class="activity-item" wx:for="{{activityList}}" wx:key="index" url="/pages/activity/index?linkId={{item.id}}">
+          <image class="activity-img" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
+        </navigator>
+      </scroll-view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class ActivityScroll extends wepy.component {
+    props = {
+      activityList: Array
+    }
+    data = {
+      status: {
+        0: '未开始',
+        1: '进行中',
+        2: '已结束'
+      }
+    }
+
+    events = {
+    }
+
+    methods = {
+      handleToActivityList () {
+        this.$emit('handleToActivityList')
+      }
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

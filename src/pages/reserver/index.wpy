@@ -66,11 +66,11 @@
           <view>商品金额</view>
           <view>￥{{ bill.spuPrice}}</view>
         </view>
-        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between">
+        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between" wx:if="{{bill.totalMailing}}">
           <view>运费</view>
           <view class="color-price">+￥{{ bill.totalMailing }}</view>
         </view>
-        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between" wx:if="{{!bill.mailing}}">
+        <view class="detail-box__item wow-flex is-align-middle is-justify-space-between" wx:if="{{!bill.mailing && bill.totalMailing}}">
           <view>满200包邮</view>
           <view class="color-price">-￥{{ bill.totalMailing }}</view>
         </view>
@@ -157,7 +157,7 @@
         this.bill = {
           spuPrice,
           mailing: Number(mailing),
-          totalMailing,
+          totalMailing: Number(totalMailing),
           reducePrice
         }
         console.log(this.bill)

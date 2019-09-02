@@ -1,7 +1,8 @@
 /* eslint-disable */
-function commentTimeHandle(dateStr) {
+export function timeHandle (dateStr) {
     // dateStr = 2018-09-06 18:47:00" 测试时间
     // console.log(dateStr)
+    dateStr = dateStr.replace(/-/g, '/')
     var publishTime = Date.parse(dateStr) / 1000,  //获取dataStr的秒数  打印结果--1536230820000
         date = new Date(dateStr), //获取dateStr的标准格式 console.log(date) 打印结果  Thu Sep 06 2018 18:47:00 GMT+0800 (中国标准时间)
         // 获取date 中的 年 月 日 时 分 秒
@@ -56,7 +57,4 @@ function commentTimeHandle(dateStr) {
     } else if (diff_days >= 30) {
         return Y + '-' + M + '-' + D + ' ' + H + ':' + m;
     }
-}
-module.exports = {
-    timeHandle: commentTimeHandle
 }

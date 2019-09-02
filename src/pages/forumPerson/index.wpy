@@ -1,0 +1,207 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain forum-person">
+    <view class="person-header wow-flex">
+      <image src="{{smallAvator}}" class="smallAvator" mode="aspectFill"></image>
+      <view class="info">
+        <view class="font-size--32 nickname">{{nickname}}</view>
+        <view class="wow-flex is-align-middle font-size--36 sticky-wrap">
+          <view>{{sendNum}}篇发表</view>
+          <view class="solid">·</view>
+          <view>{{saveNum}}篇草稿</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="person-list" wx:if="{{mineList.length}}">
+      <view class="person-list__item" wx:for="{{mineList}}" wx:key="index" @tap.stop="handleDetail({{item}})">
+        <view class="rich-content">
+          <view class="font-size--26 remark-box" wx:if="{{item.forumStatus === 3 && item.remark}}"><text>原因：</text>{{item.remark}}</view>
+          <view class="font-size--36 title" wx:if="{{item.title}}">{{item.title}}</view>
+          <view class="font-size--28 content {{item.title ? 'has-title' : ''}}">{{item.content}}</view>
+          <view class="imgs" wx:if="{{item.showImage}}">
+            <image @tap.stop="handleImagePreview({{item.showImage}})" src="{{item.showImage}}" class="imgs-single" mode="aspectFill"></image>
+          </view>
+          <view class="footer font-size--24 wow-flex is-align-middle is-justify-space-between">
+            <view class="action-box wow-flex is-align-middle" wx:if="{{item.forumStatus === 2}}">
+              <view>收藏 {{item.collectionNum}}</view>
+              <view class="solid">·</view>
+              <view>评论 {{item.commentNum}}</view>
+            </view>
+            <view>{{item.time}}</view>
+          </view>
+        </view>
+        <view class="status font-size--24 status-{{item.forumStatus}}">{{item.statustxt}}</view>
+        <image class="btn-delete" @tap.stop="handleDelDraft({{item.id}})" wx:if="{{item.forumStatus === 0}}" src="../../images/common/btn_delete.png" mode="aspectFill"></image>
+      </view>
+    </view>
+  
+    <loading wx:if="{{hasMoreData}}"></loading>
+
+    <issue :userId="userId"></issue>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import forumApis from '../../api/forum'
+  import Loading from '../../components/loading'
+  import { timeHandle } from '../../utils/commentTimeHandle'
+  import wxutils from '../../utils/wxutils'
+  import Issue from './modules/issue'
+  const forumTag = {
+    0: '草稿',
+    1: '审核中',
+    2: '已发表',
+    3: '不通过'
+  }
+  export default class ForumPerson extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维',
+      enablePullDownRefresh: true
+    }
+    components = {
+      loading: Loading,
+      issue: Issue
+    }
+    methods = {
+      handleDetail (item) {
+        const { forumStatus, id } = item
+        let url
+        switch (forumStatus) {
+          case 0:
+          case 3:
+            url = `/pages/forumSubmit/index?id=${id}`
+            break
+          case 2:
+            url = `/pages/forumDetail/index?id=${id}`
+            break
+          default:
+            break
+        }
+        wxutils.backOrNavigate(url)
+      },
+      handleDelDraft (id) {
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '是否确认删除草稿？',
+          success (res) {
+            if (res.confirm) {
+              that.removeDraft(id)
+            }
+          }
+        })
+      },
+      handleImagePreview (img) {
+        wx.previewImage({
+          current: img, // 当前预览的图片
+          urls: [img] // 所有要预览的图片
+        })
+      }
+    }
+    updateData () {
+      this.getForumPerson()
+    }
+    onLoad () {
+      this.getForumPerson()
+      wepy.$instance.globalData.subpub.on('updateData', this.updateData, this)
+    }
+    async removeDraft (id) {
+      try {
+        wx.showLoading({
+          title: '删除中',
+          mask: true
+        })
+        const opts = {
+          id,
+          forumStatus: 0
+        }
+        await forumApis.removeTheDraft(opts)
+        this.getForumPerson()
+        wx.hideLoading()
+        wx.nextTick(() => {
+          wx.showToast({
+            title: `删除成功`,
+            success: function () {
+              setTimeout(() => {
+                wx.hideToast()
+              }, 1000)
+            }
+          })
+        })
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    async getForumPerson () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        let { mineStart, mineLimit, mineList } = this
+        const opts = {
+          start: mineStart,
+          limit: mineLimit
+        }
+        let { data } = await forumApis.listMyForum(opts)
+        const { forumVOList, nickname, saveNum, sendNum, smallAvator } = data
+        if (mineStart === 1) {
+          mineList = []
+        }
+        forumVOList.data.forEach(item => {
+          if (item.image.length) {
+            item.showImage = item.image[0]
+          }
+          item.time = timeHandle(item.createTime)
+          item.statustxt = forumTag[item.forumStatus]
+        })
+        this.mineList = mineList.concat(forumVOList.data)
+        if (forumVOList.data.length < mineLimit) {
+          this.hasActMoreData = false
+        } else {
+          this.hasActMoreData = true
+          this.mineStart ++
+        }
+        this.nickname = nickname
+        this.smallAvator = smallAvator
+        this.saveNum = saveNum
+        this.sendNum = sendNum
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    onPullDownRefresh () {
+      this.getForumPerson()
+      wx.nextTick(() => {
+        wx.stopPullDownRefresh()
+      })
+    }
+    data = {
+      userId: '',
+      mineStart: 1,
+      mineLimit: 7,
+      mineList: [],
+      nickname: '',
+      saveNum: '',
+      sendNum: '',
+      smallAvator: '',
+      hasActMoreData: false
+    }
+    onHide () {
+    }
+    onShow () {
+      if (wepy.$instance.globalData.userId) {
+        this.userId = wepy.$instance.globalData.userId
+      }
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/forumPerson/common.postcss';
+</style>

@@ -8,7 +8,7 @@ export default class CommonMixin extends wepy.mixin {
     encryptedData: '',
     iv: '',
     url: '',
-    userId: '',
+    userId: wepy.$instance.globalData.userId || '',
     authType: '',
     userInfo: wepy.$instance.globalData.userInfo || '',
     target: '',
@@ -22,7 +22,7 @@ export default class CommonMixin extends wepy.mixin {
   onLoad () {
   }
   onShow () {
-    const userId = wx.getStorageSync('wow').userId
+    const userId = wepy.$instance.globalData.userId
     this.userId = userId
     if (this.userId) {
       this.getCartNum()

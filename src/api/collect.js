@@ -63,4 +63,10 @@ export default class collect extends base {
   static getTheVideoCollection (opts) {
     return this.get(`api/collection/getTheVideoCollection`, opts)
   }
+  /**
+   * 话题收藏
+   */
+  static insertForumCollection (opts) {
+    return this.post(`api/collection/insertForumCollection`, opts)
+  }
 }

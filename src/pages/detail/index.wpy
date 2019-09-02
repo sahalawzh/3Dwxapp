@@ -112,7 +112,8 @@
       enablePullDownRefresh: true,
       usingComponents: {
         'wow-popup': '../../packages/popup/index',
-        'wow-stepper': '../../packages/stepper/index'
+        'wow-stepper': '../../packages/stepper/index',
+        'wow-elip': '../../packages/elip/index'
       }
     }
     components = {
@@ -220,7 +221,7 @@
         console.log(error)
       }
     }
-    async getRelatedProducts () { 
+    async getRelatedProducts () {
       try {
         let opts = {
           spuId: this.pid
@@ -313,14 +314,16 @@
             return
           }
           await cartApis.addToCart(opts)
-          this.isRuleTrue = false
-          this.cartNum = 2
+          const that = this
           wx.showToast({
             title: '添加购物车成功',
             icon: 'success',
-            duration: 2000
+            success () {
+              that.isRuleTrue = false
+              wxutils.backOrNavigate('/pages/cart/index')
+            }
           })
-          this.$apply()
+          that.$apply()
         } catch (error) {
           console.log(error)
           wx.showToast({

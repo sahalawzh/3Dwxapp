@@ -60,7 +60,7 @@
     </view>
 
     <!-- 分享 -->
-    <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
+    <!-- <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
       <view class="share-box">
         <view class="share-box__item" @tap.stop="handleSharePoster">
           <image class="ico_share_img" src="../../images/common/ico_share_img.png" mode="aspectFill"></image>
@@ -72,7 +72,8 @@
           </button>
         </view>
       </view>
-    </wow-popup>
+    </wow-popup> -->
+    <share></share>
 
     <!-- 选择 -->
     <wow-popup class="j_select popup-picker" border-radius="false" full="false" gaps="{{[0]}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
@@ -105,6 +106,7 @@
   import CommonMixin from '../../mixins/common'
   import imageUtil from '../../utils/image'
   import Commet from '../../components/commet'
+  import Share from '../../components/share'
   import { parseQueryString } from '../../utils/utils'
   import commetApis from '../../api/commet'
   import { timeHandle } from '../../utils/commentTimeHandle'
@@ -133,7 +135,8 @@
       }
     }
     components = {
-      commet: Commet
+      commet: Commet,
+      share: Share
     }
     mixins = [CommonMixin]
     config = {
@@ -256,6 +259,9 @@
       return errVaild
     }
     events = {
+      handleSharePoster () {
+        this.getSharePoster()
+      },
       handleCloseCommetMask () {
         this.isShowCommetInput = false
         this.isShowControls = true
@@ -284,6 +290,32 @@
         } catch (error) {
           wx.hideLoading()
         }
+      }
+    }
+    async getSharePoster () {
+      try {
+        wx.showLoading({
+          title: '生成中',
+          mask: true
+        })
+        const { linkId, linkType } = this.activityData
+        const opts = {
+          type: 'activity',
+          id: this.linkId,
+          page: 'pages/activity/index',
+          scene: `linkId=${linkId}`
+        }
+        const { data } = await shareApis.createSharePoster(opts)
+        this.$wxpage.selectComponent('.wow_share').hide()
+        wx.previewImage({
+          current: data,
+          urls: [data]
+        })
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
       }
     }
     methods = {
@@ -373,34 +405,8 @@
         let $popup = this.$wxpage.selectComponent('.j_select')
         $popup && $popup.show()
       },
-      async handleSharePoster () {
-        try {
-          wx.showLoading({
-            title: '生成中',
-            mask: true
-          })
-          const { linkId, linkType } = this.activityData
-          const opts = {
-            type: 'activity',
-            id: this.linkId,
-            page: 'pages/activity/index',
-            scene: `linkId=${linkId}`
-          }
-          const { data } = await shareApis.createSharePoster(opts)
-          this.$wxpage.selectComponent('.wow_share').hide()
-          wx.previewImage({
-            current: data,
-            urls: [data]
-          })
-          wx.hideLoading()
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-          wx.hideLoading()
-        }
-      },
       handleShareItems () {
-        this.$wxpage.selectComponent('.wow_share').show()
+        this.$broadcast('handleShowSharePopup')
       },
       handleShowCommetInput () {
         this.handleActivityCommet()

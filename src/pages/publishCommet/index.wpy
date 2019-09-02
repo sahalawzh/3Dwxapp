@@ -169,7 +169,7 @@
                   'Content-Type': 'multipart/form-data'
                 },
                 formData: {
-                  'fileType': 'comment'
+                  'fileType': 0
                 },
                 success: function (res) {
                   resolve(JSON.parse(res.data).data)

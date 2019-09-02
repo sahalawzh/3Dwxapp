@@ -1,13 +1,73 @@
 @import '../mixins/common.postcss';
 .video-lists {
+  padding: 0 52rpx;
+  .forum-item {
+    position: relative;
+    margin-bottom: 52rpx;
+    &__header {
+      margin-bottom: 16rpx;
+      .header {
+        width: 48rpx;
+        height: 48rpx;
+        border-radius: 50%;
+        margin-right: 14rpx;
+      }
+      .nickname {
+        color: #464646;
+      }
+    }
+    &__content {
+      .title {
+        color: #333;
+        font-weight: 600;
+        margin-left: -12rpx;
+      }
+      .content {
+        color: #333;
+        .showtext {
+          color: #6d90dd;
+        }
+      }
+      .hot {
+        width: 30rpx;
+        height: 30rpx;
+        margin-left: 8rpx;
+      }
+      .imgs {
+        margin-top: 20rpx;
+        flex-wrap: wrap;
+        &-single {
+          width: 432rpx;
+          height: 336rpx;
+          border-radius: 6rpx;
+        }
+        &-more {
+          width: 204rpx;
+          height: 204rpx;
+          border-radius: 6rpx;
+          margin: 0 8rpx 8rpx 0;
+        }
+      }
+    }
+    &__footer {
+      position: relative;
+      color: #bdbfc6;
+      margin-top: 18rpx;
+      .action-box {
+        .solid {
+          padding: 0 24rpx;
+        }
+      }
+    }
+  }
   .video-item {
     position: relative;
-    margin: 50rpx 52rpx 64rpx;
+    margin: 40rpx 0 64rpx;
     .title {
       color: #333;
       font-weight: 600;
-      margin-top: 14rpx;
-      margin-bottom: 10rpx;
+      margin-top: 22rpx;
+      margin-bottom: 4rpx;
       letter-spacing: 1rpx;
       @mixin ellipsis 2;
     }

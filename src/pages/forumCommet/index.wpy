@@ -1,0 +1,205 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-commet">
+    <form bindsubmit="handleCreatCommet">
+      <view class="commet-wrap">
+        
+        <view class="commet-content">
+          <textarea class="font-size--28 commet-content__area" name="commet" maxlength="200" placeholder="{{placeholderText}}"/>
+          <view class="commet-content__upload">
+            <view class="upload-imgs wow-flex" wx:if="{{uploadImgs.length}}">
+              <view class="upload-imgs__item" wx:for="{{uploadImgs}}" wx:key="index">
+                <icon type="clear" size="20" class="upload-clear" @tap.stop="handleRemoveImg({{index}})"/>
+                <image class="upload-img" @tap.stop="handleImagePreview({{index}})" src="{{item}}" mode="aspectFill"></image>
+              </view>
+            </view>
+            <image class="icon-upload" @tap.stop="handleToUpload" src="../../images/common/btn_evaluate_addimg.png" mode="aspectFill"></image>
+          </view>
+        </view>
+
+        
+        <view class="footer">
+          <button class="footer-btn font-size--28" form-type="submit">提交</button>
+        </view>
+      </view>
+
+    </form>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import commetApis from '../../api/commet'
+  import wxutils from '../../utils/wxutils'
+  import CommonMixin from '../../mixins/common'
+  export default class ForumCommet extends wepy.page {
+    config = {
+      navigationBarTitleText: '话题评论'
+    }
+    data = {
+      userId: '',
+      uploadImgs: [],
+      image: '',
+      placeholderText: '',
+      forumId: '',
+      nickname: '',
+      parentId: '',
+      replyId: '',
+      commetContent: ''
+    }
+    mixins = [CommonMixin]
+    onLoad ({ forumId, nickname, parentId, replyId }) {
+      this.userId = wepy.$instance.globalData.userId
+      this.forumId = forumId
+      if (nickname) {
+        this.placeholderText = `回复：${nickname}`
+      } else {
+        this.placeholderText = `此刻我也有话要说...`
+      }
+      this.nickname = nickname
+      this.parentId = parentId
+      this.replyId = replyId
+    }
+    async insertForumComment (uploadsId) {
+      try {
+        wx.showLoading({
+          title: '提交中',
+          mask: true
+        })
+        const { forumId, parentId, replyId, commetContent } = this
+        const opts = {
+          commentType: 0,
+          content: commetContent,
+          forumId,
+          parentId: parentId || 0,
+          replyId
+        }
+        if (uploadsId) {
+          opts.imageIndex = uploadsId.join('_')
+        }
+        await commetApis.insertForumComment(opts)
+        wx.hideLoading()
+        const that = this
+        wx.nextTick(() => {
+          wx.showToast({
+            title: `提交成功`,
+            success: function () {
+              setTimeout(() => {
+                wxutils.backOrRedirect(`/pages/forumDetail/index?id=${forumId}`)
+                that.$apply()
+                wx.hideToast()
+              }, 1000)
+            }
+          })
+        })
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    }
+    methods = {
+      handleImagePreview (idx) {
+        wx.previewImage({
+          current: this.uploadImgs[idx], // 当前预览的图片
+          urls: this.uploadImgs // 所有要预览的图片
+        })
+      },
+      handleCreatCommet (e) {
+        let { commet } = e.detail.value
+        commet = commet.trim()
+        this.commetContent = commet
+        if (!commet) {
+          return wx.showToast({
+            title: '评论信息不能为空',
+            icon: 'none'
+          })
+        }
+
+        if (this.uploadImgs.length) {
+          wx.showLoading({
+            title: '上传中',
+            mask: true
+          })
+          let uploads = []
+          this.uploadImgs.map((item, index) => {
+            uploads[index] = new Promise((resolve, reject) => {
+              wx.uploadFile({
+                url: wepy.$instance.globalData.baseUrl + '/api/file/upload',
+                filePath: item,
+                name: 'file',
+                header: {
+                  'token': wepy.$instance.globalData.Token,
+                  'Content-Type': 'multipart/form-data'
+                },
+                formData: {
+                  'fileType': 0
+                },
+                success: function (res) {
+                  resolve(JSON.parse(res.data).data)
+                },
+                fail: function (error) {
+                  reject(error)
+                }
+              })
+            })
+          })
+          Promise.all(uploads).then((result) => {
+            let uploadsId = []
+            let arr = [].concat.apply([], result)
+            arr.forEach(element => {
+              uploadsId.push(element.id)
+            })
+            console.log(uploadsId)
+            wx.hideLoading()
+            this.insertForumComment(uploadsId)
+          }).catch((err) => {
+            console.log(err)
+            wx.hideLoading()
+            wx.showToast({
+              title: '图片上传失败',
+              icon: 'none'
+            })
+          })
+        } else {
+          this.insertForumComment()
+        }
+      },
+      handleRemoveImg (index) {
+        this.uploadImgs.splice(index, 1)
+      },
+      async handleToUpload () {
+        const that = this
+        wx.chooseImage({
+          count: 5,
+          success: function(res) {
+            const { errMsg, tempFilePaths, tempFiles } = res
+            if (errMsg === 'chooseImage:ok') {
+              const MAXSIZE = 2000000
+              let isLimit = tempFiles.some(item => item.size > MAXSIZE)
+              if (isLimit) {
+                wx.showToast({
+                  title: '上传图片不能大于2M!',
+                  icon: 'none'
+                })
+              } else {
+                const MAX = 5
+                const images = that.uploadImgs.concat(tempFilePaths)
+                that.uploadImgs = images.length <= MAX ? images : images.slice(0, MAX)
+                that.$apply()
+              }
+            }
+          }
+        })
+      }
+    }
+    onUnload () {
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/forumCommet/common.postcss';
+</style>

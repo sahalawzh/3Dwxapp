@@ -16,7 +16,7 @@
   }
   &__nav {
     position: relative;
-    padding: 44rpx 58rpx 6rpx;
+    padding: 38rpx 58rpx 6rpx;
     color: #5c626b;
     .nav-item {
       position: relative;
@@ -37,6 +37,7 @@
           color: #333;
           font-weight: 600;
           font-size: 42rpx;
+          margin-top: -6rpx;
         }
         .active-bar {
           height: 14rpx;
@@ -137,5 +138,196 @@
     margin-top: 60rpx;
     text-align: center;
     z-index: 998;
+  }
+  .activity-list {
+    position: relative;
+    padding: 32rpx 0 48rpx 52rpx;
+    .activity-header {
+      margin-bottom: 14rpx;
+      margin-right: 52rpx;
+      .title {
+        color: #373737;
+        font-weight: 600;
+      }
+      .enter {
+        color: #5c626b;
+      }
+    }
+    .activity-content {
+      position: relative;
+      z-index: 2;
+      .activity-scroll {
+        display: flex;
+        white-space: nowrap;
+        .activity-item {
+          position: relative;
+          width: 310rpx;
+          height: 241rpx;
+          border-radius: 10rpx;
+          overflow: hidden;
+          display: inline-block;
+          margin-right: 18rpx;
+          &:last-child {
+            margin-right: 52rpx;
+          }
+          .activity-img {
+            width: 100%;
+            height: 100%;
+          }
+        }
+      }
+      .activity-status {
+        position: absolute;
+        right: 18rpx;
+        bottom: 18rpx;
+        width: 130rpx;
+        height: 48rpx;
+        line-height: 48rpx;
+        text-align: center;
+        background-color: #aec7ee;
+        color: #000300;
+        border-radius: 12rpx;
+        z-index: 18;
+        &__end {
+          background-color: #fff;
+          color: #a2a2a2;
+        }
+        &__start {
+          background-color: #65F8AE;
+        }
+      }
+    }
+  }
+  .topic-nav {
+    margin: 34rpx 58rpx 30rpx;
+    &__item {
+      position: relative;
+      color: #9a9a9a;
+      margin-right: 42rpx;
+      font-weight: 600;
+      line-height: 50rpx;
+      .circle {
+        position: absolute;
+        width: 9rpx;
+        height: 9rpx;
+        top: 4rpx;
+        right: -8rpx;
+        border-radius: 50%;
+        background-color: #da196b;
+      }
+      &.on {
+        background-color: #dadbe6;
+        color: #4a4a4a;
+        width: 122rpx;
+        height: 50rpx;
+        box-sizing: border-box;
+        text-align: center;
+        border-radius: 6rpx;
+        .circle {
+          top: 6rpx;
+          right: 16rpx;
+        }
+      }
+    }
+  }
+  .mine-list {
+    .update-wrap {
+      position: relative;
+      display: inline-block;
+      margin-top: 30rpx;
+      margin-bottom: 60rpx;
+    }
+    .update-box {
+      height: 80rpx;
+      padding: 0 44rpx 0 42rpx;
+      color: #fff;
+      background-color: #1360e1;
+      border-radius: 10rpx;
+      .ico_edit {
+        width: 26rpx;
+        height: 28rpx;
+        margin-right: 12rpx;
+      }
+      .solid {
+        margin: 0 14rpx;
+      }
+      text {
+        font-weight: 600;
+      }
+      .warn-text {
+        color: #ffd889;
+      }
+    }
+    .content {
+      position: relative;
+      padding: 0 60rpx 0 56rpx;
+      &-item {
+        margin-bottom: 66rpx;
+        .smallAvator {
+          width: 48rpx;
+          height: 48rpx;
+          border-radius: 50%;
+          margin-right: 12rpx;
+        }
+        .nickname {
+          color: #4a4a4a;
+        }
+        .title {
+          color: #333;
+          margin-top: 20rpx;
+          &-big {
+            font-weight: 600;
+          }
+        }
+        .replay-label {
+          color: #4b4b4c;
+          font-weight: 600;
+          margin-top: 38rpx;
+        }
+        .footer {
+          position: relative;
+          color: #bdbfc6;
+          margin-top: 36rpx;
+          .action-box {
+            .solid {
+              padding: 0 24rpx;
+            }
+          }
+        }
+      }
+      .replay-label {
+        color: #4b4b4c;
+        font-weight: 600;
+        margin-top: 38rpx;
+      }
+      .replay-content {
+        color: #989898;
+        padding: 26rpx 0 32rpx;
+        border-bottom: 1rpx solid #d1d1d1;
+      }
+      &-commet {
+        color: #484848;
+        margin-top: 30rpx;
+      }
+    }
+  }
+  .auth-btn {
+    color: #fff;
+    background-color: #1360e1;
+    padding: 14rpx 26rpx;
+    margin-top: 60rpx;
+  }
+  .edit-box {
+    position: fixed;
+    bottom: 290rpx;
+    left: calc((100% - 152rpx)/2);
+    width: 152rpx;
+    height: 152rpx;
+    z-index: 199;
+    background-color: transparent;
+    .btn_edit {
+      width: 100%;
+      height: 100%;
+    }
   }
 }

@@ -1,0 +1,287 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain forum-submit">
+    <form bindsubmit="handleToSubmit">
+      <view class="forum-main">
+        <view class="title">
+          <input type="text" value="{{title}}" name="title" class="font-size--36 title-input" placeholder-class="title-input__placeholder" placeholder="输入标题更容易被推荐（非必填）">
+        </view>
+
+        <view class="main">
+          <editor
+            id="editor"
+            class="main-container font-size--28"
+            placeholder="积极参与站内的热门话题，你的发布更容易被推荐哦"
+            showImgSize
+            showImgToolbar
+            showImgResize
+            bindblur="handleBlur"
+            bindinput="handleInput"
+            bindfocus="handleFocus"
+            bindstatuschange="onStatusChange"
+            bindready="onEditorReady">
+        </view>
+
+        <view class="tip font-size--30">- 关闭信息回复可见内容</view>
+
+        <editor
+          id="hideContent"
+          class="container-part font-size--28"
+          placeholder="如信息需要设置隐藏并回复可见，请在此添加"
+          showImgSize
+          showImgToolbar
+          showImgResize
+          bindfocus="handleFocus"
+          bindblur="handleBlur"
+          bindinput="handleInput"
+          bindstatuschange="onStatusChange"
+          bindready="onEditorReady">
+
+      </view>
+      
+      <view class="footer wow-flex is-justify-space-between">
+        <view class="wow-flex edit-box" @tap.stop="handleFormat">
+          <image src="../../images/forum/btn_editor_img.png" @tap.stop="handleInsertImage" class="icon" mode="aspectFill"></image>
+          <image src="../../images/forum/btn_editor_title.png" data-name="list" data-value="bullet" class="icon" mode="aspectFill"></image>
+        </view>
+        <view class="wow-flex action-box">
+          <button class="wow-flex is-align-middle save-btn open-type-btn" id="save" form-type="submit">
+            <view class="font-size--30">保存</view>
+            <image src="../../images/forum/ico_editor_save.png" class="ico_edit" mode="aspectFill"></image>
+          </button>
+          <button class="wow-flex is-align-middle submit-btn open-type-btn" id="issue" form-type="submit">
+            <view class="font-size--30">发表</view>
+            <image src="../../images/common/ico_send.png" class="ico_send" mode="aspectFill"></image>
+          </button>
+        </view>
+      </view>
+    </form>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import forumApis from '../../api/forum'
+  import wxutils from '../../utils/wxutils'
+  export default class forumSubmit extends wepy.page {
+    config = {
+      navigationBarTitleText: '无限三维'
+    }
+    components = {
+    }
+    async handleToSubmit (e) {
+      try {
+        if (!this.content || this.content === '<p><br></p>') {
+          wx.showToast({
+            title: '还没有编辑正文',
+            icon: 'none'
+          })
+          return
+        }
+        wx.showLoading({
+          title: '提交中...',
+          mask: true
+        })
+        const { title } = e.detail.value
+        const { id } = e.detail.target
+        let { content, hiddenContent, forumId } = this
+        if (hiddenContent === '<p><br></p>') {
+          hiddenContent = ''
+        }
+        const opts = {
+          title,
+          content,
+          hiddenContent,
+          forumStatus: id === 'save' ? 0 : 1,
+          hiddenType: hiddenContent ? 1 : 0
+        }
+        if (forumId) {
+          opts.id = forumId
+        }
+        console.log(opts)
+        const { data } = await forumApis.insertForum(opts)
+        this.forumId = data.forumId
+        wx.hideLoading()
+        wx.nextTick(() => {
+          wx.showToast({
+            title: `${id === 'save' ? '保存成功' : '提交成功'}`,
+            icon: 'none',
+            success: function () {
+              setTimeout(() => {
+                wx.hideToast()
+                if (id === 'issue') {
+                  wxutils.backOrNavigate('/pages/forumPerson/index')
+                  wepy.$instance.globalData.subpub.emit('updateData')
+                }
+              }, 1000)
+            }
+          })
+        })
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    onEditorReady() {
+      const that = this
+      wx.createSelectorQuery().select('#editor').context(function (res) {
+        that.editorCtx = res.context
+      }).exec()
+      wx.createSelectorQuery().select('#hideContent').context(function (res) {
+        that.hideContentCtx = res.context
+      }).exec()
+      that.isLoad = true
+    }
+    watch = {
+      isLoad (val) {
+        if (this.forumId) {
+          this.getSaveContent()
+        }
+      }
+    }
+    onStatusChange(e) {
+      const formats = e.detail
+      this.formats = formats
+      this.$apply()
+    }
+    handleUpload (img) {
+      const that = this
+      wx.showLoading({
+        title: '加载中...',
+        mask: true
+      })
+      wx.uploadFile({
+        url: wepy.$instance.globalData.baseUrl + '/api/file/upload',
+        filePath: img,
+        name: 'file',
+        header: {
+          'token': wepy.$instance.globalData.Token,
+          'Content-Type': 'multipart/form-data'
+        },
+        formData: {
+          'fileType': 1 // 商品评论是0   话题是1   话题评论是2
+        },
+        success: function (res) {
+          if (res.statusCode === 200) {
+            const imgData = JSON.parse(res.data)
+            const result = {
+              src: imgData.data[0].file
+            }
+            if (that.focusType === 'editor') {
+              that.editorCtx.insertImage(result)
+            } else {
+              that.hideContentCtx.insertImage(result)
+            }
+          } else {
+            wx.showToast({
+              title: '图片上传失败',
+              icon: 'none'
+            })
+          }
+          wx.hideLoading()
+        },
+        fail: function () {
+          wx.showToast({
+            title: '图片上传失败',
+            icon: 'none'
+          })
+          wx.hideLoading()
+        }
+      })
+    }
+    methods = {
+      handleFocus (e) {
+        const { id } = e.target
+        if (!id) return
+        this.focusType = id
+      },
+      handleInput (e) {
+        this.getHtml(e)
+      },
+      handleBlur (e) {
+        this.getHtml(e)
+      },
+      handleFormat (e) {
+        let { name, value } = e.target.dataset
+        if (!name) return
+        if (this.focusType === 'editor') {
+          this.editorCtx.format(name, value)
+        } else {
+          this.hideContentCtx.format(name, value)
+        }
+      },
+      handleInsertImage () {
+        const that = this
+        wx.chooseImage({
+          count: 1,
+          success: function (res) {
+            const { errMsg, tempFilePaths } = res
+            if (errMsg === 'chooseImage:ok') {
+              let imgUrl = tempFilePaths.join('')
+              that.handleUpload(imgUrl)
+            }
+          }
+        })
+      }
+    }
+    getHtml (e) {
+      const { html } = e.detail
+      if (this.focusType === 'editor') {
+        this.content = html
+      } else {
+        this.hiddenContent = html
+      }
+    }
+    async getSaveContent () {
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const { forumId } = this
+        const opts = {
+          forumId
+        }
+        const { data } = await forumApis.getForumDetail(opts)
+        const that = this
+        const { title, content, hiddenContent } = data
+        this.title = title
+        this.editorCtx.setContents({
+          html: content,
+          success () {
+            that.content = content
+          }
+        })
+        this.hideContentCtx.setContents({
+          html: hiddenContent,
+          success () {
+            that.hiddenContent = hiddenContent
+          }
+        })
+        console.log(data)
+        this.$apply()
+        wx.hideLoading()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+    onLoad ({id}) {
+      this.forumId = id
+    }
+    data = {
+      isLoad: false,
+      formats: {},
+      focusType: 'editor',
+      content: '',
+      hiddenContent: '',
+      forumId: '',
+      title: ''
+    }
+    onHide () {
+    }
+    onShow () {
+    }
+  }
+</script>
+<style lang='postcss'>
+  @import 'src/styles/pages/forumSubmit/common.postcss';
+</style>

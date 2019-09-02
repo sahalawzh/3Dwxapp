@@ -1,35 +1,52 @@
 <template>
   <view class="video-lists">
-    <view class="video-item" wx:for="{{lists}}" wx:key="item">
-      <view class="item">
-        <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
-        <view class="video-lists__item wow-background-image font-color-white"
-          style="background-image: url({{item.homePageType === 1 ? item.imageUrl : item.image}})"
-          @tap.stop="handleToDetail({{item}})">
-          <view class="bg-mask"></view>
-
-          <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}" wx:if="{{item.homePageType === 1}}">{{status[item.dateType]}}</view>
-          <view class="wow-flex is-align-middle viewtimes" wx:else>
-            <image class="icon" lazy-load="true" src="../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
-            <text class="font-size--24">{{item.hot}}</text>
+    <block wx:for="{{lists}}" wx:key="item">
+      <navigator hover-class="none" wx:if="{{item.homePageType === 1}}" url="/pages/forumDetail/index?id={{item.id}}" class="forum-item">
+        <view class="forum-item__header wow-flex is-align-middle">
+          <image src="{{item.smallAvator}}" class="header" mode="aspectFill"></image>
+          <text class="nickname font-size--32">{{item.nickname}}</text>
+          <text></text>
+        </view>
+        <view class="forum-item__content">
+          <view class="title font-size--36" wx:if="{{item.title}}">
+            {{ item.title }}<image wx:if="{{item.hotShow === 1}}" src="../images/forum/hot.png" class="hot" mode="aspectFill"></image>
           </view>
+          <view class="content" wx:elif="{{item.content}}">
+            <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
+            <view class="imgs wow-flex" wx:if="{{item.image.length}}">
+              <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" @tap.stop="handleImagePreview({{_item}}, {{index}})" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
+            </view>
+          </view>
+        </view>
+        <view class="forum-item__footer font-size--24 wow-flex is-align-middle is-justify-space-between">
+          <view class="action-box wow-flex is-align-middle">
+            <view>收藏 {{item.collectionNum}}</view>
+            <view class="solid">·</view>
+            <view>评论 {{item.commentNum}}</view>
+          </view>
+          <view>{{item.time}}</view>
+        </view>
+      </navigator>
+      <view class="video-item" wx:else>
+        <view class="item">
+          <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
+          <view class="video-lists__item wow-background-image font-color-white"
+            style="background-image: url({{item.image}})"
+            @tap.stop="handleToDetail({{item}})">
+            <view class="bg-mask"></view>
 
-        </view>
-      </view>
-      <view class="title font-size--36">{{item.title}}</view>
+            <view class="wow-flex is-align-middle viewtimes">
+              <image class="icon" lazy-load="true" src="../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
+              <text class="font-size--24">{{item.hot}}</text>
+            </view>
 
-      <view class="activity-desc wow-flex is-align-middle is-justify-space-between font-size--24" wx:if="{{item.homePageType === 1}}">
-        <view class="wow-flex is-align-middle">
-          <image class="ico_duration" src="../images/common/ico_duration.png" mode="aspectFill"></image>
-          <view>{{item.beginTime + '-' + item.endTime}}</view>
+          </view>
         </view>
-        <view class="wow-flex is-align-middle">
-          <image class="ico_applicants" src="../images/common/ico_applicants.png" mode="aspectFill"></image>
-          <view>{{item.member}}</view>
-        </view>
+        <view class="title font-size--36">{{item.title}}</view>
+
+        <view class="desc font-size--26">{{ item.videoType === 0 ? '创意' : '课程' }}<text class="desc-duration">{{item.duration}}</text></view>
       </view>
-      <view class="desc font-size--26" wx:else>{{ item.videoType === 0 ? '创意' : '课程' }}<text class="desc-duration">{{item.duration}}</text></view>
-    </view>
+    </block>
   </view>
 </template>
 <script>
@@ -54,6 +71,12 @@ export default class VideoList extends wepy.component {
     handleToDetail (item) {
       const url = item.homePageType === 1 ? '/pages/activity/index?linkId=' + item.id : '/pages/videoDetail/index?id=' + item.id
       wxUtils.backOrNavigate(url)
+    },
+    handleImagePreview (img, index) {
+      wx.previewImage({
+        current: img, // 当前预览的图片
+        urls: this.lists[index].image // 所有要预览的图片
+      })
     }
   }
 }

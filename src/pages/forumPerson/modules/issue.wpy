@@ -1,0 +1,34 @@
+
+<template>
+  <block>
+    <navigator hover-class="none" url="/pages/forumSubmit/index" wx:if="{{userId}}" class="edit-box">
+      <image src="../../../images/forum/btn_edit.png" class="btn_edit" mode="aspectFill"></image>
+    </navigator>
+    <button wx:else data-url="/pages/forumSubmit/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="edit-box open-type-btn">
+      <image src="../../../images/forum/btn_edit.png" class="btn_edit" mode="aspectFill"></image>
+    </button>
+  </block>
+</template>
+<script>
+  import wepy from 'wepy'
+  import CommonMixin from '../../../mixins/common'
+  export default class ForumBtn extends wepy.component {
+    props = {
+      userId: [String, Number]
+    }
+    mixins = [CommonMixin]
+    data = {
+    }
+
+    events = {
+    }
+
+    methods = {
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

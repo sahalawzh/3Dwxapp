@@ -1,0 +1,77 @@
+.forum-list {
+  position: relative;
+  padding: 0 52rpx;
+  .forum-item {
+    position: relative;
+    margin-bottom: 56rpx;
+    &__header {
+      position: relative;
+      margin-bottom: 16rpx;
+      .header {
+        width: 48rpx;
+        height: 48rpx;
+        border-radius: 50%;
+        margin-right: 14rpx;
+      }
+      .nickname {
+        color: #464646;
+      }
+    }
+    &__content {
+      .title {
+        color: #333;
+        font-weight: 600;
+        margin-left: -12rpx;
+      }
+      .content {
+        color: #333;
+        text-align: justify;
+        .showtext {
+          color: #6d90dd;
+        }
+      }
+      .hot {
+        width: 30rpx;
+        height: 30rpx;
+        margin-left: 8rpx;
+      }
+      .top {
+        position: relative;
+        top: -4rpx;
+        background-color: #14E179;
+        color: #fff;
+        height: 40rpx;
+        line-height: 40rpx;
+        padding: 0 10rpx;
+        border-radius: 6rpx;
+        text-align: center;
+        margin-left: 12rpx;
+      }
+      .imgs {
+        margin-top: 20rpx;
+        flex-wrap: wrap;
+        &-single {
+          width: 432rpx;
+          height: 336rpx;
+          border-radius: 6rpx;
+        }
+        &-more {
+          width: 204rpx;
+          height: 204rpx;
+          border-radius: 6rpx;
+          margin: 0 8rpx 8rpx 0;
+        }
+      }
+    }
+    &__footer {
+      position: relative;
+      color: #bdbfc6;
+      margin-top: 18rpx;
+      .action-box {
+        .solid {
+          padding: 0 24rpx;
+        }
+      }
+    }
+  }
+}

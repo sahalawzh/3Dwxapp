@@ -1,0 +1,54 @@
+<template>
+  <view class="forum-list">
+    <navigator hover-class="none" wx:for="{{lists}}" wx:key="index" url="/pages/forumDetail/index?id={{item.id}}" class="forum-item">
+      <view class="forum-item__header wow-flex is-align-middle">
+        <image src="{{item.smallAvator}}" class="header" mode="aspectFill"></image>
+        <text class="nickname font-size--32">{{item.nickname}}</text>
+        <text></text>
+      </view>
+      <view class="forum-item__content">
+        <view class="title font-size--36" wx:if="{{item.title}}">
+          {{ item.title }}<image wx:if="{{item.hotShow === 1}}" src="../images/forum/hot.png" class="hot" mode="aspectFill"></image><text wx:if="{{item.isTopping === 1}}" class="top font-size--24">置顶</text>
+        </view>
+        <view class="content" wx:elif="{{item.content}}">
+          <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
+        </view>
+        <view class="imgs wow-flex" wx:if="{{item.image.length}}">
+          <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" @tap.stop="handleImagePreview({{_item}}, {{index}})" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
+        </view>
+      </view>
+      <view class="forum-item__footer font-size--24 wow-flex is-align-middle is-justify-space-between">
+        <view class="action-box wow-flex is-align-middle">
+          <view>收藏 {{item.collectionNum}}</view>
+          <view class="solid">·</view>
+          <view>评论 {{item.commentNum}}</view>
+        </view>
+        <view>{{item.time}}</view>
+      </view>
+    </navigator>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class ForumList extends wepy.component {
+  props = {
+    lists: {
+      type: Array,
+      default: []
+    }
+  }
+  data = {
+  }
+  methods = {
+    handleImagePreview (img, index) {
+      wx.previewImage({
+        current: img, // 当前预览的图片
+        urls: this.lists[index].image // 所有要预览的图片
+      })
+    }
+  }
+}
+</script>
+<style lang="postcss">
+  @import 'src/styles/modules/forumList.postcss';
+</style>

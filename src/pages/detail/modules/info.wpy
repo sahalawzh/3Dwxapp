@@ -7,7 +7,7 @@
     <view class="good-info__name font-size--36">
       <view class="name-elip">{{good.title}}</view>
     </view>
-    <view class="good-info__postage font-size--24">快递<text class="freeShipping">{{good.mailing === 0 ? '包邮' : '￥' + good.mailing}}</text></view>
+    <view class="good-info__postage font-size--24">快递<text class="freeShipping">{{good.mailing ? '￥' + good.mailing : '包邮'}}</text></view>
   </view>
 </template>
 <script>

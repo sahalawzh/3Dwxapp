@@ -1,0 +1,37 @@
+
+<template>
+  <view class="topic-nav wow-flex font-size--30">
+    <view class="topic-nav__item {{actType === 'hot' ? 'on' : ''}}" @tap.stop="handleSelectItem({{'hot'}})">热门</view>
+    <view class="topic-nav__item {{actType === 'follow' ? 'on' : ''}}" @tap.stop="handleSelectItem({{'follow'}})">关注</view>
+    <view class="topic-nav__item {{actType === 'activity' ? 'on' : ''}}" @tap.stop="handleSelectItem({{'activity'}})">活动</view>
+    <view class="topic-nav__item {{actType === 'mine' ? 'on' : ''}}" @tap.stop="handleSelectItem({{'mine'}})">我的<text class="circle" wx:if="{{isShowRedPoint}}"></text></view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class TopicNav extends wepy.component {
+    props = {
+      actType: {
+        type: String,
+        twoWay: true
+      },
+      isShowRedPoint: Boolean
+    }
+    data = {
+    }
+
+    events = {
+    }
+
+    methods = {
+      handleSelectItem (type) {
+        this.actType = type
+      }
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>

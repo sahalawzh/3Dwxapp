@@ -1,0 +1,135 @@
+.forum-person {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f2f7;
+  position: relative;
+  padding-bottom: 100rpx;
+  .person-header {
+    padding: 48rpx 54rpx 28rpx;
+    background-color: #fff;
+    .smallAvator {
+      width: 84rpx;
+      height: 84rpx;
+      border-radius: 50%;
+      margin-right: 14rpx;
+    }
+    .info {
+      flex: 1;
+      color: #484848;
+      .nickname {
+        margin: 6rpx 0 10rpx;
+      }
+      .sticky-wrap {
+        font-weight: 600;
+        .solid {
+          margin: 0 24rpx;
+        }
+      }
+    }
+  }
+  .person-list {
+    padding: 0 14rpx;
+    &__item {
+      position: relative;
+      margin-top: 30rpx;
+      border-radius: 14rpx;
+      overflow: hidden;
+      padding: 36rpx 32rpx 40rpx 40rpx;
+      background-color: #fff;
+      .rich-content {
+        max-width: 432rpx;
+        .title {
+          color: #484848;
+          font-weight: 600;
+        }
+        .content {
+          color: #484848;
+          text-align: justify;
+          &.has-title {
+            margin: 26rpx 0 6rpx;
+          }
+        }
+        .imgs {
+          margin-top: 30rpx;
+          flex-wrap: wrap;
+          &-single {
+            width: 432rpx;
+            height: 336rpx;
+            border-radius: 6rpx;
+          }
+        }
+        .footer {
+          position: relative;
+          color: #bdbfc6;
+          margin-top: 12rpx;
+          .action-box {
+            .solid {
+              padding: 0 24rpx;
+            }
+          }
+        }
+      }
+      .status {
+        position: absolute;
+        right: 32rpx;
+        top: 30rpx;
+        border-radius: 8rpx;
+        height: 44rpx;
+        line-height: 44rpx;
+        padding: 0 22rpx;
+        font-weight: 600;
+        &-0 {
+          background-color: #1360e1;
+          color: #fff;
+        }
+        &-1 {
+          background-color: #6396ea;
+          color: #fff;
+        }
+        &-2 {
+          background-color: #f1f1f1;
+          color: #9c9c9c;
+        }
+        &-3 {
+          background-color: #faf2e2;
+          color: #e19c18;
+        }
+      }
+      .btn-delete {
+        position: absolute;
+        bottom: 30rpx;
+        right: 32rpx;
+        width: 48rpx;
+        height: 48rpx;
+        line-height: 64rpx;
+      }
+    }
+  }
+  .edit-box {
+    position: fixed;
+    bottom: 290rpx;
+    left: calc((100% - 152rpx)/2);
+    width: 152rpx;
+    height: 152rpx;
+    z-index: 199;
+    background-color: transparent;
+    .btn_edit {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .remark-box {
+    color: #e19c18;
+    background-color: #faf2e2;
+    padding: 15rpx 22rpx 20rpx;
+    border-radius: 12rpx;
+    margin-bottom: 22rpx;
+    overflow: hidden;
+    text {
+      font-weight: 600;
+    }
+  }
+}

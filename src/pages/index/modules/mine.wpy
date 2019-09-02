@@ -1,0 +1,68 @@
+
+<template lang="wxml" miniapp="wepy">
+  <view class="mine-list">
+    <view class="wow-ta-c">
+      <view class="update-wrap">
+        <navigator hover-class="none" url="/pages/forumPerson/index" class="update-box wow-flex is-align-middle font-size--24">
+          <image src="../../../images/forum/ico_edit.png" class="ico_edit" mode="aspectFill"></image>
+          <view><text>{{sendNum}}</text>篇发表</view>
+          <view class="solid">·</view>
+          <view><text>{{saveNum}}</text>篇草稿待完成</view>
+          <view class="solid">·</view>
+          <view class="warn-text">{{failNum}}篇审核不通过</view>
+        </navigator>
+      </view>
+    </view>
+    <view class="content" wx:if="{{mineList.length}}">
+      <navigator wx:for="{{mineList}}" wx:key="index" hover-class="none" url="/pages/forumDetail/index?id={{item.forumId}}" class="content-item">
+        <view class="header wow-flex is-align-middle">
+          <image src="{{item.smallAvator}}" class="smallAvator" mode="aspectFill"></image>
+          <view class="nickname font-size--32">{{item.nickname}}</view>
+        </view>
+        <view class="title">
+          <text class="font-size--30">关于：</text>
+          <text class="font-size--36 title-big" wx:if="{{item.title}}">{{ item.title }}</text>
+          <text class="font-size--30" wx:elif="{{item.content}}">{{ item.content }}</text>
+        </view>
+        <block wx:if="{{item.forumReplyVO}}">
+          <view class="font-size--30 replay-label">回复：我</view>
+          <view class="font-size--30 replay-content">{{item.forumReplyVO.content}}</view>
+        </block>
+        <view class="font-size--30 content-commet">{{item.commentContent}}</view>
+        <view class="footer font-size--24 wow-flex is-align-middle is-justify-space-between">
+          <view class="action-box wow-flex is-align-middle">
+            <view>收藏 {{item.collectionNum}}</view>
+            <view class="solid">·</view>
+            <view>评论 {{item.commentNum}}</view>
+          </view>
+          <view>{{item.time}}</view>
+        </view>
+      </navigator>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class Mine extends wepy.component {
+    props = {
+      sendNum: [String, Number],
+      saveNum: [String, Number],
+      failNum: [String, Number],
+      mineList: Array
+    }
+    data = {
+    }
+    computed = {
+    }
+    events = {
+    }
+
+    methods = {
+    }
+
+    onLoad () {
+    }
+  }
+</script>
+<style lang='postcss'>
+</style>
