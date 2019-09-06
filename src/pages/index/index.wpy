@@ -60,7 +60,7 @@
     <view class="empty-list font-size--26" wx:if="{{!hasData}}">暂无相关数据~</view>
 
     <forumBtn
-      :userId="userId"
+      :userId.sync="userId"
       wx:if="{{actType !== 'activity' && navType === 'topic'}}"
     ></forumBtn>
     
@@ -85,6 +85,7 @@
   import activityApis from '../../api/activity'
   import forumApis from '../../api/forum'
   import commetApis from '../../api/commet'
+  import momentApis from '../../api/moment'
   import ActivityList from '../../components/activityList'
   import Silder from './modules/silder'
   import ActivityScroll from './modules/activityScroll'
@@ -190,6 +191,25 @@
       }
     }
     events = {
+      async handleToLike (param) { // 点赞
+        try {
+          const { forumCommentId, forumId, index } = param
+          const opts = {
+            forumCommentId,
+            forumId
+          }
+          const { data, msg } = await momentApis.insertForumCommentMoment(opts)
+          const { isEnable, momentNum } = data
+          this.mineList[index].isMoment = isEnable
+          this.mineList[index].momentNum = momentNum
+          wx.showToast({
+            title: msg
+          })
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+        }
+      },
       handleNav (type) {
         this.navType = type
         this.resetData()

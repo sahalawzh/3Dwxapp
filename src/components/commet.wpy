@@ -43,6 +43,16 @@
                 <view class="reply-message__info">{{ item.reply }}</view>
               </view>
             </view>
+            <block wx:if="{{lastpage === 'forum'}}">
+              <view wx:if="{{userId}}" class="like wow-flex is-align-middle" @tap.stop="handleLike({{item.id}}, {{item.forumId}}, {{index}})">
+                <image src="../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png" class="btn_support" mode="aspectFill"></image>
+                <view class="font-size--24">{{item.momentNum}}</view>
+              </view>
+              <button wx:else data-type="like" data-id="{{index}}" class="like wow-flex is-align-middle open-type-btn" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" @tap.stop="handleHideMenu">
+                <image src="../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png" class="btn_support" mode="aspectFill"></image>
+                <view class="font-size--24">{{item.momentNum}}</view>
+              </button>
+            </block>
           </view>
         </view>
       </view>
@@ -115,7 +125,21 @@ export default class Commet extends wepy.component {
       this.$apply()
     }
   }
+  onLoad () {
+    wepy.$instance.globalData.subpub.on('like', this.handleTolike, this)
+  }
+  handleTolike (userId, index) {
+    this.userId = userId
+    const { id, forumId } = this.commetList[index]
+    this.$emit('handleToLike', {forumCommentId: id, forumId, index})
+  }
   methods = {
+    handleHideMenu () {
+      this.menuShow = false
+    },
+    handleLike (forumCommentId, forumId, index) {
+      this.$emit('handleToLike', {forumCommentId, forumId, index})
+    },
     handleMenu (index, type) {
       const current = {
         index,

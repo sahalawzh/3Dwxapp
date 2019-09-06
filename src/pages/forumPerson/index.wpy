@@ -67,6 +67,7 @@
     methods = {
       handleDetail (item) {
         const { forumStatus, id } = item
+        if (forumStatus === 1) return
         let url
         switch (forumStatus) {
           case 0:

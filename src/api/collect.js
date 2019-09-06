@@ -69,4 +69,16 @@ export default class collect extends base {
   static insertForumCollection (opts) {
     return this.post(`api/collection/insertForumCollection`, opts)
   }
+  /**
+   * 话题收藏集
+   */
+  static getUserForumCollection (opts) {
+    return this.get(`api/collection/getUserForumCollection`, opts)
+  }
+  /**
+   * 删除话题
+   */
+  static updateForumCollection (opts) {
+    return this.put(`api/collection/updateForumCollection`, opts)
+  }
 }

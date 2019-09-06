@@ -18,6 +18,7 @@
         <view class="header wow-flex is-align-middle">
           <image src="{{item.smallAvator}}" class="smallAvator" mode="aspectFill"></image>
           <view class="nickname font-size--32">{{item.nickname}}</view>
+          <view class="time font-size--24">{{item.time}}</view>
         </view>
         <view class="title">
           <text class="font-size--30">关于：</text>
@@ -35,7 +36,10 @@
             <view class="solid">·</view>
             <view>评论 {{item.commentNum}}</view>
           </view>
-          <view>{{item.time}}</view>
+          <view class="wow-flex is-align-middle" @tap.stop="handleLike({{item.id}}, {{item.forumId}}, {{index}})">
+            <image src="../../../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png" class="btn_support" mode="aspectFill"></image>
+            <view class="font-size--24">{{item.momentNum}}</view>
+          </view>
         </view>
       </navigator>
     </view>
@@ -48,16 +52,19 @@
       sendNum: [String, Number],
       saveNum: [String, Number],
       failNum: [String, Number],
-      mineList: Array
+      mineList: {
+        type: Array,
+        twoWay: true
+      }
     }
     data = {
     }
     computed = {
     }
-    events = {
-    }
-
     methods = {
+      handleLike (forumCommentId, forumId, index) {
+        this.$emit('handleToLike', {forumCommentId, forumId, index})
+      }
     }
 
     onLoad () {

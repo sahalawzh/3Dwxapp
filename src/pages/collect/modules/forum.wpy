@@ -1,0 +1,43 @@
+<template>
+  <view class="forum-list">
+    <navigator hover-class="none" class="forum-list__item" wx:for="{{forumList}}" wx:key="index" url="/pages/forumDetail/index?id={{item.id}}">
+      <view class="title font-size--36" wx:if="{{item.title}}">{{item.title}}</view>
+      <view class="content" wx:elif="{{item.content}}">
+        <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
+      </view>
+      <view class="imgs wow-flex" wx:if="{{item.image.length}}">
+        <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" @tap.stop="handleImagePreview({{_item}}, {{index}})" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
+      </view>
+      <view class="wow-radio radio-box font-size--26" wx:if="{{isEdit}}" @tap.stop="handleToChecked({{item}}, {{index}})">
+        <lebel class="radio">
+          <image hidden='{{!item.checked}}' class="ico_selected" src='../../../images/common/ico_selected.png'></image>
+        </lebel>
+      </view>
+    </navigator>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Forum extends wepy.component {
+  props = {
+    forumList: {
+      type: [Array],
+      twoWay: true
+    },
+    isEdit: Boolean
+  }
+  data = {
+  }
+  methods = {
+    handleImagePreview (img, index) {
+      wx.previewImage({
+        current: img, // 当前预览的图片
+        urls: this.forumList[index].image // 所有要预览的图片
+      })
+    },
+    handleToChecked (item, index) {
+      this.$emit('handleCheckedRadio', item, index)
+    }
+  }
+}
+</script>

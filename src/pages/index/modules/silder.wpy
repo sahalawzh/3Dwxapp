@@ -24,11 +24,13 @@
 </template>
 <script>
   import wepy from 'wepy'
+  import CommonMixin from '../../../mixins/common'
   export default class Silder extends wepy.component {
     props = {
       userId: [String, Number],
       cartNum: [String, Number]
     }
+    mixins = [CommonMixin]
     data = {
     }
 

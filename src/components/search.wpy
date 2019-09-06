@@ -7,7 +7,7 @@
         <image class="icon search-icon" src="../images/common/btn_bar_search_white.png" mode="aspectFill"></image>
       </navigator>
     </view>
-    <cart class="icon" :userId.sync="userId"  :cartNum.sync="cartNum"></cart>
+    <cart class="icon" :userId.sync="userId" :cartNum.sync="cartNum"></cart>
   </view>
 </template>
 <script>

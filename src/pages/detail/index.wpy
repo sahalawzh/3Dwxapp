@@ -1,6 +1,6 @@
 
 <template lang="wxml" miniapp="wepy">
-  <view class="page-contain page-detail">
+  <view class="page-contain page-detail" wx:if="{{detail}}">
     <banner :good.sync="detail" :cartNum.sync="cartNum" :userId.sync="userId"></banner>
 
     <info :good.sync="detail"></info>
@@ -437,7 +437,7 @@
     data = {
       isRuleTrue: false,
       pid: '',
-      detail: {},
+      detail: '',
       relatedProducts: [],
       sku: [],
       spec: [],

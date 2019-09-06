@@ -185,7 +185,6 @@
       })
     }
     onLoad ({ printerId, printerSerialNumber, title }) {
-      console.log(this.printerSerialNumber)
       this.printerId = printerId
       this.printerSerialNumber = printerSerialNumber
       this.title = title

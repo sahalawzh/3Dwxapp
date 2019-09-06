@@ -6,6 +6,7 @@
   flex-direction: column;
   min-height: 100vh;
   padding-bottom: 180rpx;
+  background-color: #f0f2f7;
   .good-list {
     margin-bottom: 54rpx;
     .title {
@@ -24,7 +25,8 @@
         padding: 0 9rpx 0 10rpx;
         margin-bottom: 12prx;
         .radio-box {
-          margin-bottom: 20rpx;
+          padding-bottom: 20rpx;
+          padding-right: 60rpx;
         }
         &_bottom {
           position: absolute;
@@ -89,24 +91,55 @@
         }
       }
     }
-    &.video-list {
-
+  }
+  .forum-list {
+    &__item {
+      position: relative;
+      background-color: #fff;
+      margin: 0 16rpx 32rpx;
+      padding: 32rpx 76rpx 32rpx 30rpx;
+      border-radius: 8rpx;
+      overflow: hidden;
+      .title {
+        color: #333;
+        font-weight: 600;
+      }
+      .content {
+        color: #333;
+        text-align: justify;
+        .showtext {
+          color: #6d90dd;
+        }
+      }
+      .imgs {
+        margin-top: 30rpx;
+        flex-wrap: wrap;
+        &-single {
+          width: 432rpx;
+          height: 336rpx;
+          border-radius: 6rpx;
+        }
+        &-more {
+          width: 204rpx;
+          height: 204rpx;
+          border-radius: 6rpx;
+          margin: 0 8rpx 8rpx 0;
+        }
+      }
+      .radio-box {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 36rpx 20rpx;
+        
+      }
     }
   }
   .collect-tabs {
     position: relative;
     color: #4b4b4b;
     height: 80rpx;
-    padding-bottom: 12rpx;
-    &::after{
-      content: '';
-      position: absolute;
-      left: 0;
-      bottom: -4rpx;
-      width: 100%;
-      background-color: #eee;
-      height: 16rpx;
-    }
+    padding-bottom: 44rpx;
     &__panle {
       padding: 24rpx 0 16rpx;
     }
@@ -122,10 +155,11 @@
     margin-left: 30rpx;
   }
   .opertion-row {
-    margin: 30rpx 52rpx;
-    .manager {
-      float: right;
-    }
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 26rpx 40rpx;
+    color: #4a4a4a;
   }
   .collect-empty {
     &__split{

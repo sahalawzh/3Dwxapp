@@ -1,6 +1,6 @@
 
 <template lang="wxml" miniapp="wepy">
-  <view class="page-contain forum-detail">
+  <view class="page-contain forum-detail" wx:if="{{detail}}">
     <view class="article">
       <view class="article-header wow-flex is-align-middle">
         <image src="{{detail.smallAvator}}" class="header" mode="aspectFill"></image>
@@ -61,8 +61,8 @@
         <view class="collect-box">
           <view class="collect-num font-size--24" wx:if="{{collectionNum}}">{{collectionNum}}</view>
           <image wx:if="{{userId}}" @tap.stop="handleToCollect" class="icon" src="../../images/common/btn_collection{{ isCollection === 1 ? '_on' : ''}}.png" mode="aspectFill"></image>
-          <button wx:else data-type="collect" data-id="{{id}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
-            <image class="icon" src="../../images/common/btn_collection.png" mode="aspectFill"></image>
+          <button wx:else data-type="collect" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+            <image class="icon" src="../../images/common/btn_collection{{ isCollection === 1 ? '_on' : ''}}.png" mode="aspectFill"></image>
           </button>
         </view>
       </view>
@@ -83,6 +83,7 @@
   import Share from '../../components/share'
   import wxutils from '../../utils/wxutils'
   import shareApis from '../../api/share'
+  import momentApis from '../../api/moment'
   export default class ForumDetail extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -130,6 +131,25 @@
       }
     }
     events = {
+      async handleToLike (param) { // 点赞
+        try {
+          const { forumCommentId, forumId, index } = param
+          const opts = {
+            forumCommentId,
+            forumId
+          }
+          const { data, msg } = await momentApis.insertForumCommentMoment(opts)
+          const { isEnable, momentNum } = data
+          this.commetList[index].isMoment = isEnable
+          this.commetList[index].momentNum = momentNum
+          wx.showToast({
+            title: msg
+          })
+          this.$apply()
+        } catch (error) {
+          console.log(error)
+        }
+      },
       handleSharePoster () {
         this.getSharePoster()
       },
@@ -227,8 +247,9 @@
           title: '加载中',
           mask: true
         })
+        const { id } = this
         const opts = {
-          forumId: this.id
+          forumId: id
         }
         const { data: commetData } = await commetApis.getForumComment(opts)
         commetData.data.length && commetData.data.forEach(item => {
@@ -240,6 +261,7 @@
         this.commetList = commetData.data
         this.commetTotal = commetData.total
         const { data } = await forumApis.getForumDetail(opts)
+        this.isCollection = data.isCollection
         let content = data.content
         let hiddenContent = data.hiddenContent
         const formatHtml = function (html) {
@@ -253,7 +275,9 @@
             result = result.replace(/<p/gi, '<p style="color:#373737;text-align:justify;"')
           }
           if (/<img/gi.test(result)) {
-            result = result.replace(/<img/gi, '<img style="width:100%;height:auto;margin-top:9px;margin-bottom:9px;"').replace(/<img[^>]*>/gi, function (match, capture) {
+            result = result.replace(/<img [^>]*>/gi, function (match, capture) {
+              return match.replace(/style\s*?=\s*?([‘"])[\s\S]*?\1/gi, '')
+            }).replace(/<img/gi, '<img style="width:100%!important;height:auto;margin-top:9px;margin-bottom:9px;"').replace(/<img[^>]*>/gi, function (match, capture) {
               return `<br/>${match}`
             })
           }
@@ -263,19 +287,20 @@
         data.hiddenContent = formatHtml(hiddenContent)
         data.time = timeHandle(data.createTime)
         this.detail = data
+        this.id = id
+        wepy.$instance.globalData.subpub.on('collect', this.handleCollect, this)
+        wepy.$instance.globalData.subpub.on('follow', this.handleFollow, this)
         this.$apply()
         wx.hideLoading()
       } catch (error) {
         wx.hideLoading()
       }
     }
-    async handleCollect (userId, id) {
+    async handleCollect (userId) {
       try {
-        wepy.$instance.globalData.userId = this.userId = userId
-        const { id: forumId } = this
-        this.id = id || forumId
+        this.userId = userId
         const opts = {
-          forumId: this.id
+          forumId: this.detail.id
         }
         const { data, msg } = await collectApis.insertForumCollection(opts)
         this.isCollection = data.isCollection
@@ -292,11 +317,9 @@
     onLoad ({id}) {
       this.id = id
       this.getForumDetail()
-      wepy.$instance.globalData.subpub.on('collect', this.handleCollect, this)
-      wepy.$instance.globalData.subpub.on('follow', this.handleFollow, this)
     }
     handleFollow (userId) {
-      wepy.$instance.globalData.userId = this.userId = userId
+      this.userId = userId
       this.handleToFollow()
     }
     async handleToFollow () {
