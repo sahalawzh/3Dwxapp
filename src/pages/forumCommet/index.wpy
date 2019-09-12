@@ -1,11 +1,11 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-commet">
-    <form bindsubmit="handleCreatCommet">
+    <form bindsubmit="handleCreatCommet" report-submit="true">
       <view class="commet-wrap">
         
         <view class="commet-content">
-          <textarea class="font-size--28 commet-content__area" name="commet" maxlength="200" placeholder="{{placeholderText}}"/>
+          <textarea class="font-size--28 commet-content__area" name="commet" value="{{commetContent}}" maxlength="200" placeholder="{{placeholderText}}"/>
           <view class="commet-content__upload">
             <view class="upload-imgs wow-flex" wx:if="{{uploadImgs.length}}">
               <view class="upload-imgs__item" wx:for="{{uploadImgs}}" wx:key="index">
@@ -19,7 +19,7 @@
 
         
         <view class="footer">
-          <button class="footer-btn font-size--28" form-type="submit">提交</button>
+          <button class="footer-btn font-size--28" data-target="commet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo" form-type="submit">提交</button>
         </view>
       </view>
 
@@ -45,7 +45,8 @@
       nickname: '',
       parentId: '',
       replyId: '',
-      commetContent: ''
+      commetContent: '',
+      formId: ''
     }
     mixins = [CommonMixin]
     onLoad ({ forumId, nickname, parentId, replyId }) {
@@ -59,6 +60,65 @@
       this.nickname = nickname
       this.parentId = parentId
       this.replyId = replyId
+      wepy.$instance.globalData.subpub.on('commet', this.handleSendInfo, this)
+    }
+    async handleSendInfo () {
+      console.log(this.commetContent)
+      if (!this.commetContent) {
+        return wx.showToast({
+          title: '评论信息不能为空',
+          icon: 'none'
+        })
+      }
+
+      if (this.uploadImgs.length) {
+        wx.showLoading({
+          title: '上传中',
+          mask: true
+        })
+        let uploads = []
+        this.uploadImgs.map((item, index) => {
+          uploads[index] = new Promise((resolve, reject) => {
+            wx.uploadFile({
+              url: wepy.$instance.globalData.baseUrl + '/api/file/upload',
+              filePath: item,
+              name: 'file',
+              header: {
+                'token': wepy.$instance.globalData.Token,
+                'Content-Type': 'multipart/form-data'
+              },
+              formData: {
+                'fileType': 0
+              },
+              success: function (res) {
+                resolve(JSON.parse(res.data).data)
+              },
+              fail: function (error) {
+                reject(error)
+              }
+            })
+          })
+        })
+        Promise.all(uploads).then((result) => {
+          let uploadsId = []
+          let arr = [].concat.apply([], result)
+          arr.forEach(element => {
+            uploadsId.push(element.id)
+          })
+          console.log(uploadsId)
+          wx.hideLoading()
+          this.insertForumComment(uploadsId)
+        }).catch((err) => {
+          console.log(err)
+          wx.hideLoading()
+          wx.showToast({
+            title: '图片上传失败',
+            icon: 'none'
+          })
+        })
+      } else {
+        this.insertForumComment()
+      }
     }
     async insertForumComment (uploadsId) {
       try {
@@ -66,13 +126,14 @@
           title: '提交中',
           mask: true
         })
-        const { forumId, parentId, replyId, commetContent } = this
+        const { forumId, parentId, replyId, commetContent, formId } = this
         const opts = {
           commentType: 0,
           content: commetContent,
           forumId,
           parentId: parentId || 0,
-          replyId
+          replyId,
+          formId
         }
         if (uploadsId) {
           opts.imageIndex = uploadsId.join('_')
@@ -98,6 +159,9 @@
       }
     }
     methods = {
+      handleToSend () {
+        this.handleSendInfo()
+      },
       handleImagePreview (idx) {
         wx.previewImage({
           current: this.uploadImgs[idx], // 当前预览的图片
@@ -105,64 +169,12 @@
         })
       },
       handleCreatCommet (e) {
+        console.log(e)
         let { commet } = e.detail.value
+        this.formId = e.detail.formId
         commet = commet.trim()
         this.commetContent = commet
-        if (!commet) {
-          return wx.showToast({
-            title: '评论信息不能为空',
-            icon: 'none'
-          })
-        }
-
-        if (this.uploadImgs.length) {
-          wx.showLoading({
-            title: '上传中',
-            mask: true
-          })
-          let uploads = []
-          this.uploadImgs.map((item, index) => {
-            uploads[index] = new Promise((resolve, reject) => {
-              wx.uploadFile({
-                url: wepy.$instance.globalData.baseUrl + '/api/file/upload',
-                filePath: item,
-                name: 'file',
-                header: {
-                  'token': wepy.$instance.globalData.Token,
-                  'Content-Type': 'multipart/form-data'
-                },
-                formData: {
-                  'fileType': 0
-                },
-                success: function (res) {
-                  resolve(JSON.parse(res.data).data)
-                },
-                fail: function (error) {
-                  reject(error)
-                }
-              })
-            })
-          })
-          Promise.all(uploads).then((result) => {
-            let uploadsId = []
-            let arr = [].concat.apply([], result)
-            arr.forEach(element => {
-              uploadsId.push(element.id)
-            })
-            console.log(uploadsId)
-            wx.hideLoading()
-            this.insertForumComment(uploadsId)
-          }).catch((err) => {
-            console.log(err)
-            wx.hideLoading()
-            wx.showToast({
-              title: '图片上传失败',
-              icon: 'none'
-            })
-          })
-        } else {
-          this.insertForumComment()
-        }
+        this.$apply()
       },
       handleRemoveImg (index) {
         this.uploadImgs.splice(index, 1)

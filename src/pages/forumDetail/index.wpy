@@ -84,6 +84,7 @@
   import wxutils from '../../utils/wxutils'
   import shareApis from '../../api/share'
   import momentApis from '../../api/moment'
+  import { parseQueryString } from '../../utils/utils'
   export default class ForumDetail extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -314,8 +315,13 @@
         console.log(error)
       }
     }
-    onLoad ({id}) {
-      this.id = id
+    onLoad (options) {
+      if (options.scene) {
+        let sceneObj = decodeURIComponent(options.scene)
+        let urlObj = 'url?' + sceneObj
+        options = parseQueryString(urlObj)
+      }
+      this.id = options.id
       this.getForumDetail()
     }
     handleFollow (userId) {

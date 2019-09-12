@@ -45,8 +45,9 @@ export default class CommonMixin extends wepy.mixin {
         smallAvator: userInfo.avatarUrl
       }
       await userApis.updateNickname(opts)
-      if (target === 'commet') {
-        this.$emit('handleSendInfo')
+      if (target) {
+        // this.$emit('handleSendInfo')
+        wepy.$instance.globalData.subpub.emit(target)
       }
     } catch (error) {
       console.log(error)

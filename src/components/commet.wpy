@@ -127,11 +127,15 @@ export default class Commet extends wepy.component {
   }
   onLoad () {
     wepy.$instance.globalData.subpub.on('like', this.handleTolike, this)
+    wepy.$instance.globalData.subpub.on('commet', this.handleSendInfo, this)
   }
   handleTolike (userId, index) {
     this.userId = userId
     const { id, forumId } = this.commetList[index]
     this.$emit('handleToLike', {forumCommentId: id, forumId, index})
+  }
+  handleSendInfo () {
+    this.$emit('handleSendInfo')
   }
   methods = {
     handleHideMenu () {

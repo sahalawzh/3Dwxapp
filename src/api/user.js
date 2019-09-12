@@ -9,4 +9,10 @@ export default class user extends base {
   static updateNickname (opts) {
     return this.get(`api/user/updateNickname`, opts)
   }
+  /**
+   * 测试formId
+   */
+  static getFormId (opts) {
+    return this.get(`/api/user/getFormId`, opts)
+  }
 }

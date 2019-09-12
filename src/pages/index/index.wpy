@@ -214,7 +214,13 @@
         this.navType = type
         this.resetData()
         if (this.navType === 'topic') {
-          this.getForumList()
+          if (this.actType === 'hot' || this.actType === 'follow') {
+            this.getForumList()
+          } else if (this.actType === 'mine') {
+            this.getMyForumReply()
+          } else {
+            this.getListActivity()
+          }
         } else if (this.navType === -1) {
           this.getListActivity()
           this.getListVideoActivity()
@@ -356,6 +362,7 @@
           this.hasMoreData = true
           this.start ++
         }
+        console.log(this.hasMoreData)
         wx.hideLoading()
         this.$apply()
       } catch (error) {
@@ -426,8 +433,8 @@
       wx.hideTabBar()
       wepy.$instance.editTabbar()
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
-      this.getListVideoActivity()
       this.getListActivity()
+      this.getListVideoActivity()
       this.getAdvertisement()
       this.getPrintGuide()
       wepy.$instance.globalData.subpub.on('auth', this.handleAuth, this)
@@ -438,7 +445,7 @@
       this.actStart = 1
       this.forumStart = 1
       this.mineStart = 1
-      this.hasMoreData = false
+      // this.hasMoreData = false
       this.activityList = []
       this.videoActivityList = []
       this.mineList = []
@@ -471,6 +478,7 @@
       }
     }
     onReachBottom () {
+      console.log(this.hasMoreData)
       if (this.hasMoreData) {
         if (this.navType === 'topic') {
           if (this.actType === 'hot' || this.actType === 'follow') {

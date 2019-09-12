@@ -11,6 +11,7 @@
         poster="{{initTime > 0 ? '' : info.image}}"
         title="{{info.title}}"
         initial-time="{{initTime}}"
+        vslide-gesture="{{true}}"
         bindtimeupdate="handleRecordTime"
       >
         <navigator url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
@@ -241,10 +242,12 @@
             title: '发送中',
             mask: true
           })
-          const { userId, id, sendInfo } = this
+          console.log(this)
+          console.log(this.id)
+          const { userId, info, sendInfo } = this
           const opts = {
             userId,
-            videoId: id,
+            videoId: info.id,
             content: sendInfo
           }
           await commetApis.addVideoComment(opts)
@@ -374,7 +377,7 @@
     async getVideoComment () {
       try {
         const opts = {
-          videoId: this.id
+          videoId: this.id || this.info.id
         }
         const { data: commetData } = await commetApis.getVideoComment(opts)
         commetData.data.length && commetData.data.forEach(item => {

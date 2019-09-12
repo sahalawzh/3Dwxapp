@@ -18,14 +18,14 @@
       <view class="wow-flex">
         <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
         <view class="btn-box">
-          <button wx:if="{{userId}}" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn font-size--36">我要参与</button>
+          <button wx:if="{{userId}}" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
           <button
             wx:else
             data-type="activity"
             open-type="getPhoneNumber"
             bindgetphonenumber="getPhoneNumber"
             disabled="{{activityData.dateType === 2}}"
-            class="part-btn open-type-btn font-size--36">我要参与</button>
+            class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
         </view>
       </view>
     </view>
@@ -51,7 +51,7 @@
                 <image class="arrow_down" wx:if="{{item.controlType === 2}}" src="../../images/common/arrow_down.png" mode="aspectFill"></image>
               </input>
           </scroll-view>
-        <button class="form-content__btn font-size--28" form-type="submit">我要参与</button>
+        <button class="form-content__btn font-size--28" form-type="submit">{{buttonText}}</button>
         </form>
       </view>
       <view class="wow-ta-c">
@@ -59,20 +59,6 @@
       </view>
     </view>
 
-    <!-- 分享 -->
-    <!-- <wow-popup class="wow_share" position="bottom" show-close="false" full="false" border-radius="false">
-      <view class="share-box">
-        <view class="share-box__item" @tap.stop="handleSharePoster">
-          <image class="ico_share_img" src="../../images/common/ico_share_img.png" mode="aspectFill"></image>
-          <view class="font-size--28">生成分享海报</view>
-        </view>
-        <view class="share-box__item">
-          <button open-type="share" class="open-type-btn">
-            <view class="font-size--28">转发</view>
-          </button>
-        </view>
-      </view>
-    </wow-popup> -->
     <share></share>
 
     <!-- 选择 -->
@@ -175,6 +161,9 @@
       }
     }
     computed = {
+      buttonText () {
+        return this.activityData && this.activityData.buttonName
+      },
       controlHeight () {
         let maxHeight = ''
         wx.getSystemInfo({
@@ -268,28 +257,28 @@
       },
       handleGetInfo (val) {
         this.sendInfo = val
-      },
-      async handleSendInfo () {
-        try {
-          if (!this.sendInfo) return
-          wx.showLoading({
-            title: '发送中',
-            mask: true
-          })
-          const { linkId, sendInfo } = this
-          const opts = {
-            activityId: linkId,
-            content: sendInfo
-          }
-          await commetApis.insertActivityComment(opts)
-          this.sendInfo = ''
-          this.$broadcast('handleClearInput', this.sendInfo)
-          this.getActivityComment()
-          wx.hideLoading()
-          this.$apply()
-        } catch (error) {
-          wx.hideLoading()
+      }
+    }
+    async handleSendInfo () {
+      try {
+        if (!this.sendInfo) return
+        wx.showLoading({
+          title: '发送中',
+          mask: true
+        })
+        const { linkId, sendInfo } = this
+        const opts = {
+          activityId: linkId,
+          content: sendInfo
         }
+        await commetApis.insertActivityComment(opts)
+        this.sendInfo = ''
+        this.$broadcast('handleClearInput', this.sendInfo)
+        this.getActivityComment()
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
       }
     }
     async getSharePoster () {
@@ -369,12 +358,16 @@
             item.value = ''
           })
           this.isShowForm = false
+          const that = this
           wx.nextTick(() => {
             wx.showToast({
               title: '提交成功',
               success: function () {
                 setTimeout(() => {
                   wx.hideToast()
+                  if (that.activityData.isBackHome === 1) {
+                    wx.switchTab({url: '/pages/index/index'})
+                  }
                 }, 200)
               }
             })

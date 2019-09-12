@@ -20,7 +20,7 @@
 		}
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.8.1",
+	"libVersion": "2.8.2",
 	"appid": "wx5819d1f1540598a5",
 	"projectname": "3Dwxapp",
 	"miniprogramRoot": "dist/",
@@ -58,7 +58,7 @@
 					"id": 1,
 					"name": "论坛详情",
 					"pathName": "pages/forumDetail/index",
-					"query": "id=41",
+					"query": "id=52",
 					"scene": null
 				},
 				{

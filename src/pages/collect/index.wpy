@@ -50,7 +50,21 @@
       video: Video,
       forum: Forum
     }
-    async getCollectList () {
+    getLocalCollectList () {
+      let list = wepy.$instance.globalData.collectList
+      console.log(list)
+      if (!list) {
+        this.getCollectListFormServe()
+      } else {
+        // 先从缓存获取，优化体验
+        this.collectList = list
+        this.getImageWidth(this.collectList)
+        this.$apply()
+        // 从服务器获取
+        this.getCollectListFormServe()
+      }
+    }
+    async getCollectListFormServe () {
       try {
         const { userId, defaultSelectTab } = this
         let opts = {
@@ -70,7 +84,10 @@
         result && result.forEach(item => {
           item.checked = false
         })
-        this.collectList = result || []
+        result = result || []
+        wepy.$instance.globalData.collectList = result
+        this.collectList = result
+        this.getImageWidth(this.collectList)
         this.$apply()
       } catch (error) {
         console.log(error)
@@ -80,7 +97,6 @@
       handleCheckedRadio (item, index) {
         const result = []
         this.collectList[index].checked = !item.checked
-        const { defaultSelectTab } = this
         this.isAllChecked = this.collectList.every(item => item.checked)
         for (let i = 0; i < this.collectList.length; i++) {
           const item = this.collectList[i]
@@ -125,7 +141,7 @@
               success: function () {
                 setTimeout(() => {
                   wx.hideToast()
-                  that.getCollectList()
+                  that.getLocalCollectList()
                 }, 200)
               }
             })
@@ -161,12 +177,18 @@
       handleToTab (type) {
         this.defaultSelectTab = type
         this.isAllChecked = false
-        this.getCollectList()
+        this.getLocalCollectList()
       }
+    }
+    getImageWidth (list) {
+      this.imageWidth = Math.ceil((list.length > 1 ? 280 : 330) * wx.rpx2px * 2)
+      this.imageHeight = Math.ceil(271 * wx.rpx2px * 2)
+      this.imageQuality = wx.imageQuality
+      console.log(this.imageWidth, this.imageHeight, this.imageQuality)
     }
     onLoad () {
       this.userId = wepy.$instance.globalData.userId
-      this.getCollectList()
+      this.getLocalCollectList()
     }
     computed = {
       emptyTxt () {
@@ -184,7 +206,10 @@
       isEdit: false,
       isAllChecked: false,
       ids: [],
-      collectList: []
+      collectList: [],
+      imageWidth: 0,
+      imageHeight: 0,
+      imageQuality: 80,
     }
 
     onHide () {
