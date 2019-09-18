@@ -19,7 +19,7 @@
 
         
         <view class="footer">
-          <button class="footer-btn font-size--28" data-target="commet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo" form-type="submit">提交</button>
+          <button class="footer-btn font-size--28" data-target="forumcommet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo" form-type="submit">提交</button>
         </view>
       </view>
 
@@ -50,20 +50,20 @@
     }
     mixins = [CommonMixin]
     onLoad ({ forumId, nickname, parentId, replyId }) {
+      console.log(forumId)
+      wepy.$instance.globalData.subpub.on('forumcommet', this.handleForumSendInfo, this)
       this.userId = wepy.$instance.globalData.userId
-      this.forumId = forumId
       if (nickname) {
         this.placeholderText = `回复：${nickname}`
       } else {
         this.placeholderText = `此刻我也有话要说...`
       }
+      this.forumId = forumId
       this.nickname = nickname
       this.parentId = parentId
       this.replyId = replyId
-      wepy.$instance.globalData.subpub.on('commet', this.handleSendInfo, this)
     }
-    async handleSendInfo () {
-      console.log(this.commetContent)
+    async handleForumSendInfo () {
       if (!this.commetContent) {
         return wx.showToast({
           title: '评论信息不能为空',
@@ -139,6 +139,7 @@
           opts.imageIndex = uploadsId.join('_')
         }
         await commetApis.insertForumComment(opts)
+        wepy.$instance.globalData.subpub.off('forumcommet', this.handleForumSendInfo)
         wx.hideLoading()
         const that = this
         wx.nextTick(() => {
@@ -159,9 +160,6 @@
       }
     }
     methods = {
-      handleToSend () {
-        this.handleSendInfo()
-      },
       handleImagePreview (idx) {
         wx.previewImage({
           current: this.uploadImgs[idx], // 当前预览的图片
@@ -169,7 +167,6 @@
         })
       },
       handleCreatCommet (e) {
-        console.log(e)
         let { commet } = e.detail.value
         this.formId = e.detail.formId
         commet = commet.trim()
@@ -205,6 +202,7 @@
       }
     }
     onUnload () {
+      wepy.$instance.globalData.subpub.off('forumcommet', this.handleForumSendInfo)
     }
     onHide () {
     }

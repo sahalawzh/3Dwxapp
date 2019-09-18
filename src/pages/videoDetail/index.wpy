@@ -242,8 +242,6 @@
             title: '发送中',
             mask: true
           })
-          console.log(this)
-          console.log(this.id)
           const { userId, info, sendInfo } = this
           const opts = {
             userId,
@@ -343,8 +341,10 @@
       }
     }
     handleVideoCommet (e) {
-      wepy.$instance.globalData.userId = e
-      this.userId = e
+      if (e) {
+        wepy.$instance.globalData.userId = e
+        this.userId = e
+      }
       this.isShowControls = false
       this.isShowCommetInput = true
       this.$apply()

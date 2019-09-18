@@ -40,7 +40,7 @@ export default class CommonMixin extends wepy.mixin {
     try {
       const { userId, userInfo, target } = this
       const opts = {
-        userId,
+        userId: userId || wepy.$instance.globalData.userId,
         nickname: userInfo.nickName,
         smallAvator: userInfo.avatarUrl
       }

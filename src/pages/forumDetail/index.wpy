@@ -156,11 +156,11 @@
       },
       handleMenu (current) {
         const { type, index } = current
-        const { id, commetList } = this
-        const { nickname, id: commetId, content, replyId } = commetList[index]
+        const { commetList } = this
+        const { nickname, id: commetId, forumId, content, replyId } = commetList[index]
         switch (type) {
           case 'reply':
-            wxutils.backOrNavigate(`/pages/forumCommet/index?forumId=${id}&nickname=${nickname}&parentId=${commetId}&replyId=${replyId}`)
+            wxutils.backOrNavigate(`/pages/forumCommet/index?forumId=${forumId}&nickname=${nickname}&parentId=${commetId}&replyId=${replyId}`)
             this.menuShow = false
             this.$apply()
             break
@@ -299,7 +299,9 @@
     }
     async handleCollect (userId) {
       try {
-        this.userId = userId
+        if (userId) {
+          this.userId = userId
+        }
         const opts = {
           forumId: this.detail.id
         }

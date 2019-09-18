@@ -11,7 +11,7 @@
               <image class="menu-icon" src="../images/common/btn_comment_white.png" mode="aspectFill"></image>
               <view class="font-size--24">回复</view>
             </view>
-            <button wx:else data-url="/pages/forumCommet/index?forumId={{item.id}}&nickname={{item.nickname}}&parentId={{item.commetId}}&replyId={{item.replyId}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="open-type-btn menu-box__item">
+            <button wx:else data-url="/pages/forumCommet/index?forumId={{item.forumId}}&nickname={{item.nickname}}&parentId={{item.id}}&replyId={{item.replyId}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="open-type-btn menu-box__item">
               <image class="menu-icon" src="../images/common/btn_comment_white.png" mode="aspectFill"></image>
               <view class="font-size--24">回复</view>
             </button>
@@ -170,7 +170,7 @@ export default class Commet extends wepy.component {
       })
     },
     handleToSend () {
-      this.$emit('handleSendInfo')
+      this.handleSendInfo()
     },
     handleGetInfo (e) {
       const { value } = e.detail

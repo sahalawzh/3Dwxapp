@@ -176,8 +176,10 @@
       }
     }
     handleToActivity (e) {
-      wepy.$instance.globalData.userId = e
-      this.userId = e
+      if (e) {
+        wepy.$instance.globalData.userId = e
+        this.userId = e
+      }
       this.isShowForm = true
       this.$apply()
     }
@@ -199,7 +201,7 @@
             [item.controlKey]: item.title
           }
         })
-        wepy.$instance.globalData.subpub.on('activityCommet', this.handleVideoCommet, this)
+        wepy.$instance.globalData.subpub.on('activityCommet', this.handleActivityCommet, this)
         wepy.$instance.globalData.subpub.on('activity', this.handleToActivity, this)
         wx.setNavigationBarTitle({
           title: decodeURIComponent(data.title)
@@ -257,28 +259,29 @@
       },
       handleGetInfo (val) {
         this.sendInfo = val
-      }
-    }
-    async handleSendInfo () {
-      try {
-        if (!this.sendInfo) return
-        wx.showLoading({
-          title: '发送中',
-          mask: true
-        })
-        const { linkId, sendInfo } = this
-        const opts = {
-          activityId: linkId,
-          content: sendInfo
+      },
+      async handleSendInfo () {
+        try {
+          if (!this.sendInfo) return
+          wx.showLoading({
+            title: '发送中',
+            mask: true
+          })
+          const { linkId, sendInfo } = this
+          const opts = {
+            activityId: linkId,
+            content: sendInfo
+          }
+          await commetApis.insertActivityComment(opts)
+          wepy.$instance.globalData.subpub.off('activityCommet', this.handleActivityCommet)
+          this.sendInfo = ''
+          this.$broadcast('handleClearInput', this.sendInfo)
+          this.getActivityComment()
+          wx.hideLoading()
+          this.$apply()
+        } catch (error) {
+          wx.hideLoading()
         }
-        await commetApis.insertActivityComment(opts)
-        this.sendInfo = ''
-        this.$broadcast('handleClearInput', this.sendInfo)
-        this.getActivityComment()
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        wx.hideLoading()
       }
     }
     async getSharePoster () {
@@ -406,8 +409,10 @@
       }
     }
     handleActivityCommet (e) {
-      wepy.$instance.globalData.userId = e
-      this.userId = e
+      if (e) {
+        wepy.$instance.globalData.userId = e
+        this.userId = e
+      }
       this.isShowControls = false
       this.isShowCommetInput = true
       this.$apply()
