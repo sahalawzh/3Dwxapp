@@ -20,7 +20,7 @@
 		}
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.8.2",
+	"libVersion": "2.8.3",
 	"appid": "wx5819d1f1540598a5",
 	"projectname": "3Dwxapp",
 	"miniprogramRoot": "dist/",
@@ -45,20 +45,20 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 1,
+			"current": 0,
 			"list": [
 				{
 					"id": 0,
 					"name": "首页",
 					"pathName": "pages/index/index",
-					"query": "",
-					"scene": ""
+					"query": "navType=-1&actType=hot",
+					"scene": null
 				},
 				{
 					"id": 1,
 					"name": "论坛详情",
 					"pathName": "pages/forumDetail/index",
-					"query": "id=52",
+					"query": "id=53",
 					"scene": null
 				},
 				{

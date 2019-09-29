@@ -14,7 +14,7 @@
           <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
         </view>
         <view class="imgs wow-flex" wx:if="{{item.image.length}}">
-          <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" @tap.stop="handleImagePreview({{_item}}, {{index}})" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
+          <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
         </view>
       </view>
       <view class="forum-item__footer font-size--24 wow-flex is-align-middle is-justify-space-between">
@@ -40,12 +40,6 @@ export default class ForumList extends wepy.component {
   data = {
   }
   methods = {
-    handleImagePreview (img, index) {
-      wx.previewImage({
-        current: img, // 当前预览的图片
-        urls: this.lists[index].image // 所有要预览的图片
-      })
-    }
   }
 }
 </script>

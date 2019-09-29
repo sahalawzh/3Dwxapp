@@ -21,7 +21,7 @@
 
         <rich-text nodes="{{detail.content}}"></rich-text>
 
-        <block wx:if="{{detail.hiddenType === 1}}">
+        <view :class="{'has-hidden': detail.hiddenContent}" wx:if="{{detail.hiddenType === 1}}">
 
           <rich-text wx:if="{{detail.hiddenContent}}" nodes="{{detail.hiddenContent}}"></rich-text>
           <view class="content-hide font-size--28" wx:else>
@@ -31,8 +31,9 @@
             </navigator>
             <button wx:else data-url="/pages/forumCommet/index?forumId={{id}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="tip open-type-btn">回复后可见</button>
           </view>
-        
-        </block>
+          
+          <view class="copy-btn font-size--28" wx:if="{{detail.hiddenContent && detail.copyContent}}" @tap.stop="handleCopyHiddenContent">复制</view>
+        </view>
 
       </view>
     </view>
@@ -350,6 +351,22 @@
       }
     }
     methods = {
+      handleCopyHiddenContent () {
+        const that = this
+        wx.setClipboardData({
+          data: this.detail.copyContent,
+          success(res) {
+            wx.getClipboardData({
+              success(res) {
+                wx.showToast({
+                  title: '内容复制成功'
+                })
+                that.$apply()
+              }
+            })
+          }
+        })
+      },
       handleShareItems () {
         this.$broadcast('handleShowSharePopup')
       },

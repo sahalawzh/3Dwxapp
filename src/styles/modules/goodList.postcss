@@ -1,0 +1,60 @@
+.recommed-list {
+  &__item {
+    margin-bottom: 70rpx;
+    .item-wrap-head {
+      position: relative;
+      height: 532rpx;
+      .item-collection {
+        position: absolute;
+        left: 42rpx;
+        bottom: 26rpx;
+        .icon {
+          width: 30rpx;
+          height: 30rpx;
+          margin-right: 12rpx;
+        }
+      }
+    }
+    &_bg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 30rpx;
+      z-index: 2;
+      &--default {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 30rpx;
+        z-index: 1;
+      }
+    }
+    .item-info {
+      padding-left: 20rpx;
+      .line {
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .item-name {
+        font-weight: 600;
+        color: #595959;
+        padding-top: 30rpx;
+      }
+      .item-desc {
+        color: #9b9b9b;
+        padding-top: 8rpx;
+      }
+      .item-price {
+        padding-top: 8rpx;
+        margin-left: -4rpx;
+        &__market {
+          margin-left: 24rpx;
+          color: #9b9b9b;
+        }
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-cart">
   
-    <block wx:if="{{goods.length > 0}}">
+    <block wx:if="{{isFirst && goods.length}}">
       <view class="page-cart-choice wow-flex is-align-middle is-justify-space-between">
         <view class="wow-flex is-align-middle" @tap.stop="handleCheckAll">
           <view class="wow-radio radio-box font-size--26">
@@ -51,7 +51,10 @@
       <view class="footer wow-clearfix">
         <view class="wow-fl-l font-size--26 footer-price" hidden"{{isEdit}}">总计<text class="color-price font-size--30 wow-ml-30">￥{{price}}</text></view>
         <view class="wow-fl-r font-size--26">
-          <view class="pay-btn font-color-white {{ cartId ? '' : 'btn-disabled'}}" @tap.stop="handleEvent">{{isEdit ? '删除' : '去结算'}}</view>
+          <view class="pay-btn font-color-white {{ cartId ? '' : 'btn-disabled'}}" wx:if="{{isEdit}}" @tap.stop="handleEvent">删除</view>
+          <form bindsubmit="setFormId" report-submit="true" wx:else>
+            <button formType="submit" class="pay-btn font-color-white font-size--26 {{ cartId ? '' : 'btn-disabled'}}" @tap.stop="handleEvent">去结算</button>
+          </form>
         </view>
       </view>
 
@@ -106,7 +109,7 @@
     </block>
 
 
-    <view class="cart-empty" wx:else>
+    <view class="cart-empty" wx:if="{{isFirst && !goods.length}}">
       <view class="cart-empty-box">
         <image class="cart-empty__icon" src='../../images/cart/ico_cart_empty.png'></image>
         <view class="font-size--26 cart-empty__info">您的购物车还没有商品哦~</view>
@@ -132,6 +135,7 @@
   import goodsApi from '../../api/goods'
   import wxutils from '../../utils/wxutils'
   import commonwxs from './wxs/common.wxs'
+  import formIdMixin from '../../mixins/formId'
   export default class Cart extends wepy.page {
     config = {
       navigationBarTitleText: '购物车',
@@ -141,6 +145,7 @@
         'wow-stepper': '../../packages/stepper/index'
       }
     }
+    mixins = [formIdMixin]
     wxs = {
       commonwxs: commonwxs
     }
@@ -214,6 +219,7 @@
         })
         this.goods = data
         this.isCheckAll = false
+        this.price = '0.00'
         this.$apply()
         if (!data.length) {
           this.getRecommend()
@@ -253,7 +259,7 @@
       }
     }
     onLoad ({ userId }) {
-      this.userId = wx.getStorageSync('wow').userId
+      this.userId = wepy.$instance.globalData.userId
       this.getCartList()
     }
     onReachBottom () {
@@ -484,7 +490,9 @@
             }
           })
         } else {
-          wxutils.backOrNavigate('/pages/reserver/index?cartId=' + this.cartId)
+          this.getTemplateFormId().then(() => {
+            wxutils.backOrNavigate('/pages/reserver/index?cartId=' + this.cartId)
+          })
         }
       },
       handleToManager () {

@@ -16,7 +16,7 @@
     <view class="content" wx:if="{{mineList.length}}">
       <navigator wx:for="{{mineList}}" wx:key="index" hover-class="none" url="/pages/forumDetail/index?id={{item.forumId}}" class="content-item">
         <view class="header wow-flex is-align-middle">
-          <image src="{{item.smallAvator}}" class="smallAvator" mode="aspectFill"></image>
+          <image src="{{item.smallAvator}}" lazy-load="true" class="smallAvator" mode="aspectFill"></image>
           <view class="nickname font-size--32">{{item.nickname}}</view>
           <view class="time font-size--24">{{item.time}}</view>
         </view>

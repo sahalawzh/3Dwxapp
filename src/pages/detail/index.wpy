@@ -364,7 +364,7 @@
     }
     events = {
       handleToCart () {
-        this.isRuleTrue = true
+        this.handleShowSku()
       },
       handleToCollect () {
         this.handleCollect()
@@ -393,6 +393,14 @@
       this.getRelatedProducts()
       this.getSpuCollectionNum()
       this.getTheSpuCollection()
+      wepy.$instance.globalData.subpub.on('cart', this.handleShowSku, this)
+    }
+    handleShowSku (userId) {
+      if (userId) {
+        this.userId = userId
+      }
+      this.isRuleTrue = true
+      this.$apply()
     }
     computed = {
       isLease () { // 720是购买,其他都是租赁
@@ -475,6 +483,9 @@
         imageUrl: detail.image,
         path: 'pages/detail/index?id=' + pid
       }
+    }
+    onUnload () {
+      wepy.$instance.globalData.subpub.off('cart', this.handleShowSku)
     }
     onHide () {
     }

@@ -2,7 +2,7 @@
   <view class="good-info">
     <view class="wow-flex is-align-middle">
       <view class="font-size--36 color-price good-info__price">￥{{good.recommendedPrice}}</view>
-      <view class="product-price-maket wow-ml-30 price-maket" wx:if="{{good.price}}">原价 ￥{{good.price}}</view>
+      <view class="product-price-maket wow-ml-30 price-maket" wx:if="{{isShowMarket}}">原价 ￥{{good.price}}</view>
     </view>
     <view class="good-info__name font-size--36">
       <view class="name-elip">{{good.title}}</view>
@@ -17,6 +17,12 @@ export default class Info extends wepy.component {
     good: {
       type: [Object],
       twoWay: true
+    }
+  }
+  computed = {
+    isShowMarket () {
+      const { good } = this
+      return good && (Number(good.recommendedPrice) < Number(good.price))
     }
   }
   data = {

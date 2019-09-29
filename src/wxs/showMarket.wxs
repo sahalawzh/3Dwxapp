@@ -1,0 +1,5 @@
+module.exports = {
+  show: function (price, market_price) {
+    return Number(price) < Number(market_price)
+  }
+}

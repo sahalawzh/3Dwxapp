@@ -25,7 +25,9 @@
             <view class="wow-background-image order-img"
             style="background-image: url({{item.image}})"></view>
             <view class="order-info">
-              <wow-elip line="2" class="order-info__title font-size--28">{{item.title}}</wow-elip>
+              <view class="order-info__title font-size--28">
+                <wow-elip line="2">{{item.title}}</wow-elip>
+              </view>
               <wow-elip line="1" class="order-info__sku font-size--24">{{commonwxs.specStr(item)}}</wow-elip>
               <view class="order-info__price font-size--28 wow-flex is-justify-space-between is-align-middle">
                 <view class="color-price">￥{{item.price}}</view>
@@ -34,10 +36,6 @@
             </view>
           </view>
 
-          <!-- <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
-            <view>配送方式</view>
-            <view>快递 包邮</view>
-          </view> -->
           <block wx:if="{{false}}">
             <view class="order-lists-items__status font-size--26 wow-flex is-justify-space-between">
               <view>发票</view>

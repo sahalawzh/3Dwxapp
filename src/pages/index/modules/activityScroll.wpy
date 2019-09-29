@@ -8,7 +8,7 @@
     <view class="activity-content">
       <scroll-view class="activity-scroll" scroll-x="true">
         <navigator class="activity-item" wx:for="{{activityList}}" wx:key="index" url="/pages/activity/index?linkId={{item.id}}">
-          <image class="activity-img" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <image class="activity-img" lazy-load="true" src="{{item.imageUrl}}" mode="aspectFill"></image>
           <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
         </navigator>
       </scroll-view>

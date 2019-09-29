@@ -172,13 +172,13 @@ export default class extends wepy.app {
         console.log('app', wx.imageQuality)
       }
     })
-    if (process.env.NODE_ENV === 'development') { // http://testapi.gdlwzn.com
-      this.globalData.baseUrl = 'http://testapi.gdlwzn.com'
+    if (process.env.NODE_ENV === 'development') { // https://testapi.gdlwzn.com
+      this.globalData.baseUrl = 'https://testapi.gdlwzn.com'
     } else {
       if (process.env.TARGET_APP === 'proapp') {
-        this.globalData.baseUrl = ''
-      } else {
         this.globalData.baseUrl = 'https://api.gdlwzn.com'
+      } else {
+        this.globalData.baseUrl = 'https://testapi.gdlwzn.com'
       }
     }
     let cacheWowInfo = wx.getStorageSync('wow')

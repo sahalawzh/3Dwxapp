@@ -151,8 +151,8 @@
       stage: 0,
       animation: {},
       floatAdv: '',
-      isShowFloatAdv: process.env.NODE_ENV === 'development' ? false : true,
-      navType: -1, // -1 全部 1 课程  act 话题活动
+      isShowFloatAdv: process.env.NODE_ENV !== 'development',
+      navType: -1, // -1 全部 1 课程  topic 话题活动
       actStart: 1,
       actLimit: 5,
       actType: 'hot', // hot 热门 follow 关注 activity 活动 mine 我的
@@ -167,7 +167,7 @@
       sendNum: '',
       failNum: '',
       isShowRedPoint: false, // 我的红圈
-      authButtonText: '请点这里登录查看'
+      authButtonText: '请点击这里登录查看'
     }
     watch = {
       actType (val) {
@@ -362,7 +362,6 @@
           this.hasMoreData = true
           this.start ++
         }
-        console.log(this.hasMoreData)
         wx.hideLoading()
         this.$apply()
       } catch (error) {
@@ -406,7 +405,7 @@
           activityList = []
         }
         this.activityList = activityList.concat(actData.data)
-        if (actData.data.length < actLimit) {
+        if (actData.data.length >= actData.total) {
           this.hasMoreData = false
         } else {
           this.hasMoreData = true
@@ -428,13 +427,14 @@
         this.getMyForumReply()
       }
     }
-    onLoad () {
+    onLoad ({navType = -1, actType = 'hot'}) {
+      this.navType = navType === '-1' || navType === '1' ? Number(navType) : navType
+      this.actType = actType
       // 隐藏系统tabbar
       wx.hideTabBar()
       wepy.$instance.editTabbar()
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
-      this.getListActivity()
-      this.getListVideoActivity()
+      this.resetFn()
       this.getAdvertisement()
       this.getPrintGuide()
       wepy.$instance.globalData.subpub.on('auth', this.handleAuth, this)
@@ -445,11 +445,24 @@
       this.actStart = 1
       this.forumStart = 1
       this.mineStart = 1
-      // this.hasMoreData = false
       this.activityList = []
       this.videoActivityList = []
       this.mineList = []
       this.forumList = []
+    }
+    resetFn () {
+      if (this.navType === 'topic') {
+        if (this.actType === 'hot') {
+          this.getForumList()
+        } else if (this.actType === 'activity') {
+          this.getListActivity()
+        }
+      } else if (this.navType === -1) { // 发现
+        this.getListActivity()
+        this.getListVideoActivity()
+      } else { // 课程
+        this.getListVideoActivity()
+      }
     }
     onPullDownRefresh () {
       this.resetData()
@@ -472,13 +485,19 @@
     methods = {
     }
     onShareAppMessage () {
+      const { navType, actType } = this
+      let path = `pages/index/index?navType=${navType}&actType=${actType}`
+      if (this.navType === 'topic') {
+        if (this.actType === 'follow' || this.actType === 'mine') {
+          path = `pages/index/index`
+        }
+      }
       return {
         title: '无限三维 · 让孩子创造未来',
-        path: 'pages/index/index'
+        path
       }
     }
     onReachBottom () {
-      console.log(this.hasMoreData)
       if (this.hasMoreData) {
         if (this.navType === 'topic') {
           if (this.actType === 'hot' || this.actType === 'follow') {
