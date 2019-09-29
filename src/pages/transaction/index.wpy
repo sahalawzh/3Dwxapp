@@ -37,7 +37,7 @@
         }
         let { data: recommendedData } = await goodsApis.recommended(opts)
         let data = recommendedData.data
-        if (start === 0) {
+        if (start === 1) {
           lists = []
         }
         this.lists = lists.concat(data)

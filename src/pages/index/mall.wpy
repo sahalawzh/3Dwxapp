@@ -86,11 +86,12 @@
           limits
         }
         let { data } = await goodsApi.recommended(opts)
-        if (start === 0) {
+        if (start === 1) {
           lists = []
         }
-        this.lists = lists.concat(data.data)
-        if (data.data.length < limits) {
+        const { data: recommendData, total } = data
+        this.lists = lists.concat(recommendData)
+        if (recommendData.length >= total) {
           this.hasMoreData = false
         } else {
           this.hasMoreData = true

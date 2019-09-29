@@ -65,7 +65,7 @@
         }
         const { data } = await modelApis.listModels(opts)
         wx.hideLoading()
-        if (start === 0) {
+        if (start === 1) {
           lists = []
         }
         this.lists = lists.concat(data)
