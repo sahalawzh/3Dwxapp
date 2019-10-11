@@ -4,7 +4,6 @@
   "description": "商城小程序",
   "main": "dist/app.js",
   "scripts": {
-    "copy:jfkPackage": "node copy.package.js",
     "dev": "wepy build --watch",
     "dev:nocopy": "wepy build --watch",
     "build:proapp": "cross-env NODE_ENV=production TARGET_APP=proapp wepy build --no-cache",

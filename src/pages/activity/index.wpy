@@ -18,14 +18,17 @@
       <view class="wow-flex">
         <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
         <view class="btn-box">
-          <button wx:if="{{userId}}" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
-          <button
-            wx:else
-            data-type="activity"
-            open-type="getPhoneNumber"
-            bindgetphonenumber="getPhoneNumber"
-            disabled="{{activityData.dateType === 2}}"
-            class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
+          <form bindsubmit="setFormId" report-submit="true">
+            <button wx:if="{{userId}}" formType="submit" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
+            <button
+              wx:else
+              data-type="activity"
+              open-type="getPhoneNumber"
+              bindgetphonenumber="getPhoneNumber"
+              disabled="{{activityData.dateType === 2}}"
+              formType="submit"
+              class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
+          </form>
         </view>
       </view>
     </view>
@@ -34,7 +37,7 @@
     <view class="form-box" catchtouchmove="true" wx:if="{{isShowForm}}">
       <view class="form-mask"></view>
       <view class="form-content font-size--30" wx:if="{{controlList.length}}">
-        <form bindsubmit="formSubmitSend">
+        <form bindsubmit="formSubmitSend" report-submit="true">
           <scroll-view class="scroll-view_H" scroll-y style="max-height:{{controlHeight}}px">
             <input
               type="{{ item.controlKey === 'phone' ? 'number' : 'text' }}"
@@ -51,7 +54,7 @@
                 <image class="arrow_down" wx:if="{{item.controlType === 2}}" src="../../images/common/arrow_down.png" mode="aspectFill"></image>
               </input>
           </scroll-view>
-        <button class="form-content__btn font-size--28" form-type="submit">{{buttonText}}</button>
+          <button class="form-content__btn font-size--28" data-target="activitySign" form-type="submit" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">{{buttonText}}</button>
         </form>
       </view>
       <view class="wow-ta-c">
@@ -64,7 +67,7 @@
     <!-- 选择 -->
     <wow-popup class="j_select popup-picker" border-radius="false" full="false" gaps="{{[0]}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
       <view style="width: 750rpx" class="popup-picker__box" @tap.stop="noop">
-        <view class="popup-picker__toolbar jfk-flex is-justify-space-between font-size--32">
+        <view class="popup-picker__toolbar wow-flex is-justify-space-between font-size--32">
           <text class="font-color-extra-light-gray" @tap.stop="handleCancelArea">取消</text>
           <text @tap.stop="handleSelectedArea">完成</text>
         </view>
@@ -90,6 +93,7 @@
   import activityApis from '../../api/activity'
   import shareApis from '../../api/share'
   import CommonMixin from '../../mixins/common'
+  import formIdMixin from '../../mixins/formId'
   import imageUtil from '../../utils/image'
   import Commet from '../../components/commet'
   import Share from '../../components/share'
@@ -124,7 +128,7 @@
       commet: Commet,
       share: Share
     }
-    mixins = [CommonMixin]
+    mixins = [CommonMixin, formIdMixin]
     config = {
       navigationBarTitleText: '',
       usingComponents: {
@@ -137,7 +141,6 @@
         let urlObj = 'url?' + sceneObj
         options = parseQueryString(urlObj)
       }
-      console.log(options)
       this.linkId = options.linkId
       this.advDetail()
       this.getActivityComment()
@@ -175,10 +178,36 @@
         return maxHeight
       }
     }
-    handleToActivity (e) {
+    async handleToActivity (e) {
       if (e) {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
         wepy.$instance.globalData.userId = e
         this.userId = e
+        this.$apply()
+      }
+      const { id, activityType } = this.activityData
+      const param = {
+        id,
+        activityType
+      }
+      this.getTemplateFormId()
+      const { data } = await activityApis.checkForm(param)
+      wx.hideLoading()
+      if (data.isEnable === 1) {
+        wx.nextTick(() => {
+          wx.showToast({
+            title: '您已成功报名',
+            success: function () {
+              setTimeout(() => {
+                wx.hideToast()
+              }, 1000)
+            }
+          })
+        })
+        return
       }
       this.isShowForm = true
       this.$apply()
@@ -203,6 +232,7 @@
         })
         wepy.$instance.globalData.subpub.on('activityCommet', this.handleActivityCommet, this)
         wepy.$instance.globalData.subpub.on('activity', this.handleToActivity, this)
+        wepy.$instance.globalData.subpub.on('activitySign', this.handleActivitySign, this)
         wx.setNavigationBarTitle({
           title: decodeURIComponent(data.title)
         })
@@ -310,6 +340,61 @@
         wx.hideLoading()
       }
     }
+    async handleActivitySign () {
+      const { formData, formId, activityData, linkId } = this
+      const errVaild = this.verification(formData)
+      if (!errVaild.vaild) {
+        wx.showToast({
+          title: errVaild.msg,
+          icon: 'none'
+        })
+        return
+      }
+      try {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const content = []
+        for (let key in formData) {
+          content.push({
+            'key': key,
+            'value': formData[key]
+          })
+        }
+        const opts = {
+          activityId: linkId,
+          id: activityData.formId, // 表单id
+          content, // 表单内容(数组）
+          wxFormId: formId,
+          activityTitle: activityData.title // 活动名
+        }
+        await activityApis.submit(opts)
+        wx.hideLoading()
+        this.controlList.forEach(item => {
+          item.value = ''
+        })
+        this.isShowForm = false
+        const that = this
+        wx.nextTick(() => {
+          wx.showToast({
+            title: '提交成功',
+            success: function () {
+              setTimeout(() => {
+                wx.hideToast()
+                if (that.activityData.isBackHome === 1) {
+                  wx.switchTab({url: '/pages/index/index'})
+                }
+              }, 200)
+            }
+          })
+        })
+        this.$apply()
+      } catch (e) {
+        console.log(e)
+        wx.hideLoading()
+      }
+    }
     methods = {
       handleLoadContent (e) {
         const { width, height } = e.detail
@@ -327,59 +412,10 @@
         const { value } = e.detail
         this.controlList[index].value = value
       },
-      async formSubmitSend (e) {
-        const formData = e.detail.value
-        const errVaild = this.verification(formData)
-        if (!errVaild.vaild) {
-          wx.showToast({
-            title: errVaild.msg,
-            icon: 'none'
-          })
-          return
-        }
-        try {
-          wx.showLoading({
-            title: '加载中',
-            mask: true
-          })
-          const { activityData, linkId } = this
-          const content = []
-          for (let key in formData) {
-            content.push({
-              'key': key,
-              'value': formData[key]
-            })
-          }
-          const opts = {
-            activityId: linkId,
-            id: activityData.formId, // 表单id
-            content // 表单内容(数组）
-          }
-          await activityApis.submit(opts)
-          wx.hideLoading()
-          this.controlList.forEach(item => {
-            item.value = ''
-          })
-          this.isShowForm = false
-          const that = this
-          wx.nextTick(() => {
-            wx.showToast({
-              title: '提交成功',
-              success: function () {
-                setTimeout(() => {
-                  wx.hideToast()
-                  if (that.activityData.isBackHome === 1) {
-                    wx.switchTab({url: '/pages/index/index'})
-                  }
-                }, 200)
-              }
-            })
-          })
-          this.$apply()
-        } catch (e) {
-          console.log(e)
-          wx.hideLoading()
-        }
+      formSubmitSend (e) {
+        const { value, formId } = e.detail
+        this.formData = value
+        this.formSubmitId = formId
       },
       handleSelectedArea () {
         this.controlList[this.currentIndex].value = this.currentValues[this.indexs.join('')]

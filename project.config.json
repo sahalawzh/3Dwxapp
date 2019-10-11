@@ -45,7 +45,7 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 0,
+			"current": 3,
 			"list": [
 				{
 					"id": 0,
@@ -58,7 +58,7 @@
 					"id": 1,
 					"name": "论坛详情",
 					"pathName": "pages/forumDetail/index",
-					"query": "id=53",
+					"query": "id=87",
 					"scene": null
 				},
 				{
@@ -69,10 +69,10 @@
 					"scene": null
 				},
 				{
-					"id": 2,
+					"id": 3,
 					"name": "活动页面",
 					"pathName": "pages/activity/index",
-					"query": "linkId=1",
+					"query": "linkId=2",
 					"scene": null
 				},
 				{

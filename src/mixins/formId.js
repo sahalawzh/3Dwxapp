@@ -8,6 +8,7 @@ export default class FormIdMixin extends wepy.mixin {
     setFormId (e) {
       const { formId } = e.detail
       this.formId = formId
+      console.log(this.formId)
     }
   }
   async getTemplateFormId () {

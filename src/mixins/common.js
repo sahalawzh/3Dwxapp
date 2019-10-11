@@ -35,6 +35,7 @@ export default class CommonMixin extends wepy.mixin {
       iv
     }
     await http.authLogin(config, { url, authType, id })
+    this.isCreateClick = false
   }
   async getUserInfo () {
     try {

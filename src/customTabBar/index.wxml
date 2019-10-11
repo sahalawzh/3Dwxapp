@@ -1,4 +1,4 @@
-<!--miniprogram/custom-tab-bar/index.wxml-->
+<!--miniprogram/customTabBar/index.wxml-->
 <view class="tab-bar {{ isModelIPX ? 'tab-bar__heightX' : '' }}">
   <view class="tab-bar-border"></view>
   <block wx:for="{{tabbar.list}}" wx:key="{{item.pagePath}}">

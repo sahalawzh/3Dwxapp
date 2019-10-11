@@ -120,7 +120,7 @@
       navigationBarTitleText: '打印机',
       enablePullDownRefresh: true,
       usingComponents: {
-        'custom-tabbar': '../../custom-tab-bar/index'
+        'custom-tabbar': '../../customTabBar/index'
       }
     }
     mixins = [CommonMixin]

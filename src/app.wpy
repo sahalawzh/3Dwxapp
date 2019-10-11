@@ -1,5 +1,4 @@
 <style>
-  @import './packages/package_help/common.wxss';
 </style>
 <style lang="postcss">
   @import 'src/styles/common/common.postcss';
@@ -70,20 +69,20 @@ export default class extends wepy.app {
       list: [
         {
           'pagePath': 'pages/index/index',
-          'iconPath': 'custom-tab-bar/icon/nav_button_home_default.png',
-          'selectedIconPath': 'custom-tab-bar/icon/nav_button_home_selected.png',
+          'iconPath': 'customTabBar/icon/nav_button_home_default.png',
+          'selectedIconPath': 'customTabBar/icon/nav_button_home_selected.png',
           'text': '首页'
         },
         {
           'pagePath': 'pages/index/mall',
-          'iconPath': 'custom-tab-bar/icon/nav_button_shop_default.png',
-          'selectedIconPath': 'custom-tab-bar/icon/nav_button_shop_selected.png',
+          'iconPath': 'customTabBar/icon/nav_button_shop_default.png',
+          'selectedIconPath': 'customTabBar/icon/nav_button_shop_selected.png',
           'text': '商城'
         },
         {
           'pagePath': 'pages/index/printer',
-          'iconPath': 'custom-tab-bar/icon/nav_btn_printer_default.png',
-          'selectedIconPath': 'custom-tab-bar/icon/nav_btn_printer_selected.png',
+          'iconPath': 'customTabBar/icon/nav_btn_printer_default.png',
+          'selectedIconPath': 'customTabBar/icon/nav_btn_printer_selected.png',
           'text': '打印机'
         }
       ]
@@ -173,7 +172,7 @@ export default class extends wepy.app {
       }
     })
     if (process.env.NODE_ENV === 'development') { // https://testapi.gdlwzn.com
-      this.globalData.baseUrl = 'https://testapi.gdlwzn.com'
+      this.globalData.baseUrl = 'https://api.gdlwzn.com'
     } else {
       if (process.env.TARGET_APP === 'proapp') {
         this.globalData.baseUrl = 'https://api.gdlwzn.com'

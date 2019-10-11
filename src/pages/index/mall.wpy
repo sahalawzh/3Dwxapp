@@ -42,7 +42,7 @@
       navigationBarTitleText: '无限三维',
       enablePullDownRefresh: true,
       usingComponents: {
-        'custom-tabbar': '../../custom-tab-bar/index'
+        'custom-tabbar': '../../customTabBar/index'
       }
     }
     mixins = [CommonMixin]

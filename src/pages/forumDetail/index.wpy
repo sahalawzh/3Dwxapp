@@ -274,7 +274,12 @@
             })
           }
           if (/<p/gi.test(result)) {
-            result = result.replace(/<p/gi, '<p style="color:#373737;text-align:justify;"')
+            result = result.replace(/<p>(.*?)<\/p>/gi, function (match, capture) {
+              if (capture === '<br>') {
+                capture = ''
+              }
+              return `<p style="color:#373737;text-align:justify;">${capture}</p>`
+            })
           }
           if (/<img/gi.test(result)) {
             result = result.replace(/<img [^>]*>/gi, function (match, capture) {

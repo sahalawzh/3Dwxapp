@@ -91,7 +91,7 @@
 
     <wow-popup class="j_picker popup-picker" status="{{status}}" border-radius="false" full="false" gaps="{{[0]}}" position="bottom" show-close="false" @popupclose.stop="handleCancelArea">
       <view style="width: 750rpx" class="season-picker__box" @tap.stop="noop">
-        <view class="popup-picker__toolbar jfk-flex is-justify-space-between font-size--32">
+        <view class="popup-picker__toolbar wow-flex is-justify-space-between font-size--32">
           <text class="font-color-extra-light-gray" @tap.stop="handleCancelArea">取消</text>
           <text @tap.stop="handleSelectedArea">完成</text>
         </view>

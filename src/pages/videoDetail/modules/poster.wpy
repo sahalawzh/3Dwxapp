@@ -5,7 +5,7 @@
     </view> 
     <view class="defaultPoster">
       <image src="{{poster}}" mode="widthFix"  class="posterimg"/>
-      <view class="jfk-flex is-justify-space-between buttonwrap">
+      <view class="wow-flex is-justify-space-between buttonwrap">
         <button type="primary" class="font-size--32 savePoster" @tap="handleSavePhoto" wx:if="{{!refuseAuthorize}}">保存图片</button>        
         <button type="primary" class="font-size--32 savePoster" @tap="handleSavePhoto" open-type="openSetting" wx:else>保存图片</button>        
       </view>

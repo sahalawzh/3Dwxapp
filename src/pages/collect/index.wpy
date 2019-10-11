@@ -209,7 +209,7 @@
       collectList: [],
       imageWidth: 0,
       imageHeight: 0,
-      imageQuality: 80,
+      imageQuality: 80
     }
 
     onHide () {

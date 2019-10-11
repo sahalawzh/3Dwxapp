@@ -21,4 +21,12 @@ export default class activity extends base {
   static listActivity (opts) {
     return this.get(`api/activity/listActivity`, opts)
   }
+  /**
+   * 检查是否有提交
+   * @param id 活动id
+   * @param activityType 活动类型
+   */
+  static checkForm (opts) {
+    return this.get(`/api/activity/checkForm`, opts)
+  }
 }
