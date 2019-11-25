@@ -72,7 +72,7 @@
 					"id": 3,
 					"name": "活动页面",
 					"pathName": "pages/activity/index",
-					"query": "linkId=2",
+					"query": "linkId=1",
 					"scene": null
 				},
 				{

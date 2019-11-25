@@ -31,7 +31,7 @@
         <view class="item">
           <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
           <view class="video-lists__item wow-background-image font-color-white"
-            style="background-image: url({{item.image}})"
+            style="background-image: url('{{item.image}}?x-oss-process=image/resize,w_{{listImage.imageWidth}},h_{{listImage.imageHeight}}/quality,Q_{{listImage.imageQuality}}')"
             @tap.stop="handleToDetail({{item}})">
             <view class="bg-mask"></view>
 
@@ -58,7 +58,8 @@ export default class VideoList extends wepy.component {
     lists: {
       type: Array,
       default: []
-    }
+    },
+    listImage: Object
   }
   data = {
     status: {

@@ -3,7 +3,7 @@
   <view class="recommed-list">
     <navigator class="recommed-list__item" hover-class="none" wx:for="{{list}}" wx:key="index" url="/pages/detail/index?id={{item.id}}">
       <view class="item-wrap-head">
-        <image class="recommed-list__item_bg" lazy-load="true" src="{{item.image}}" mode="aspectFill"></image>
+        <image class="recommed-list__item_bg" lazy-load="true" src="{{item.image}}?x-oss-process=image/resize,w_{{listImage.imageWidth}},h_{{listImage.imageHeight}}/quality,Q_{{listImage.imageQuality}}" mode="aspectFill"></image>
         <image class="recommed-list__item_bg--default" lazy-load="true" src="../images/mall/bg_goods_defaul.png" mode="aspectFill"></image>
         <view class="item-collection wow-flex is-align-middle">
           <image class="icon" bindload="handleFinishLoad" src="../images/common/ico_Collection_small_white.png" mode="aspectFill"></image>
@@ -29,7 +29,8 @@
       list: {
         type: Array,
         default: []
-      }
+      },
+      listImage: Object
     }
     wxs = {
       ShowMarketWXS: ShowMarketWXS

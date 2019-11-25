@@ -3,67 +3,77 @@
   <view class="page-contain page-index">
     <view class="page-index__bg"></view>
 
-    <nav :navType.sync="navType"></nav>
+    <view class="review-box" wx:if="{{template === 'review'}}">
+      <image bindload="imageLoad" style="width: {{imageReviewWidth}}px; height: {{imageReviewHeight}}px" src="{{viewImg}}" mode="aspectFill"></image>
+    </view>
 
-    <advertising
-      :floatAdv.sync="floatAdv"
-      :bannerAdv.sync="bannerAdv"
-      :navType.sync="navType"
-      :isShowFloatAdv.sync="isShowFloatAdv"
-      :stage.sync="stage"
-    ></advertising>
+    <block wx:if="{{template === 'normal'}}">
+      <nav :navType.sync="navType"></nav>
+      <advertising
+        :floatAdv.sync="floatAdv"
+        :bannerAdv.sync="bannerAdv"
+        :navType.sync="navType"
+        :isShowFloatAdv.sync="isShowFloatAdv"
+        :stage.sync="stage"
+        :advTopImage.sync="advTopImage"
+        :floatImage.sync="floatImage"
+      ></advertising>
 
-    <!-- 发现滚动活动 -->
-    <activityScroll
-      wx:if="{{activityList.length && navType === -1}}"
-      :activityList.sync="activityList"
-    ></activityScroll>
+      <!-- 发现滚动活动 -->
+      <activityScroll
+        wx:if="{{activityList.length && navType === -1}}"
+        :activityList.sync="activityList"
+        :activitySrcollImage.sync="activitySrcollImage"
+      ></activityScroll>
 
-    <topicNav
-      :actType.sync="actType"
-      :isShowRedPoint.sync="isShowRedPoint"
-      wx:if="{{navType === 'topic'}}"
-    ></topicNav>
-    
-    <block wx:if="{{actType === 'hot' || (actType === 'follow' && userId)}}">
-      <forumList
-        wx:if="{{forumList.length}}"
-        :lists.sync="forumList"
-      ></forumList>
+      <videoList 
+        :lists.sync="videoActivityList"
+        :listImage.sync="listImage"
+        wx:if="{{videoActivityList.length}}"
+      ></videoList>
+
+      <topicNav
+        :actType.sync="actType"
+        :isShowRedPoint.sync="isShowRedPoint"
+        wx:if="{{navType === 'topic'}}"
+      ></topicNav>
+      
+      <block wx:if="{{actType === 'hot' || (actType === 'follow' && userId)}}">
+        <forumList
+          wx:if="{{forumList.length}}"
+          :lists.sync="forumList"
+        ></forumList>
+      </block>
+
+      <activityList 
+        :activityList.sync="activityList"
+        :listImage.sync="listImage"
+        wx:if="{{navType === 'topic' && activityList.length && actType === 'activity'}}"
+      ></activityList>
+      
+      <mine
+        :sendNum.sync="sendNum"
+        :saveNum.sync="saveNum"
+        :failNum.sync="failNum"
+        :mineList.sync="mineList"
+        wx:if="{{navType === 'topic' && actType === 'mine' && userId}}"
+      ></mine>
+
+      <block wx:if="{{!userId}}">
+        <button wx:if="{{actType === 'follow' || actType === 'mine'}}" data-type="auth" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--26 auth-btn open-type-btn">{{authButtonText}}</button>
+      </block>
+      
+      <loading wx:if="{{hasMoreData}}"></loading>
+      
+      <view class="empty-list font-size--26" wx:if="{{!hasData}}">暂无相关数据~</view>
+
+      <forumBtn
+        :userId.sync="userId"
+        wx:if="{{actType !== 'activity' && navType === 'topic'}}"
+      ></forumBtn>
+
     </block>
-
-    <activityList 
-      :activityList.sync="activityList"
-      wx:if="{{navType === 'topic' && activityList.length && actType === 'activity'}}"
-    ></activityList>
-    
-    <mine
-      :sendNum.sync="sendNum"
-      :saveNum.sync="saveNum"
-      :failNum.sync="failNum"
-      :mineList.sync="mineList"
-      wx:if="{{navType === 'topic' && actType === 'mine' && userId}}"
-    ></mine>
-
-    <block wx:if="{{!userId}}">
-      <button wx:if="{{actType === 'follow' || actType === 'mine'}}" data-type="auth" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--26 auth-btn open-type-btn">{{authButtonText}}</button>
-    </block>
-
-
-    <videoList 
-      :lists.sync="videoActivityList"
-      wx:if="{{videoActivityList.length}}"
-    ></videoList>
-    
-    <loading wx:if="{{hasMoreData}}"></loading>
-    
-    <view class="empty-list font-size--26" wx:if="{{!hasData}}">暂无相关数据~</view>
-
-    <forumBtn
-      :userId.sync="userId"
-      wx:if="{{actType !== 'activity' && navType === 'topic'}}"
-    ></forumBtn>
-    
+  
     <silder :userId.sync="userId" :cartNum.sync="cartNum"></silder>
 
     <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
@@ -97,6 +107,8 @@
   import Advertising from './modules/advertising'
   import { timeHandle } from '../../utils/commentTimeHandle'
   import CommonMixin from '../../mixins/common'
+  import configApis from '../../api/config'
+  import imageUtil from '../../utils/image'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -147,10 +159,10 @@
       hasMoreData: false, // 默认不用拉数据
       cartNum: '',
       userId: '',
-      bannerAdv: '',
+      bannerAdv: [],
       stage: 0,
       animation: {},
-      floatAdv: '',
+      floatAdv: [],
       isShowFloatAdv: process.env.NODE_ENV !== 'development',
       navType: -1, // -1 全部 1 课程  topic 话题活动
       actStart: 1,
@@ -167,7 +179,31 @@
       sendNum: '',
       failNum: '',
       isShowRedPoint: false, // 我的红圈
-      authButtonText: '请点击这里登录查看'
+      authButtonText: '请点击这里登录查看',
+      listImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      },
+      advTopImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      },
+      activitySrcollImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      },
+      floatImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      },
+      template: '',
+      viewImg: 'https://wxsw.oss-cn-hangzhou.aliyuncs.com/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20191115172059.jpg',
+      imageReviewWidth: '',
+      imageReviewHeight: ''
     }
     watch = {
       actType (val) {
@@ -356,6 +392,7 @@
         } else {
           this.videoActivityList = [...videoActivityList, ...videoDOList]
         }
+        console.log(this.videoActivityList)
         if (this.videoActivityList.length >= total) {
           this.hasMoreData = false
         } else {
@@ -372,8 +409,8 @@
     async getAdvertisement () { // 广告位接口
       try {
         const { data: advData } = await advertisementApis.queryAdvertisements()
-        this.bannerAdv = advData.filter(item => item.advertisementType === 4)[0] // 顶部banner
-        this.floatAdv = advData.filter(item => item.advertisementType === 1)[0] // 浮动banner
+        this.bannerAdv = advData.filter(item => item.advertisementType === 4) // 顶部banner
+        this.floatAdv = advData.filter(item => item.advertisementType === 1) // 浮动banner
         this.$apply()
       } catch (error) {
         console.log(error)
@@ -427,6 +464,18 @@
         this.getMyForumReply()
       }
     }
+    async getVersion () {
+      try {
+        const { data } = await configApis.version()
+        this.template = data.template
+        // if (data.template === 'review') {
+        //   const url = 'https://www.wxswjy.com?lastPage=version'
+        //   wx.navigateTo({url: '/pages/webView/index?webUrl=' + encodeURIComponent(url)})
+        // }
+        this.$apply()
+      } catch (error) {
+      }
+    }
     onLoad ({navType = -1, actType = 'hot'}) {
       this.navType = navType === '-1' || navType === '1' ? Number(navType) : navType
       this.actType = actType
@@ -434,6 +483,7 @@
       wx.hideTabBar()
       wepy.$instance.editTabbar()
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
+      this.getVersion()
       this.resetFn()
       this.getAdvertisement()
       this.getPrintGuide()
@@ -450,6 +500,17 @@
       this.mineList = []
       this.forumList = []
     }
+    handleImageQuality () {
+      this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
+      this.listImage.imageHeight = Math.ceil(251 * wx.rpx2px * 2)
+      this.advTopImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
+      this.advTopImage.imageHeight = Math.ceil(152 * wx.rpx2px * 2)
+      this.activitySrcollImage.imageWidth = Math.ceil(155 * wx.rpx2px * 2)
+      this.activitySrcollImage.imageHeight = Math.ceil(120 * wx.rpx2px * 2)
+      this.floatImage.imageWidth = Math.ceil(482 * wx.rpx2px * 2)
+      this.floatImage.imageHeight = Math.ceil(598 * wx.rpx2px * 2)
+      this.listImage.imageQuality = this.advTopImage.imageQuality = this.activitySrcollImage.imageQuality = this.floatImage.imageQuality = wx.imageQuality
+    }
     resetFn () {
       if (this.navType === 'topic') {
         if (this.actType === 'hot') {
@@ -463,8 +524,13 @@
       } else { // 课程
         this.getListVideoActivity()
       }
+      this.handleImageQuality()
     }
     onPullDownRefresh () {
+      if (this.template === 'review') {
+        wx.stopPullDownRefresh()
+        return false
+      }
       this.resetData()
       if (this.navType === 'topic') {
         if (this.actType === 'hot' || this.actType === 'follow') {
@@ -483,6 +549,12 @@
       })
     }
     methods = {
+      imageLoad (e) {
+        const { width, height } = e.detail
+        let imageSize = imageUtil.imageZoomHeightUtil(width, height)
+        this.imageReviewWidth = imageSize.imageWidth
+        this.imageReviewHeight = imageSize.imageHeight
+      }
     }
     onShareAppMessage () {
       const { navType, actType } = this
@@ -498,6 +570,10 @@
       }
     }
     onReachBottom () {
+      if (this.template === 'review') {
+        wx.stopPullDownRefresh()
+        return false
+      }
       if (this.hasMoreData) {
         if (this.navType === 'topic') {
           if (this.actType === 'hot' || this.actType === 'follow') {
@@ -517,6 +593,9 @@
     onHide () {
     }
     onShow () {
+      var pages = getCurrentPages()
+      var currentPage = pages[pages.length - 1]
+      console.log(currentPage)
       if (wepy.$instance.globalData.userId) {
         this.userId = wepy.$instance.globalData.userId
       }

@@ -12,10 +12,10 @@ import wepy from 'wepy'
 import 'wepy-async-function'
 import Event from './utils/Event'
 const networkTypeImageTypes = {
-  'wifi': 80,
-  '4g': 80,
-  '3g': 70,
-  '2g': 50
+  'wifi': 100,
+  '4g': 100,
+  '3g': 90,
+  '2g': 70
 }
 export default class extends wepy.app {
   config = {
@@ -141,18 +141,13 @@ export default class extends wepy.app {
     this.use('promisify')
     this.use('requestfix')
     wx.windowWidth = 375
-    wx.imageQuality = 50
+    wx.imageQuality = 100
     wx.pixelRatio = 2
     wx.rpx2px = wx.windowWidth / 750
-    wx.isSupportWebp = false
     const that = this
     wx.getSystemInfo({
       success({windowWidth, windowHeight, pixelRatio, system, model}) {
         that.globalData.isModelIPX = model === 'iPhone X'
-        let systemInfo = system.split(/\s/) || []
-        if (systemInfo[0] === 'Android' && systemInfo[1] > '4.2.1') {
-          wx.isSupportWebp = true
-        }
         wx.windowWidth = windowWidth
         wx.windowHeight = windowHeight
         wx.pixelRatio = pixelRatio
@@ -162,12 +157,12 @@ export default class extends wepy.app {
     // 根据网络变化加载不同质量的图片
     wx.onNetworkStatusChange(function (res) {
       if (res.isConnected) {
-        wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
+        wx.imageQuality = networkTypeImageTypes[res.networkType] || 70
       }
     })
     wx.getNetworkType({
       success (res) {
-        wx.imageQuality = networkTypeImageTypes[res.networkType] || 50
+        wx.imageQuality = networkTypeImageTypes[res.networkType] || 70
         console.log('app', wx.imageQuality)
       }
     })

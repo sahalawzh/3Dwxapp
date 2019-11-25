@@ -1,12 +1,35 @@
 
 <template>
   <block>
-    <view wx:if="{{bannerAdv && navType === -1}}" @tap.stop="handleGoAdv({{bannerAdv}})" class="page-index__advertising">
-      <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
+    <view wx:if="{{bannerAdv && bannerAdv.length && navType === -1}}" class="page-index__advertising">
+      <swiper 
+        class="swiper"
+        indicator-dots="{{swiperOptions.indicatorDots}}"
+        indicator-active-color="{{swiperOptions.indicatorActiveColor}}"
+        autoplay="{{swiperOptions.autoplay}}" 
+        interval="{{swiperOptions.interval}}" 
+        duration="{{swiperOptions.duration}}"
+        circular="{{swiperOptions.circular}}">
+        <swiper-item wx:for="{{bannerAdv}}" wx:key="*this" class="swiper-item ad-banner" @tap.stop="handleGoAdv({{item}})">
+          <view class="ad-banner" style="background-image: url('{{item.image}}?x-oss-process=image/resize,w_{{advTopImage.imageWidth}},h_{{advTopImage.imageHeight}}/quality,Q_{{advTopImage.imageQuality}}')"></view>
+        </swiper-item>
+      </swiper>
     </view>
-    <view class="adv-float" catchtouchmove="true" wx:if="{{floatAdv && isShowFloatAdv && !stage}}">
+    <view class="adv-float" catchtouchmove="true" wx:if="{{floatAdv.length && isShowFloatAdv && !stage}}">
       <view class="adv-mask"></view>
-      <image src="{{floatAdv.image}}" @tap.stop="handleGoAdv({{floatAdv}})" class="adv-img" mode="aspectFill"></image>
+      <swiper 
+        class="swiper adv-img"
+        indicator-dots="{{swiperOptions.indicatorDots}}"
+        indicator-active-color="{{swiperOptions.indicatorActiveColor}}"
+        autoplay="{{swiperOptions.autoplay}}" 
+        interval="{{swiperOptions.interval}}" 
+        duration="{{swiperOptions.duration}}"
+        circular="{{swiperOptions.circular}}">
+        <swiper-item wx:for="{{floatAdv}}" wx:key="*this" class="swiper-item" @tap.stop="handleGoAdv({{item}})">
+          <!-- <view class="ad-banner" style="background-image: url('{{item.image}}')"></view> -->
+          <image src="{{item.image}}?x-oss-process=image/resize,w_{{floatImage.imageWidth}},h_{{floatImage.imageHeight}}/quality,Q_{{floatImage.imageQuality}}" mode="aspectFill"></image>
+        </swiper-item>
+      </swiper>
       <icon type="cancel" size="24" color="#fff" class="adv-close" @tap.stop="handleCloseAdv"/>
     </view>
   </block>
@@ -16,16 +39,26 @@
   import wxutils from '../../../utils/wxutils'
   export default class Advertising extends wepy.component {
     props = {
-      floatAdv: [Object, String],
-      bannerAdv: [Object, String],
+      floatAdv: Array,
+      bannerAdv: Array,
       stage: [Object, String],
       navType: [Number, String],
       isShowFloatAdv: {
         type: Boolean,
         twoWay: true
-      }
+      },
+      advTopImage: Object,
+      floatImage: Object
     }
     data = {
+      swiperOptions: {
+        indicatorDots: true,
+        indicatorActiveColor: '#fff',
+        circular: true,
+        interval: this.floatAdv && this.isShowFloatAdv && !this.stage ? 3000 : 4000,
+        duration: 500,
+        autoplay: true
+      }
     }
 
     events = {
@@ -34,7 +67,12 @@
     methods = {
       handleGoAdv (item) {
         const { spuId, linkId, marketingType } = item
-        let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
+        let result = {
+          0: `/pages/detail/index?id=${spuId}`,
+          1: `/pages/activity/index?linkId=${linkId}`,
+          2: `/pages/forumDetail/index?id=${linkId}`
+        }
+        let link = result[marketingType]
         wxutils.backOrNavigate(link)
         this.isShowFloatAdv = false
       },

@@ -1,7 +1,7 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-detail" wx:if="{{detail}}">
-    <banner :good.sync="detail" :cartNum.sync="cartNum" :userId.sync="userId"></banner>
+    <banner :good.sync="detail" :cartNum.sync="cartNum" :userId.sync="userId" :bannerImage.sync="bannerImage"></banner>
 
     <info :good.sync="detail"></info>
 
@@ -393,6 +393,7 @@
       this.getRelatedProducts()
       this.getSpuCollectionNum()
       this.getTheSpuCollection()
+      this.handleImageQuality()
       wepy.$instance.globalData.subpub.on('cart', this.handleShowSku, this)
     }
     handleShowSku (userId) {
@@ -462,7 +463,18 @@
       isCheckLease: false,
       poster: '',
       posterStatus: false,
-      isCollection: 0
+      isCollection: 0,
+      bannerImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      }
+    }
+
+    handleImageQuality () {
+      this.bannerImage.imageWidth = Math.ceil(wx.windowWidth * 2 * wx.rpx2px)
+      this.bannerImage.imageHeight = Math.ceil(316 * wx.rpx2px * 2)
+      this.bannerImage.imageQuality = wx.imageQuality
     }
 
     async getShareNum () {

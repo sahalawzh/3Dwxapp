@@ -4,7 +4,7 @@
       <view class="item">
         <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
         <view class="activity-lists__item wow-background-image font-color-white"
-          style="background-image: url({{item.imageUrl}})"
+          style="background-image: url({{item.imageUrl}}?x-oss-process=image/resize,w_{{listImage.imageWidth}},h_{{listImage.imageHeight}}/quality,Q_{{listImage.imageQuality}})"
           @tap.stop="handleToActivity({{item.id}})">
           <view class="bg-mask"></view>
           <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
@@ -32,7 +32,8 @@ export default class activityList extends wepy.component {
     activityList: {
       type: Array,
       default: []
-    }
+    },
+    listImage: Object
   }
   data = {
     status: {

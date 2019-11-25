@@ -25,7 +25,7 @@
     </view> 
 
     <view class="goods">
-      <goodList :list.sync="lists" wx:if="{{lists.length}}"></goodList>
+      <goodList :list.sync="lists" :listImage.sync="listImage" wx:if="{{lists.length}}"></goodList>
       <view class="font-size--28 goods-empty" wx:else>没有符合条件的商品</view>
     </view>
 
@@ -136,7 +136,12 @@
         }
       ],
       tabActive: 0,
-      userId: ''
+      userId: '',
+      listImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      }
     }
     events = {
       handleToggleTab (type) {
@@ -151,6 +156,11 @@
       slideToggle: function () {
         this.translate()
       }
+    }
+    handleImageQuality () {
+      this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 50 * 2) * wx.rpx2px)
+      this.listImage.imageHeight = Math.ceil(266 * wx.rpx2px * 2)
+      this.listImage.imageQuality = wx.imageQuality
     }
     handleGetLowPrice (e) {
       console.log(e)
@@ -286,6 +296,7 @@
       this.topic = topic ? decodeURIComponent(topic) : ''
       this.getGoodsList()
       this.getTopic()
+      this.handleImageQuality()
     }
 
     onReachBottom () {

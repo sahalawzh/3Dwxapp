@@ -27,7 +27,7 @@
           
           <image class="head" src="{{item.smallAvator}}" mode="aspectFill"></image>
           <view class="content">
-            <view class="name">{{item.nickname}}</view>
+            <view class="name">{{item.nickname}}<text wx:if="{{item.isTopping === 1}}" class="top font-size--24">置顶</text></view>
             <view class="time">{{item.createTime}}<text class="content-sku" wx:if="{{ item.spec }}">{{item.spec}}</text></view>
             <view class="{{lastpage === 'detail' ? 'commet-detail' : ''}}">
               <view class="forum-reply" wx:if="{{item.forumReplyVO}}">

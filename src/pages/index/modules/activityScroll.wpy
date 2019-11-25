@@ -8,7 +8,7 @@
     <view class="activity-content">
       <scroll-view class="activity-scroll" scroll-x="true">
         <navigator class="activity-item" wx:for="{{activityList}}" wx:key="index" url="/pages/activity/index?linkId={{item.id}}">
-          <image class="activity-img" lazy-load="true" src="{{item.imageUrl}}" mode="aspectFill"></image>
+          <image class="activity-img" lazy-load="true" src="{{item.imageUrl}}?x-oss-process=image/resize,w_{{activitySrcollImage.imageWidth}},h_{{activitySrcollImage.imageHeight}}/quality,Q_{{activitySrcollImage.imageQuality}}" mode="aspectFill"></image>
           <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
         </navigator>
       </scroll-view>
@@ -19,7 +19,8 @@
   import wepy from 'wepy'
   export default class ActivityScroll extends wepy.component {
     props = {
-      activityList: Array
+      activityList: Array,
+      activitySrcollImage: Object
     }
     data = {
       status: {

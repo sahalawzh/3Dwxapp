@@ -3,16 +3,14 @@
   <view class="banner">
     <swiper 
       class="swiper"
-      bindchange="swiperChange"
       indicator-dots="{{swiperOptions.indicatorDots}}"
+      indicator-active-color="{{swiperOptions.indicatorActiveColor}}"
       autoplay="{{swiperOptions.autoplay}}" 
       interval="{{swiperOptions.interval}}" 
       duration="{{swiperOptions.duration}}"
-      next-margin="{{swiperOptions.nextMargin}}"
-      previous-margin="{{swiperOptions.previousMargin}}"
       circular="{{swiperOptions.circular}}">
         <swiper-item wx:for="{{bannerAdv}}" wx:key="item" class="swiper-item" @tap.stop="handleToDetail({{item}})">
-          <view style="background-image: url('{{item.image}}')" class="swiper-bg"></view>
+          <view style="background-image: url('{{item.image}}?x-oss-process=image/resize,w_{{bannerImage.imageWidth}},h_{{bannerImage.imageHeight}}/quality,Q_{{bannerImage.imageQuality}}')" class="swiper-bg"></view>
         </swiper-item>
     </swiper>
   </view>
@@ -22,21 +20,18 @@
   import wxutils from '../../../utils/wxutils'
   export default class Banner extends wepy.component {
     props = {
-      bannerAdv: [Object, Array]
+      bannerAdv: [Object, Array],
+      bannerImage: Object
     }
     data = {
       swiperOptions: {
-        indicatorDots: false,
+        indicatorDots: true,
+        indicatorActiveColor: '#fff',
         circular: true,
         interval: 3000,
         duration: 500,
         autoplay: true
-      },
-      advs: [
-        {
-          logo: '../../../images/mall/Bitmap.png'
-        }
-      ]
+      }
     }
 
     events = {
@@ -45,12 +40,13 @@
     methods = {
       handleToDetail (item) {
         const { spuId, linkId, marketingType } = item
-        let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
+        let result = {
+          0: `/pages/detail/index?id=${spuId}`,
+          1: `/pages/activity/index?linkId=${linkId}`,
+          2: `/pages/forumDetail/index?id=${linkId}`
+        }
+        let link = result[marketingType]
         wxutils.backOrNavigate(link)
-      },
-      swiperChange (e) {
-        let index = e.detail.current
-        this.current = index
       }
     }
 

@@ -19,7 +19,7 @@
 
     <view class="goods" wx:if="{{lists.length}}">
       <block wx:if="{{lastpage === 'index'}}">
-        <videoList :lists.sync="lists" wx:if="{{dropVal.id !== -2}}"></videoList>
+        <videoList :lists.sync="lists" :listImage.sync="listImage" wx:if="{{dropVal.id !== -2}}"></videoList>
         <forumList :lists.sync="lists" wx:else></forumList>
       </block>
       <goodList :list.sync="lists" wx:else></goodList>
@@ -93,7 +93,12 @@
         id: -2,
         val: '话题'
       },
-      isShowDrop: false
+      isShowDrop: false,
+      listImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      }
     }
     handleToSearch (e) {
       const { value } = e.detail
@@ -216,12 +221,18 @@
         }
       }
     }
+    handleImageQuality () {
+      this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
+      this.listImage.imageHeight = Math.ceil(251 * wx.rpx2px * 2)
+      this.listImage.imageQuality = wx.imageQuality
+    }
     onLoad ({ form }) {
       this.lastpage = form
       if (wepy.$instance.globalData.Token) {
         this.getHistorySearch()
       }
       this.getHeatSearch()
+      this.handleImageQuality()
     }
 
     onReachBottom () {

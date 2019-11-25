@@ -1,7 +1,7 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-activity">
     <view class="activity-banner">
-      <image class="icon-banner" src="{{ activityData.imageUrl }}" mode="aspectFill"></image>
+      <image class="icon-banner" src="{{activityData.imageUrl}}" mode="aspectFill"></image>
       <view class="activity-status font-size--26" :class="{'activity-status__end': activityData.dateType === 2, 'activity-status__start': activityData.dateType === 0}">{{status[activityData.dateType]}}</view>
     </view>
     <navigator wx:if="{{activityData.isBack === 1}}" url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
@@ -401,6 +401,7 @@
         let imageSize = imageUtil.imageZoomHeightUtil(width, height)
         this.imageContentWidth = imageSize.imageWidth
         this.imageContentHeight = imageSize.imageHeight
+        this.$apply()
       },
       handleToSend () {
         this.handleToActivity()

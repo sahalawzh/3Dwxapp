@@ -5,7 +5,7 @@
         <swiper autoplay="{true}}" interval="3000" indicator-dots="{{true}}" circular="{{true}}" bindchange="swiperChange">
           <block>
             <swiper-item>
-              <image src="{{good.image}}" mode="aspectFill"/>
+              <image src="{{good.image}}?x-oss-process=image/resize,w_{{bannerImage.imageWidth}},h_{{bannerImage.imageHeight}}/quality,Q_{{bannerImage.imageQuality}}" mode="aspectFill"/>
             </swiper-item>
           </block>
         </swiper>
@@ -35,7 +35,8 @@ export default class Banner extends wepy.component {
   props = {
     good: [Object],
     cartNum: [Number, String],
-    userId: [String, Number]
+    userId: [String, Number],
+    bannerImage: Object
   }
   mixins = [CommonMixin]
   data = {

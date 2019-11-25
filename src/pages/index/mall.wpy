@@ -2,7 +2,7 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain pages-mall">  
     <!-- 轮播 -->
-    <banner :bannerAdv.sync="bannerAdv"></banner>
+    <banner :bannerAdv.sync="bannerAdv" :bannerImage.sync="bannerImage" :bannerImage.sync="bannerImage"></banner>
     
     <search :userId.sync="userId" :cartNum.sync="cartNum"></search>
     <!-- 类型材质 -->
@@ -17,7 +17,7 @@
         <image class="icon" src="../../images/mall/ico_shop_recommend.png" mode="aspectFill"></image>
         <view>小编推荐</view>
       </view>
-      <goodList :list.sync="lists"></goodList>
+      <goodList :list.sync="lists" :listImage.sync="listImage"></goodList>
     </view>
 
     <loading wx:if="{{hasMoreData}}"></loading>
@@ -61,7 +61,17 @@
       limits: 20,
       lists: [],
       hasMoreData: false,
-      bannerAdv: {}
+      bannerAdv: [],
+      listImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      },
+      bannerImage: {
+        imageWidth: 0,
+        imageHeight: 0,
+        imageQuality: 100
+      }
     }
     methods = {
     }
@@ -69,10 +79,18 @@
       try {
         const { data } = await advertisementApis.queryAdvertisements()
         this.bannerAdv = data.filter(item => item.advertisementType === 2)
+        console.log(this.bannerAdv)
         this.$apply()
       } catch (error) {
         console.log(error)
       }
+    }
+    handleImageQuality () {
+      this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 50 * 2) * wx.rpx2px)
+      this.listImage.imageHeight = Math.ceil(266 * wx.rpx2px * 2)
+      this.bannerImage.imageWidth = Math.ceil(wx.windowWidth * 2 * wx.rpx2px)
+      this.bannerImage.imageHeight = Math.ceil(150 * wx.rpx2px * 2)
+      this.listImage.imageQuality = this.bannerImage.imageQuality = wx.imageQuality
     }
     async getRecommend () {
       try {
@@ -110,6 +128,7 @@
       wepy.$instance.editTabbar()
       this.getRecommend()
       this.getAdvertisement()
+      this.handleImageQuality()
       this.isModelIPX = wepy.$instance.globalData.isModelIPX
     }
     onPullDownRefresh () {
