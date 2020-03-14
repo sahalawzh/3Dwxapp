@@ -49,9 +49,9 @@
 
 <script>
   import wepy from 'wepy'
-  import modelApis from '../../api/model'
-  import printerApis from '../../api/printer'
-  import CommonMixin from '../../mixins/common'
+  import modelApis from '@/api/model'
+  import printerApis from '@/api/printer'
+  import CommonMixin from '@/mixins/common'
   export default class ModelDetail extends wepy.page {
     config = {
       navigationBarTitleText: ''

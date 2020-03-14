@@ -67,7 +67,7 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
+  import printerApis from '@/api/printer'
   export default class PrinterQueueComplete extends wepy.page {
     config = {
       navigationBarTitleText: ''

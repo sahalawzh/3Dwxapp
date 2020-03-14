@@ -1,0 +1,118 @@
+<template>
+  <view class="vote-list">
+    <view class="vote-list__body">
+      <view class="vote-list__item"
+            wx:for="{{voteList}}"
+            wx:key="*this">
+        <navigator hover-class="none"
+                   url="/pages/vote/detail?voteId={{item.id}}&activityId={{activityId}}">
+          <view class="product-box">
+            <view class="product-image">
+              <view class="product-image__bg"
+                    style="background-image: url({{ item.cover }})"></view>
+            </view>
+            <view class="product-info">
+              <view class="product-info__item font-size--24">
+                <view class="label">编号：</view>
+                <view class="value">{{ item.activityNo }}</view>
+              </view>
+              <view class="product-info__item font-size--24"
+                    wx:for="{{validShowData}}"
+                    wx:key="item"
+                    wx:for-index="key"
+                    wx:for-item="_item">
+                <view class="label">{{ _item }}:</view>
+                <view class="value">{{ item[key] }}</view>
+              </view>
+              <view class="product-info__item font-size--28">
+                <view class="label">票数：</view>
+                <view class="value">{{ item.vote }}</view>
+              </view>
+            </view>
+          </view>
+        </navigator>
+        <button wx:if="{{userId}}"
+                @tap.stop="handleToVote({{item.id}}, {{index}})"
+                class="vote-btn font-size--26">投TA一票</button>
+        <button wx:else
+                data-type="vote"
+                catchtap="getCurrentVoteId({{item.id}}, {{index}})"
+                open-type="getPhoneNumber"
+                bindgetphonenumber="getPhoneNumber"
+                class="vote-btn open-type-btn font-size--26">投TA一票
+        </button>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import CommonMixin from '@/mixins/common'
+import activityApis from '@/api/activity'
+export default class Vote extends wepy.component {
+  props = {
+    voteList: Array,
+    validShowData: Object,
+    activityId: [Number, String]
+  }
+  data = {
+    userId: '',
+    currentVoteId: '',
+    currentIndex: 0
+  }
+  mixins = [CommonMixin]
+  methods = {
+    handleToVote (id, index) {
+      this.currentVoteId = id
+      this.currentIndex = index
+      this.handleVote()
+    },
+    getCurrentVoteId (id, index) {
+      this.currentVoteId = id
+      this.currentIndex = index
+    }
+  }
+  onLoad () {
+    this.userId = wepy.$instance.globalData.userId
+    wepy.$instance.globalData.subpub.on('vote', this.handleToAuth, this)
+  }
+  async handleVote () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      const { currentVoteId, currentIndex, activityId } = this
+      const opts = {
+        id: currentVoteId,
+        activityId
+      }
+      let { data } = await activityApis.postCompetitionVote(opts)
+      let { result, type, vote } = data
+      wx.showToast({ title: result, duration: 2000 })
+      if (vote) {
+        this.voteList[currentIndex].vote = vote
+      }
+      if (type === 1 && vote) { // 自己给自己投票
+        this.$emit('handleSelfVote', vote)
+      }
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  handleToAuth (e) {
+    if (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+      this.handleVote()
+      this.$apply()
+    }
+  }
+}
+</script>
+<style lang="postcss">
+@import 'src/styles/modules/vote.postcss';
+</style>

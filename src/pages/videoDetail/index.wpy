@@ -4,6 +4,7 @@
     <!-- 视频 -->
     <view class="video-box">
       <video
+        wx:if="{{info.video}}"
         custom-cache="{{false}}"
         class="video-box__control"
         id="myVideo"
@@ -123,15 +124,15 @@
 
 <script>
   import wepy from 'wepy'
-  import videoApis from '../../api/video'
-  import collectApis from '../../api/collect'
-  import commetApis from '../../api/commet'
-  import shareApis from '../../api/share'
-  import Commet from '../../components/commet'
-  import Share from '../../components/share'
-  import CommonMixin from '../../mixins/common'
-  import { timeHandle } from '../../utils/commentTimeHandle'
-  import { parseQueryString } from '../../utils/utils'
+  import videoApis from '@/api/video'
+  import collectApis from '@/api/collect'
+  import commetApis from '@/api/commet'
+  import shareApis from '@/api/share'
+  import Commet from '@/components/commet'
+  import Share from '@/components/share'
+  import CommonMixin from '@/mixins/common'
+  import { timeHandle } from '@/utils/commentTimeHandle'
+  import { parseQueryString } from '@/utils/utils'
   export default class VideoDetail extends wepy.page {
     config = {
       navigationBarTitleText: '',

@@ -40,7 +40,7 @@
   import Product from './modules/product'
   import Video from './modules/video'
   import Forum from './modules/forum'
-  import collectApis from '../../api/collect'
+  import collectApis from '@/api/collect'
   export default class Collect extends wepy.page {
     config = {
       navigationBarTitleText: '我的收藏'

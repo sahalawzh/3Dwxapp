@@ -60,7 +60,12 @@ export default class extends wepy.app {
       'pages/forumDetail/index',
       'pages/forumPerson/index',
       'pages/forumSubmit/index',
-      'pages/forumCommet/index'
+      'pages/forumCommet/index',
+      'pages/vote/index',
+      'pages/vote/list',
+      'pages/vote/detail',
+      'pages/vote/upload',
+      'pages/vote/person'
     ],
     tabBar: {
       backgroundColor: '#ffffff',
@@ -167,7 +172,7 @@ export default class extends wepy.app {
       }
     })
     if (process.env.NODE_ENV === 'development') { // https://testapi.gdlwzn.com
-      this.globalData.baseUrl = 'https://api.gdlwzn.com'
+      this.globalData.baseUrl = 'https://testapi.gdlwzn.com'
     } else {
       if (process.env.TARGET_APP === 'proapp') {
         this.globalData.baseUrl = 'https://api.gdlwzn.com'
@@ -217,8 +222,6 @@ export default class extends wepy.app {
     }
   }
   onShow () {
-    // 隐藏系统tabbar
-    wx.hideTabBar()
   }
 
   editTabbar () {
@@ -249,7 +252,6 @@ export default class extends wepy.app {
     return header
   }
   onLaunch () {
-    wx.hideTabBar()
   }
 }
 </script>

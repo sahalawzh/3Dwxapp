@@ -46,9 +46,9 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
-  import isEmpty from '../../utils/isEmpty'
-  import wxutils from '../../utils/wxutils'
+  import printerApis from '@/api/printer'
+  import isEmpty from '@/utils/isEmpty'
+  import wxutils from '@/utils/wxutils'
   export default class printerBuy extends wepy.page {
     config = {
       navigationBarTitleText: '续租'

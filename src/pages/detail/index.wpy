@@ -98,14 +98,14 @@
   import TabLabel from './modules/tabLabel'
   import Footer from './modules/footer'
   import Recommend from './modules/recommend'
-  import goodsApis from '../../api/goods'
-  import cartApis from '../../api/cart'
-  import collectApis from '../../api/collect'
-  import printerApis from '../../api/printer'
-  import shareApis from '../../api/share'
-  import CommonMixin from '../../mixins/common'
-  import wxutils from '../../utils/wxutils'
-  import { parseQueryString } from '../../utils/utils'
+  import goodsApis from '@/api/goods'
+  import cartApis from '@/api/cart'
+  import collectApis from '@/api/collect'
+  import printerApis from '@/api/printer'
+  import shareApis from '@/api/share'
+  import CommonMixin from '@//mixins/common'
+  import wxutils from '@//utils/wxutils'
+  import { parseQueryString } from '@//utils/utils'
   export default class Detail extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',

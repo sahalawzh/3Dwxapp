@@ -43,7 +43,7 @@
 
 <script>
   import wepy from 'wepy'
-  import orderApis from '../../api/order'
+  import orderApis from '@/api/order'
   export default class Logistics extends wepy.page {
     config = {
       navigationBarTitleText: '物流详情'

@@ -94,10 +94,10 @@
 <script>
 /* eslint-disable */
   import wepy from 'wepy'
-  import goodsApi from '../../api/goods'
-  import orderApis from '../../api/order'
-  import isEmpty from '../../utils/isEmpty'
-  import wxutils from '../../utils/wxutils'
+  import goodsApi from '@/api/goods'
+  import orderApis from '@/api/order'
+  import isEmpty from '@/utils/isEmpty'
+  import wxutils from '@/utils/wxutils'
   import commonwxs from './wxs/common.wxs'
   export default class Reserver extends wepy.page {
     config = {

@@ -43,8 +43,8 @@
 
 <script>
   import wepy from 'wepy'
-  import suggestionApis from '../../api/suggestion'
-  import wxutils from '../../utils/wxutils'
+  import suggestionApis from '@/api/suggestion'
+  import wxutils from '@/utils/wxutils'
   export default class Set extends wepy.page {
     config = {
       navigationBarTitleText: '我要吐槽'

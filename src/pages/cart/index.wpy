@@ -1,7 +1,7 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-cart">
-  
+
     <block wx:if="{{isFirst && goods.length}}">
       <view class="page-cart-choice wow-flex is-align-middle is-justify-space-between">
         <view class="wow-flex is-align-middle" @tap.stop="handleCheckAll">
@@ -13,7 +13,7 @@
         </view>
         <view class="opertaion font-size--26" @tap.stop="handleToManager">{{isEdit ? '完成' : '管理'}}</view>
       </view>
-    
+
       <view class="cart-lists">
         <view class="cart-lists-items">
           <block wx:for="{{goods}}" wx:key="{{index}}">
@@ -52,7 +52,7 @@
         <view class="wow-fl-l font-size--26 footer-price" hidden"{{isEdit}}">总计<text class="color-price font-size--30 wow-ml-30">￥{{price}}</text></view>
         <view class="wow-fl-r font-size--26">
           <view class="pay-btn font-color-white {{ cartId ? '' : 'btn-disabled'}}" wx:if="{{isEdit}}" @tap.stop="handleEvent">删除</view>
-          <form bindsubmit="setFormId" report-submit="true" wx:else>
+          <form report-submit="true" wx:else>
             <button formType="submit" class="pay-btn font-color-white font-size--26 {{ cartId ? '' : 'btn-disabled'}}" @tap.stop="handleEvent">去结算</button>
           </form>
         </view>
@@ -129,420 +129,418 @@
 </template>
 
 <script>
-  import wepy from 'wepy'
-  import cartApi from '../../api/cart'
-  import GoodList from '../../components/goodList'
-  import goodsApi from '../../api/goods'
-  import wxutils from '../../utils/wxutils'
-  import commonwxs from './wxs/common.wxs'
-  import formIdMixin from '../../mixins/formId'
-  export default class Cart extends wepy.page {
-    config = {
-      navigationBarTitleText: '购物车',
-      usingComponents: {
-        'wow-radio': '../../packages/radio/index',
-        'wow-elip': '../../packages/elip/index',
-        'wow-stepper': '../../packages/stepper/index'
+import wepy from 'wepy'
+import cartApi from '@/api/cart'
+import GoodList from '@/components/goodList'
+import goodsApi from '@/api/goods'
+import wxutils from '@/utils/wxutils'
+import commonwxs from './wxs/common.wxs'
+export default class Cart extends wepy.page {
+  config = {
+    navigationBarTitleText: '购物车',
+    usingComponents: {
+      'wow-radio': '../../packages/radio/index',
+      'wow-elip': '../../packages/elip/index',
+      'wow-stepper': '../../packages/stepper/index'
+    }
+  }
+  wxs = {
+    commonwxs: commonwxs
+  }
+  components = {
+    goodList: GoodList
+  }
+  computed = {
+    isAllEnble () {
+      return this.goods.length && this.goods.every(item => item.isEnable === 0)
+    },
+    slideHeight () {
+      let maxHeight = ''
+      wx.getSystemInfo({
+        success: function (res) {
+          let windowHeight = res.windowHeight
+          maxHeight = windowHeight - 90
+        }
+      })
+      return maxHeight
+    },
+    skuPrice () {
+      let price = ''
+      this.sku.forEach(item => {
+        if (item.indexes === this.indexs) {
+          price = item.price
+        }
+      })
+      return price
+    },
+    isLease () { // 720是购买,其他都是租赁
+      if (this.sku.length && this.indexs) {
+        let skuItem = this.sku.filter(item => item.indexes === this.indexs)[0]
+        return skuItem.leaseDay !== 720 && skuItem.leaseDay !== 0
       }
     }
-    mixins = [formIdMixin]
-    wxs = {
-      commonwxs: commonwxs
-    }
-    components = {
-      goodList: GoodList
-    }
-    computed = {
-      isAllEnble () {
-        return this.goods.length && this.goods.every(item => item.isEnable === 0)
-      },
-      slideHeight () {
-        let maxHeight = ''
-        wx.getSystemInfo({
-          success: function (res) {
-            let windowHeight = res.windowHeight
-            maxHeight = windowHeight - 90
-          }
-        })
-        return maxHeight
-      },
-      skuPrice () {
-        let price = ''
-        this.sku.forEach(item => {
-          if (item.indexes === this.indexs) {
-            price = item.price
-          }
-        })
-        return price
-      },
-      isLease () { // 720是购买,其他都是租赁
-        if (this.sku.length && this.indexs) {
-          let skuItem = this.sku.filter(item => item.indexes === this.indexs)[0]
-          return skuItem.leaseDay !== 720 && skuItem.leaseDay !== 0
+  }
+  data = {
+    isFirst: false,
+    isRuleTrue: false,
+    isEdit: false,
+    isCheckAll: false,
+    goods: [],
+    start: 1,
+    limits: 20,
+    lists: [],
+    hasMoreData: false,
+    price: '0.00',
+    userId: '',
+    cartId: '',
+    skuObj: {},
+    sku: [],
+    spec: [],
+    select: {},
+    indexs: '',
+    isCheckLease: false,
+    max: 99
+  }
+  async getCartList () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      let { data } = await cartApi.cartList({ userId: this.userId })
+      this.isFirst = true
+      data = data || []
+      wx.hideLoading()
+      data.forEach(element => {
+        if (element.isEnable === 1) {
+          element.checked = false
         }
+      })
+      this.goods = data
+      this.isCheckAll = false
+      this.price = '0.00'
+      this.$apply()
+      if (!data.length) {
+        this.getRecommend()
+        return
       }
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
     }
-    data = {
-      isFirst: false,
-      isRuleTrue: false,
-      isEdit: false,
-      isCheckAll: false,
-      goods: [],
-      start: 1,
-      limits: 20,
-      lists: [],
-      hasMoreData: false,
-      price: '0.00',
-      userId: '',
-      cartId: '',
-      skuObj: {},
-      sku: [],
-      spec: [],
-      select: {},
-      indexs: '',
-      isCheckLease: false,
-      max: 99
-    }
-    async getCartList () {
-      try {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        let { data } = await cartApi.cartList({userId: this.userId})
-        this.isFirst = true
-        data = data || []
-        wx.hideLoading()
-        data.forEach(element => {
-          if (element.isEnable === 1) {
-            element.checked = false
-          }
-        })
-        this.goods = data
-        this.isCheckAll = false
-        this.price = '0.00'
-        this.$apply()
-        if (!data.length) {
-          this.getRecommend()
-          return
-        }
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
+  }
+  async getRecommend () {
+    try {
+      let { start, limits, lists } = this
+      const opts = {
+        start,
+        limits
       }
-    }
-    async getRecommend () {
-      try {
-        let { start, limits, lists } = this
-        const opts = {
-          start,
-          limits
-        }
-        let { data: recommendedData } = await goodsApi.recommended(opts)
-        let data = recommendedData.data
-        if (start === 1) {
-          lists = []
-        }
-        data.forEach(item => {
-          item.finishLoadFlag = false
-        })
-        this.lists = lists.concat(data)
-        if (data.length < limits) {
-          this.hasMoreData = false
-        } else {
-          this.hasMoreData = true
-          this.start++
-        }
-        console.log(this.lists)
-        this.$apply()
-      } catch (error) {
-        console.log(error)
+      let { data: recommendedData } = await goodsApi.recommended(opts)
+      let data = recommendedData.data
+      if (start === 1) {
+        lists = []
       }
+      data.forEach(item => {
+        item.finishLoadFlag = false
+      })
+      this.lists = lists.concat(data)
+      if (data.length < limits) {
+        this.hasMoreData = false
+      } else {
+        this.hasMoreData = true
+        this.start++
+      }
+      console.log(this.lists)
+      this.$apply()
+    } catch (error) {
+      console.log(error)
     }
-    onLoad ({ userId }) {
-      this.userId = wepy.$instance.globalData.userId
-      this.getCartList()
+  }
+  onLoad ({ userId }) {
+    this.userId = wepy.$instance.globalData.userId
+    this.getCartList()
+  }
+  onReachBottom () {
+    if (this.hasMoreData) {
+      this.getRecommend()
     }
-    onReachBottom () {
-      if (this.hasMoreData) {
+  }
+  watch = {
+    goods (val) {
+      if (val.length === 0) {
         this.getRecommend()
       }
     }
-    watch = {
-      goods (val) {
-        if (val.length === 0) {
-          this.getRecommend()
+  }
+  // 计算金额
+  async getCountPrice () {
+    try {
+      let detailsId = []
+      this.goods.forEach((element, index) => {
+        if (element.checked) {
+          detailsId.push(element.id)
         }
-      }
-    }
-    // 计算金额
-    async getCountPrice () {
-      try {
-        let detailsId = []
-        this.goods.forEach((element, index) => {
-          if (element.checked) {
-            detailsId.push(element.id)
-          }
-        })
-        if (!this.isEdit) {
-          wx.showLoading({
-            title: '加载中',
-            mask: true
-          })
-        }
-        this.cartId = detailsId.join('_')
-        const opts = {
-          userId: this.userId,
-          ids: this.cartId
-        }
-        const { data } = await cartApi.countPrice(opts)
-        this.price = data.price
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
-    }
-    // 删除购物车
-    async removeCart () {
-      try {
-        wx.showLoading({
-          title: '删除中',
-          mask: true
-        })
-        const { userId, cartId } = this
-        const opts = {
-          userId,
-          ids: cartId
-        }
-        await cartApi.removeCart(opts)
-        this.getCartList()
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
-    }
-    // 修改数量
-    async modifyItemQty (data) {
-      try {
+      })
+      if (!this.isEdit) {
         wx.showLoading({
           title: '加载中',
           mask: true
         })
-        await cartApi.updateCartNum(data)
-        this.getCountPrice()
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
       }
+      this.cartId = detailsId.join('_')
+      const opts = {
+        userId: this.userId,
+        ids: this.cartId
+      }
+      const { data } = await cartApi.countPrice(opts)
+      this.price = data.price
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
     }
-    methods = {
-      handleToLease (url) {
-        wxutils.backOrNavigate('/pages/webView/index?webUrl=' + encodeURIComponent(url))
-      },
-      async handleChangeSku () {
-        try {
-          if (this.isLease && !this.isCheckLease) {
-            wx.showModal({
-              title: '提示',
-              content: '请勾选已阅租并同意赁协议再进行购买',
-              showCancel: false
-            })
-            return
-          }
-          wx.showLoading({
-            title: '加载中',
-            mask: true
-          })
-          const { userId, indexs, skuObj } = this
-          const opts = {
-            userId,
-            cartId: skuObj.id,
-            indexes: indexs
-          }
-          const { status } = await cartApi.updateSku(opts)
-          wx.hideLoading()
-          if (status === 200) { // 修改规格
-            this.getCartList()
-          }
-          if (status === 500) { // 删除规格
-            this.goods.splice(skuObj.index, 1)
-          }
-          this.isRuleTrue = false
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-          wx.hideLoading()
-        }
-      },
-      // 规格选择
-      handleToSelect (idx, index) {
-        this.select[idx] = index
-        const result = []
-        for (let i in this.select) {
-          result.push(this.select[i])
-        }
-        this.indexs = result.join('_')
-      },
-      // 礼品包装和卡片服务
-      handleToCheck (type) {
-        switch (type) {
-          case 'wrapp':
-            this.skuObj.isCheckWrapping = !this.skuObj.isCheckWrapping
-            break
-          case 'card':
-            this.skuObj.isCheckCardServer = !this.skuObj.isCheckCardServer
-            break
-          case 'lease':
-            this.isCheckLease = !this.isCheckLease
-            break
-          default:
-            break
-        }
-      },
-      handleClosePopup () {
-        this.isRuleTrue = false
-      },
-      async handleToSku (item, index) { // 打开规格
-        try {
-          if (item.isEnable === 0) return
-          wx.showLoading({
-            title: '加载中',
-            mask: true
-          })
-          const pid = item.spuId
-          this.skuObj = {
-            index,
-            image: item.image,
-            title: item.title,
-            price: item.price,
-            id: item.id,
-            specificationNumber: item.specificationNumber,
-            agreement: item.agreement,
-            isCustomized: item.isCustomized,
-            isCheckWrapping: item.wrapping === 1 || false, // 礼品包装
-            isCheckCardServer: item.card_service === 1 || false // 卡片服务
-          }
-          wx.nextTick(() => {
-            this.isRuleTrue = true
-          })
-          const { data: skuData } = await goodsApi.querySku({id: pid})
-          this.sku = skuData.data
-          const { data: spuData } = await goodsApi.querySpu({id: pid})
-          this.indexs = item.indexes
-          let selectSku = item.indexes.split('_')
-          this.spec = spuData
-          this.select = {...selectSku}
-          wx.hideLoading()
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-          wx.hideLoading()
-        }
-      },
-      handleToDeatil (item) {
-        if (item.isEnable === 0) return
-        wxutils.backOrNavigate('/pages/detail/index?id=' + item.spuId)
-      },
-      changeQty (e) { // 修改数量
-        const { qty, id, index } = e.currentTarget.dataset
-        let changeAfterQty = e.detail.value
-        const { userId } = this
-        if (Number(qty) === changeAfterQty) {
-          return
-        }
-        let nowQty = qty
-        let opts = {
-          userId,
-          cartId: id,
-          num: changeAfterQty
-        }
-        if (changeAfterQty > nowQty) { // 按钮类型参数：1减一，2加一，直接修改数量时传0或不传
-          opts.add = 1
-        } else {
-          opts.reduce = 1
-        }
-        this.goods[index].num = changeAfterQty
-        this.modifyItemQty(opts)
-      },
-      handleEvent () { // 删除
-        if (!this.cartId) {
+  }
+  // 删除购物车
+  async removeCart () {
+    try {
+      wx.showLoading({
+        title: '删除中',
+        mask: true
+      })
+      const { userId, cartId } = this
+      const opts = {
+        userId,
+        ids: cartId
+      }
+      await cartApi.removeCart(opts)
+      this.getCartList()
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  // 修改数量
+  async modifyItemQty (data) {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      await cartApi.updateCartNum(data)
+      this.getCountPrice()
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  methods = {
+    handleToLease (url) {
+      wxutils.backOrNavigate('/pages/webView/index?webUrl=' + encodeURIComponent(url))
+    },
+    async handleChangeSku () {
+      try {
+        if (this.isLease && !this.isCheckLease) {
           wx.showModal({
             title: '提示',
-            content: '您还没有选择商品',
+            content: '请勾选已阅租并同意赁协议再进行购买',
             showCancel: false
           })
           return
         }
-        if (this.isEdit) {
-          const that = this
-          wx.showModal({
-            title: '提示',
-            content: '是否删除选中的商品',
-            success(res) {
-              if (res.confirm) {
-                that.removeCart()
-              }
-            }
-          })
-        } else {
-          this.getTemplateFormId().then(() => {
-            wxutils.backOrNavigate('/pages/reserver/index?cartId=' + this.cartId)
-          })
-        }
-      },
-      handleToManager () {
-        this.isEdit = !this.isEdit
-        if (!this.isEdit && this.isAllEnble) {
-          this.isCheckAll = false
-          this.goods.forEach(element => {
-            if (element.isEnable === 0) {
-              element.checked = false
-            }
-          })
-          this.getCountPrice()
-        }
-      },
-      handleCheckSingle (item, index) { // 单选
-        if (item.isEnable === 0 && !this.isEdit) return
-        this.goods[index].checked = !item.checked
-        const result = []
-        this.goods.forEach(element => {
-          if (element.isEnable === 1) {
-            result.push(element.checked)
-          }
+        wx.showLoading({
+          title: '加载中',
+          mask: true
         })
-        this.isCheckAll = result.every(element => element === true)
-        this.getCountPrice()
+        const { userId, indexs, skuObj } = this
+        const opts = {
+          userId,
+          cartId: skuObj.id,
+          indexes: indexs
+        }
+        const { status } = await cartApi.updateSku(opts)
+        wx.hideLoading()
+        if (status === 200) { // 修改规格
+          this.getCartList()
+        }
+        if (status === 500) { // 删除规格
+          this.goods.splice(skuObj.index, 1)
+        }
+        this.isRuleTrue = false
         this.$apply()
-      },
-      handleCheckAll () {
-        if (this.isAllEnble && !this.isEdit) return
-        this.isCheckAll = !this.isCheckAll
-        this.goods.forEach(element => { // 全选
-          if (element.isEnable === 1) {
-            element.checked = this.isCheckAll
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    },
+    // 规格选择
+    handleToSelect (idx, index) {
+      this.select[idx] = index
+      const result = []
+      for (let i in this.select) {
+        result.push(this.select[i])
+      }
+      this.indexs = result.join('_')
+    },
+    // 礼品包装和卡片服务
+    handleToCheck (type) {
+      switch (type) {
+        case 'wrapp':
+          this.skuObj.isCheckWrapping = !this.skuObj.isCheckWrapping
+          break
+        case 'card':
+          this.skuObj.isCheckCardServer = !this.skuObj.isCheckCardServer
+          break
+        case 'lease':
+          this.isCheckLease = !this.isCheckLease
+          break
+        default:
+          break
+      }
+    },
+    handleClosePopup () {
+      this.isRuleTrue = false
+    },
+    async handleToSku (item, index) { // 打开规格
+      try {
+        if (item.isEnable === 0) return
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        const pid = item.spuId
+        this.skuObj = {
+          index,
+          image: item.image,
+          title: item.title,
+          price: item.price,
+          id: item.id,
+          specificationNumber: item.specificationNumber,
+          agreement: item.agreement,
+          isCustomized: item.isCustomized,
+          isCheckWrapping: item.wrapping === 1 || false, // 礼品包装
+          isCheckCardServer: item.card_service === 1 || false // 卡片服务
+        }
+        wx.nextTick(() => {
+          this.isRuleTrue = true
+        })
+        const { data: skuData } = await goodsApi.querySku({ id: pid })
+        this.sku = skuData.data
+        const { data: spuData } = await goodsApi.querySpu({ id: pid })
+        this.indexs = item.indexes
+        let selectSku = item.indexes.split('_')
+        this.spec = spuData
+        this.select = { ...selectSku }
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+        wx.hideLoading()
+      }
+    },
+    handleToDeatil (item) {
+      if (item.isEnable === 0) return
+      wxutils.backOrNavigate('/pages/detail/index?id=' + item.spuId)
+    },
+    changeQty (e) { // 修改数量
+      const { qty, id, index } = e.currentTarget.dataset
+      let changeAfterQty = e.detail.value
+      const { userId } = this
+      if (Number(qty) === changeAfterQty) {
+        return
+      }
+      let nowQty = qty
+      let opts = {
+        userId,
+        cartId: id,
+        num: changeAfterQty
+      }
+      if (changeAfterQty > nowQty) { // 按钮类型参数：1减一，2加一，直接修改数量时传0或不传
+        opts.add = 1
+      } else {
+        opts.reduce = 1
+      }
+      this.goods[index].num = changeAfterQty
+      this.modifyItemQty(opts)
+    },
+    handleEvent () { // 删除
+      if (!this.cartId) {
+        wx.showModal({
+          title: '提示',
+          content: '您还没有选择商品',
+          showCancel: false
+        })
+        return
+      }
+      if (this.isEdit) {
+        const that = this
+        wx.showModal({
+          title: '提示',
+          content: '是否删除选中的商品',
+          success (res) {
+            if (res.confirm) {
+              that.removeCart()
+            }
+          }
+        })
+      } else {
+        this.getTemplateFormId().then(() => {
+          wxutils.backOrNavigate('/pages/reserver/index?cartId=' + this.cartId)
+        })
+      }
+    },
+    handleToManager () {
+      this.isEdit = !this.isEdit
+      if (!this.isEdit && this.isAllEnble) {
+        this.isCheckAll = false
+        this.goods.forEach(element => {
+          if (element.isEnable === 0) {
+            element.checked = false
           }
         })
         this.getCountPrice()
       }
-    }
-    onUnload () {
-    }
-    onHide () {
-    }
-    onShow () {
-      if (this.isFirst) {
-        this.getCartList()
-      }
+    },
+    handleCheckSingle (item, index) { // 单选
+      if (item.isEnable === 0 && !this.isEdit) return
+      this.goods[index].checked = !item.checked
+      const result = []
+      this.goods.forEach(element => {
+        if (element.isEnable === 1) {
+          result.push(element.checked)
+        }
+      })
+      this.isCheckAll = result.every(element => element === true)
+      this.getCountPrice()
+      this.$apply()
+    },
+    handleCheckAll () {
+      if (this.isAllEnble && !this.isEdit) return
+      this.isCheckAll = !this.isCheckAll
+      this.goods.forEach(element => { // 全选
+        if (element.isEnable === 1) {
+          element.checked = this.isCheckAll
+        }
+      })
+      this.getCountPrice()
     }
   }
+  onUnload () {
+  }
+  onHide () {
+  }
+  onShow () {
+    if (this.isFirst) {
+      this.getCartList()
+    }
+  }
+}
 </script>
 <style lang='postcss'>
-  @import 'src/styles/pages/cart/common.postcss';
+@import 'src/styles/pages/cart/common.postcss';
 </style>

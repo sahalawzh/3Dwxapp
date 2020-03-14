@@ -20,7 +20,7 @@
 		}
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.8.3",
+	"libVersion": "2.10.3",
 	"appid": "wx5819d1f1540598a5",
 	"projectname": "3Dwxapp",
 	"miniprogramRoot": "dist/",
@@ -44,6 +44,10 @@
 			"currentL": -1,
 			"list": []
 		},
+		"gamePlugin": {
+			"current": -1,
+			"list": []
+		},
 		"miniprogram": {
 			"current": 3,
 			"list": [
@@ -55,10 +59,45 @@
 					"scene": null
 				},
 				{
+					"id": 38,
+					"name": "投票主页",
+					"pathName": "pages/vote/index",
+					"query": "linkId=1",
+					"scene": null
+				},
+				{
+					"id": 2,
+					"name": "投票上传作品",
+					"pathName": "pages/vote/upload",
+					"query": "activityId=1&voteStatus=-1",
+					"scene": null
+				},
+				{
+					"id": 3,
+					"name": "作品详情",
+					"pathName": "pages/vote/detail",
+					"query": "voteId=5&activityId=1",
+					"scene": null
+				},
+				{
+					"id": 41,
+					"name": "作品列表",
+					"pathName": "pages/vote/list",
+					"query": "activityId=1",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "个人作品",
+					"pathName": "pages/vote/person",
+					"query": "activityId=1",
+					"scene": null
+				},
+				{
 					"id": 1,
 					"name": "论坛详情",
 					"pathName": "pages/forumDetail/index",
-					"query": "id=87",
+					"query": "id=98",
 					"scene": null
 				},
 				{
@@ -69,10 +108,10 @@
 					"scene": null
 				},
 				{
-					"id": 3,
+					"id": 8,
 					"name": "活动页面",
 					"pathName": "pages/activity/index",
-					"query": "linkId=1",
+					"query": "linkId=19",
 					"scene": null
 				},
 				{
@@ -251,10 +290,10 @@
 					"scene": null
 				},
 				{
-					"id": 28,
+					"id": 29,
 					"name": "视频详情",
 					"pathName": "pages/videoDetail/index",
-					"query": "id=93",
+					"query": "id=213",
 					"scene": null
 				},
 				{
@@ -303,6 +342,13 @@
 					"id": -1,
 					"name": "pages/forumCommet/index",
 					"pathName": "pages/forumCommet/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": -1,
+					"name": "模型",
+					"pathName": "pages/model/index",
 					"query": "",
 					"scene": null
 				}

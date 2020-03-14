@@ -26,7 +26,7 @@
         :activitySrcollImage.sync="activitySrcollImage"
       ></activityScroll>
 
-      <videoList 
+      <videoList
         :lists.sync="videoActivityList"
         :listImage.sync="listImage"
         wx:if="{{videoActivityList.length}}"
@@ -37,7 +37,7 @@
         :isShowRedPoint.sync="isShowRedPoint"
         wx:if="{{navType === 'topic'}}"
       ></topicNav>
-      
+
       <block wx:if="{{actType === 'hot' || (actType === 'follow' && userId)}}">
         <forumList
           wx:if="{{forumList.length}}"
@@ -45,12 +45,12 @@
         ></forumList>
       </block>
 
-      <activityList 
+      <activityList
         :activityList.sync="activityList"
         :listImage.sync="listImage"
         wx:if="{{navType === 'topic' && activityList.length && actType === 'activity'}}"
       ></activityList>
-      
+
       <mine
         :sendNum.sync="sendNum"
         :saveNum.sync="saveNum"
@@ -62,9 +62,9 @@
       <block wx:if="{{!userId}}">
         <button wx:if="{{actType === 'follow' || actType === 'mine'}}" data-type="auth" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--26 auth-btn open-type-btn">{{authButtonText}}</button>
       </block>
-      
+
       <loading wx:if="{{hasMoreData}}"></loading>
-      
+
       <view class="empty-list font-size--26" wx:if="{{!hasData}}">暂无相关数据~</view>
 
       <forumBtn
@@ -73,11 +73,11 @@
       ></forumBtn>
 
     </block>
-  
+
     <silder :userId.sync="userId" :cartNum.sync="cartNum"></silder>
 
     <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
-    
+
     <guideIndex wx:if="{{stage}}" :animation.sync="animation" :stage.sync="stage"></guideIndex>
 
 
@@ -85,453 +85,496 @@
 </template>
 
 <script>
-  import wepy from 'wepy'
-  import VideoList from '../../components/videoList'
-  import Loading from '../../components/loading'
-  import GuideIndex from '../../components/guideIndex'
-  import videoApis from '../../api/video'
-  import advertisementApis from '../../api/advertisement'
-  import guideApis from '../../api/guide'
-  import activityApis from '../../api/activity'
-  import forumApis from '../../api/forum'
-  import commetApis from '../../api/commet'
-  import momentApis from '../../api/moment'
-  import ActivityList from '../../components/activityList'
-  import Silder from './modules/silder'
-  import ActivityScroll from './modules/activityScroll'
-  import ForumList from '../../components/forumList'
-  import Mine from './modules/mine'
-  import TopicNav from './modules/topicNav'
-  import Nav from './modules/nav'
-  import ForumBtn from './modules/forumBtn'
-  import Advertising from './modules/advertising'
-  import { timeHandle } from '../../utils/commentTimeHandle'
-  import CommonMixin from '../../mixins/common'
-  import configApis from '../../api/config'
-  import imageUtil from '../../utils/image'
-  export default class Index extends wepy.page {
-    config = {
-      navigationBarTitleText: '无限三维',
-      enablePullDownRefresh: true,
-      usingComponents: {
-        'custom-tabbar': '../../customTabBar/index'
-      }
+import wepy from 'wepy'
+import VideoList from '@/components/videoList'
+import Loading from '@/components/loading'
+import GuideIndex from '@/components/guideIndex'
+import videoApis from '@/api/video'
+import advertisementApis from '@/api/advertisement'
+import guideApis from '@/api/guide'
+import activityApis from '@/api/activity'
+import forumApis from '@/api/forum'
+import commetApis from '@/api/commet'
+import momentApis from '@/api/moment'
+import ActivityList from '@/components/activityList'
+import Silder from './modules/silder'
+import ActivityScroll from './modules/activityScroll'
+import ForumList from '@/components/forumList'
+import Mine from './modules/mine'
+import TopicNav from './modules/topicNav'
+import Nav from './modules/nav'
+import ForumBtn from './modules/forumBtn'
+import Advertising from './modules/advertising'
+import { timeHandle } from '@/utils/commentTimeHandle'
+import CommonMixin from '@/mixins/common'
+import configApis from '@/api/config'
+import imageUtil from '@/utils/image'
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '无限三维',
+    enablePullDownRefresh: true,
+    usingComponents: {
+      'custom-tabbar': '../../customTabBar/index'
     }
-    mixins = [CommonMixin]
-    components = {
-      videoList: VideoList,
-      loading: Loading,
-      guideIndex: GuideIndex,
-      activityList: ActivityList,
-      silder: Silder,
-      activityScroll: ActivityScroll,
-      forumList: ForumList,
-      mine: Mine,
-      topicNav: TopicNav,
-      nav: Nav,
-      advertising: Advertising,
-      forumBtn: ForumBtn
-    }
-    computed = {
-      hasData (val) {
-        const { navType, activityList, videoActivityList, actType, forumList, mineList, userId } = this
-        if (navType === 'topic') {
-          if (actType === 'hot') {
-            return forumList.length
-          } else if (actType === 'follow') {
-            return forumList.length || !userId
-          } else if (actType === 'mine') {
-            return mineList.length || !userId
-          }
-          return activityList.length
-        } else {
-          return videoActivityList.length
-        }
-      }
-    }
-    data = {
-      isModelIPX: false,
-      tabbar: '',
-      start: 1,
-      limits: 4,
-      activityList: [],
-      videoActivityList: [],
-      hasMoreData: false, // 默认不用拉数据
-      cartNum: '',
-      userId: '',
-      bannerAdv: [],
-      stage: 0,
-      animation: {},
-      floatAdv: [],
-      isShowFloatAdv: process.env.NODE_ENV !== 'development',
-      navType: -1, // -1 全部 1 课程  topic 话题活动
-      actStart: 1,
-      actLimit: 5,
-      actType: 'hot', // hot 热门 follow 关注 activity 活动 mine 我的
-      forumStart: 1,
-      forumLimit: 7,
-      forumList: [],
-      mineStart: 1,
-      mineLimit: 7,
-      mineList: [],
-      nickname: '',
-      saveNum: '',
-      sendNum: '',
-      failNum: '',
-      isShowRedPoint: false, // 我的红圈
-      authButtonText: '请点击这里登录查看',
-      listImage: {
-        imageWidth: 0,
-        imageHeight: 0,
-        imageQuality: 100
-      },
-      advTopImage: {
-        imageWidth: 0,
-        imageHeight: 0,
-        imageQuality: 100
-      },
-      activitySrcollImage: {
-        imageWidth: 0,
-        imageHeight: 0,
-        imageQuality: 100
-      },
-      floatImage: {
-        imageWidth: 0,
-        imageHeight: 0,
-        imageQuality: 100
-      },
-      template: '',
-      viewImg: 'https://wxsw.oss-cn-hangzhou.aliyuncs.com/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20191115172059.jpg',
-      imageReviewWidth: '',
-      imageReviewHeight: ''
-    }
-    watch = {
-      actType (val) {
-        this.resetData()
-        switch (val) {
-          case 'hot':
-          case 'follow':
-            if (val === 'follow' && !this.userId) return
-            this.getForumList()
-            break
-          case 'mine':
-            if (!this.userId) return
-            this.getMyForumReply()
-            break
-          case 'activity':
-            this.getListActivity()
-            break
-          default:
-            break
-        }
-      }
-    }
-    events = {
-      async handleToLike (param) { // 点赞
-        try {
-          const { forumCommentId, forumId, index } = param
-          const opts = {
-            forumCommentId,
-            forumId
-          }
-          const { data, msg } = await momentApis.insertForumCommentMoment(opts)
-          const { isEnable, momentNum } = data
-          this.mineList[index].isMoment = isEnable
-          this.mineList[index].momentNum = momentNum
-          wx.showToast({
-            title: msg
-          })
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-        }
-      },
-      handleNav (type) {
-        this.navType = type
-        this.resetData()
-        if (this.navType === 'topic') {
-          if (this.actType === 'hot' || this.actType === 'follow') {
-            this.getForumList()
-          } else if (this.actType === 'mine') {
-            this.getMyForumReply()
-          } else {
-            this.getListActivity()
-          }
-        } else if (this.navType === -1) {
-          this.getListActivity()
-          this.getListVideoActivity()
-        } else {
-          this.getListVideoActivity()
-        }
-      },
-      handleToActivityList () {
-        this.resetData()
-        this.navType = 'topic'
-        this.actType = 'activity'
-      },
-      handleToPriner () {
-        wx.switchTab({url: '/pages/index/printer'})
-        this.stage = 0
-      },
-      async handleOutStage () {
-        try {
-          const opts = {
-            stage: 0
-          }
-          await guideApis.updateByPrintGuide(opts)
-          this.stage = 0
-          wepy.$instance.globalData.stage = 0
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-        }
-      }
-    }
-    async getMyForumReply () {
-      try {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        const { data: pointDara } = await commetApis.getRedPoint()
-        this.isShowRedPoint = pointDara.isShow === 1
-        let { mineStart, mineLimit, mineList } = this
-        const opts = {
-          start: mineStart,
-          limit: mineLimit
-        }
-        let { data } = await commetApis.getMyForumReply(opts)
-        const { forumVOList, nickname, saveNum, sendNum, failNum } = data
-        if (mineStart === 1) {
-          mineList = []
-        }
-        forumVOList.data.forEach(item => {
-          item.time = timeHandle(item.createTime)
-        })
-        this.mineList = mineList.concat(forumVOList.data)
-        if (forumVOList.data.length < mineLimit) {
-          this.hasMoreData = false
-        } else {
-          this.hasMoreData = true
-          this.mineStart ++
-        }
-        this.nickname = nickname
-        this.saveNum = saveNum
-        this.sendNum = sendNum
-        this.failNum = failNum
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
-    }
-    async getForumList () {
-      try {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        let { forumStart, forumLimit, forumList, actType } = this
-        const opts = {
-          start: forumStart,
-          limits: forumLimit
-        }
-        const { data } = await commetApis.getRedPoint()
-        this.isShowRedPoint = data.isShow === 1
-        let result
+  }
+  mixins = [CommonMixin]
+  components = {
+    videoList: VideoList,
+    loading: Loading,
+    guideIndex: GuideIndex,
+    activityList: ActivityList,
+    silder: Silder,
+    activityScroll: ActivityScroll,
+    forumList: ForumList,
+    mine: Mine,
+    topicNav: TopicNav,
+    nav: Nav,
+    advertising: Advertising,
+    forumBtn: ForumBtn
+  }
+  computed = {
+    hasData (val) {
+      const { navType, activityList, videoActivityList, actType, forumList, mineList, userId } = this
+      if (navType === 'topic') {
         if (actType === 'hot') {
-          const { data: hotData } = await forumApis.listHotForum(opts)
-          result = hotData
+          return forumList.length
         } else if (actType === 'follow') {
-          const { data: followData } = await forumApis.listFollowForum(opts)
-          result = followData
+          return forumList.length || !userId
+        } else if (actType === 'mine') {
+          return mineList.length || !userId
         }
-        if (forumStart === 1) {
-          forumList = []
-        }
-        result.data.forEach(item => {
-          item.time = timeHandle(item.createTime)
-        })
-        this.forumList = forumList.concat(result.data)
-        if (this.forumList.length >= result.total) {
-          this.hasMoreData = false
-        } else {
-          this.hasMoreData = true
-          this.forumStart ++
-        }
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
+        return activityList.length
+      } else {
+        return videoActivityList.length
       }
     }
-    async getListVideoActivity () {
-      try {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        let { start, limits, navType, videoActivityList } = this
-        const opts = {
-          start,
-          limits,
-          videoType: navType
-        }
-        let { data: indexData } = await videoApis.listVideoForum(opts)
-        const { videoDOList, total, forumVOList } = indexData
-        if (start === 1) {
-          videoActivityList = []
-        }
-        forumVOList.forEach(item => {
-          item.time = timeHandle(item.createTime)
-        })
-        if (navType === -1) {
-          this.videoActivityList = [...videoActivityList, ...forumVOList, ...videoDOList]
-        } else {
-          this.videoActivityList = [...videoActivityList, ...videoDOList]
-        }
-        console.log(this.videoActivityList)
-        if (this.videoActivityList.length >= total) {
-          this.hasMoreData = false
-        } else {
-          this.hasMoreData = true
-          this.start ++
-        }
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
-    }
-    async getAdvertisement () { // 广告位接口
-      try {
-        const { data: advData } = await advertisementApis.queryAdvertisements()
-        this.bannerAdv = advData.filter(item => item.advertisementType === 4) // 顶部banner
-        this.floatAdv = advData.filter(item => item.advertisementType === 1) // 浮动banner
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    async getPrintGuide () { // 获取引导信息
-      try {
-        const { data } = await guideApis.printGuide()
-        this.stage = data.stage
-        wepy.$instance.globalData.stage = data.stage
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    async getListActivity () { // 获取活动数据
-      try {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        let { actStart, actLimit, activityList } = this
-        const opts = {
-          start: actStart,
-          limit: actLimit
-        }
-        const { data: actData } = await activityApis.listActivity(opts)
-        if (actStart === 1) {
-          activityList = []
-        }
-        this.activityList = activityList.concat(actData.data)
-        if (actData.data.length >= actData.total) {
-          this.hasMoreData = false
-        } else {
-          this.hasMoreData = true
-          this.actStart ++
-        }
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
-    }
-    handleAuth (userId) {
-      wepy.$instance.globalData.userId = this.userId = userId
-      if (this.actType === 'follow') {
-        this.getForumList()
-      }
-      if (this.actType === 'mine') {
-        this.getMyForumReply()
-      }
-    }
-    async getVersion () {
-      try {
-        const { data } = await configApis.version()
-        this.template = data.template
-        // if (data.template === 'review') {
-        //   const url = 'https://www.wxswjy.com?lastPage=version'
-        //   wx.navigateTo({url: '/pages/webView/index?webUrl=' + encodeURIComponent(url)})
-        // }
-        this.$apply()
-      } catch (error) {
-      }
-    }
-    onLoad ({navType = -1, actType = 'hot'}) {
-      this.navType = navType === '-1' || navType === '1' ? Number(navType) : navType
-      this.actType = actType
-      // 隐藏系统tabbar
-      wx.hideTabBar()
-      wepy.$instance.editTabbar()
-      this.isModelIPX = wepy.$instance.globalData.isModelIPX
-      this.getVersion()
-      this.resetFn()
-      this.getAdvertisement()
-      this.getPrintGuide()
-      wepy.$instance.globalData.subpub.on('auth', this.handleAuth, this)
-      this.$apply()
-    }
-    resetData () {
-      this.start = 1
-      this.actStart = 1
-      this.forumStart = 1
-      this.mineStart = 1
-      this.activityList = []
-      this.videoActivityList = []
-      this.mineList = []
-      this.forumList = []
-    }
-    handleImageQuality () {
-      this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
-      this.listImage.imageHeight = Math.ceil(251 * wx.rpx2px * 2)
-      this.advTopImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
-      this.advTopImage.imageHeight = Math.ceil(152 * wx.rpx2px * 2)
-      this.activitySrcollImage.imageWidth = Math.ceil(155 * wx.rpx2px * 2)
-      this.activitySrcollImage.imageHeight = Math.ceil(120 * wx.rpx2px * 2)
-      this.floatImage.imageWidth = Math.ceil(482 * wx.rpx2px * 2)
-      this.floatImage.imageHeight = Math.ceil(598 * wx.rpx2px * 2)
-      this.listImage.imageQuality = this.advTopImage.imageQuality = this.activitySrcollImage.imageQuality = this.floatImage.imageQuality = wx.imageQuality
-    }
-    resetFn () {
-      if (this.navType === 'topic') {
-        if (this.actType === 'hot') {
+  }
+  data = {
+    isModelIPX: false,
+    tabbar: '',
+    start: 1,
+    limits: 4,
+    activityList: [],
+    videoActivityList: [],
+    hasMoreData: false, // 默认不用拉数据
+    cartNum: '',
+    userId: '',
+    bannerAdv: [],
+    stage: 0,
+    animation: {},
+    floatAdv: [],
+    isShowFloatAdv: process.env.NODE_ENV !== 'development',
+    navType: -1, // -1 全部 1 课程  topic 话题活动
+    actStart: 1,
+    actLimit: 5,
+    actType: 'hot', // hot 热门 follow 关注 activity 活动 mine 我的
+    forumStart: 1,
+    forumLimit: 7,
+    forumList: [],
+    mineStart: 1,
+    mineLimit: 7,
+    mineList: [],
+    nickname: '',
+    saveNum: '',
+    sendNum: '',
+    failNum: '',
+    isShowRedPoint: false, // 我的红圈
+    authButtonText: '请点击这里登录查看',
+    listImage: {
+      imageWidth: 0,
+      imageHeight: 0,
+      imageQuality: 100
+    },
+    advTopImage: {
+      imageWidth: 0,
+      imageHeight: 0,
+      imageQuality: 100
+    },
+    activitySrcollImage: {
+      imageWidth: 0,
+      imageHeight: 0,
+      imageQuality: 100
+    },
+    floatImage: {
+      imageWidth: 0,
+      imageHeight: 0,
+      imageQuality: 100
+    },
+    template: '',
+    viewImg: 'https://wxsw.oss-cn-hangzhou.aliyuncs.com/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20191115172059.jpg',
+    imageReviewWidth: '',
+    imageReviewHeight: ''
+  }
+  watch = {
+    actType (val) {
+      this.resetData()
+      switch (val) {
+        case 'hot':
+        case 'follow':
+          if (val === 'follow' && !this.userId) return
           this.getForumList()
-        } else if (this.actType === 'activity') {
+          break
+        case 'mine':
+          if (!this.userId) return
+          this.getMyForumReply()
+          break
+        case 'activity':
+          this.getListActivity()
+          break
+        default:
+          break
+      }
+    }
+  }
+  events = {
+    async handleToLike (param) { // 点赞
+      try {
+        const { forumCommentId, forumId, index } = param
+        const opts = {
+          forumCommentId,
+          forumId
+        }
+        const { data, msg } = await momentApis.insertForumCommentMoment(opts)
+        const { isEnable, momentNum } = data
+        this.mineList[index].isMoment = isEnable
+        this.mineList[index].momentNum = momentNum
+        wx.showToast({
+          title: msg
+        })
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    handleNav (type) {
+      this.navType = type
+      this.resetData()
+      if (this.navType === 'topic') {
+        if (this.actType === 'hot' || this.actType === 'follow') {
+          this.getForumList()
+        } else if (this.actType === 'mine') {
+          this.getMyForumReply()
+        } else {
           this.getListActivity()
         }
-      } else if (this.navType === -1) { // 发现
+      } else if (this.navType === -1) {
         this.getListActivity()
         this.getListVideoActivity()
-      } else { // 课程
+      } else {
         this.getListVideoActivity()
       }
-      this.handleImageQuality()
-    }
-    onPullDownRefresh () {
-      if (this.template === 'review') {
-        wx.stopPullDownRefresh()
-        return false
-      }
+    },
+    handleToActivityList () {
       this.resetData()
+      this.navType = 'topic'
+      this.actType = 'activity'
+    },
+    handleToPriner () {
+      wx.switchTab({ url: '/pages/index/printer' })
+      this.stage = 0
+    },
+    async handleOutStage () {
+      try {
+        const opts = {
+          stage: 0
+        }
+        await guideApis.updateByPrintGuide(opts)
+        this.stage = 0
+        wepy.$instance.globalData.stage = 0
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
+  async getMyForumReply () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      const { data: pointDara } = await commetApis.getRedPoint()
+      this.isShowRedPoint = pointDara.isShow === 1
+      let { mineStart, mineLimit, mineList } = this
+      const opts = {
+        start: mineStart,
+        limit: mineLimit
+      }
+      let { data } = await commetApis.getMyForumReply(opts)
+      const { forumVOList, nickname, saveNum, sendNum, failNum } = data
+      if (mineStart === 1) {
+        mineList = []
+      }
+      forumVOList.data.forEach(item => {
+        item.time = timeHandle(item.createTime)
+      })
+      this.mineList = mineList.concat(forumVOList.data)
+      if (forumVOList.data.length < mineLimit) {
+        this.hasMoreData = false
+      } else {
+        this.hasMoreData = true
+        this.mineStart++
+      }
+      this.nickname = nickname
+      this.saveNum = saveNum
+      this.sendNum = sendNum
+      this.failNum = failNum
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  async getForumList () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      let { forumStart, forumLimit, forumList, actType } = this
+      const opts = {
+        start: forumStart,
+        limits: forumLimit
+      }
+      const { data } = await commetApis.getRedPoint()
+      this.isShowRedPoint = data.isShow === 1
+      let result
+      if (actType === 'hot') {
+        const { data: hotData } = await forumApis.listHotForum(opts)
+        result = hotData
+      } else if (actType === 'follow') {
+        const { data: followData } = await forumApis.listFollowForum(opts)
+        result = followData
+      }
+      if (forumStart === 1) {
+        forumList = []
+      }
+      result.data.forEach(item => {
+        item.time = timeHandle(item.createTime)
+      })
+      this.forumList = forumList.concat(result.data)
+      if (this.forumList.length >= result.total) {
+        this.hasMoreData = false
+      } else {
+        this.hasMoreData = true
+        this.forumStart++
+      }
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  async getListVideoActivity () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      let { start, limits, navType, videoActivityList } = this
+      const opts = {
+        start,
+        limits,
+        videoType: navType
+      }
+      let { data: indexData } = await videoApis.listVideoForum(opts)
+      const { videoDOList, total, forumVOList } = indexData
+      if (start === 1) {
+        videoActivityList = []
+      }
+      forumVOList.forEach(item => {
+        item.time = timeHandle(item.createTime)
+      })
+      if (navType === -1) {
+        this.videoActivityList = [...videoActivityList, ...forumVOList, ...videoDOList]
+      } else {
+        this.videoActivityList = [...videoActivityList, ...videoDOList]
+      }
+      console.log(this.videoActivityList)
+      if (this.videoActivityList.length >= total) {
+        this.hasMoreData = false
+      } else {
+        this.hasMoreData = true
+        this.start++
+      }
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  async getAdvertisement () { // 广告位接口
+    try {
+      const { data: advData } = await advertisementApis.queryAdvertisements()
+      this.bannerAdv = advData.filter(item => item.advertisementType === 4) // 顶部banner
+      this.floatAdv = advData.filter(item => item.advertisementType === 1) // 浮动banner
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  async getPrintGuide () { // 获取引导信息
+    try {
+      const { data } = await guideApis.printGuide()
+      this.stage = data.stage
+      wepy.$instance.globalData.stage = data.stage
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  async getListActivity () { // 获取活动数据
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      let { actStart, actLimit, activityList } = this
+      const opts = {
+        start: actStart,
+        limit: actLimit
+      }
+      const { data: actData } = await activityApis.listActivity(opts)
+      if (actStart === 1) {
+        activityList = []
+      }
+      this.activityList = activityList.concat(actData.data)
+      if (actData.data.length >= actData.total) {
+        this.hasMoreData = false
+      } else {
+        this.hasMoreData = true
+        this.actStart++
+      }
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  handleAuth (userId) {
+    wepy.$instance.globalData.userId = this.userId = userId
+    if (this.actType === 'follow') {
+      this.getForumList()
+    }
+    if (this.actType === 'mine') {
+      this.getMyForumReply()
+    }
+  }
+  async getVersion () {
+    try {
+      const { data } = await configApis.version()
+      this.template = data.template
+      // if (data.template === 'review') {
+      //   const url = 'https://www.wxswjy.com?lastPage=version'
+      //   wx.navigateTo({url: '/pages/webView/index?webUrl=' + encodeURIComponent(url)})
+      // }
+      this.$apply()
+    } catch (error) {
+    }
+  }
+  onLoad ({ navType = -1, actType = 'hot' }) {
+    this.navType = navType === '-1' || navType === '1' ? Number(navType) : navType
+    this.actType = actType
+    // 隐藏系统tabbar
+    wx.hideTabBar()
+    wepy.$instance.editTabbar()
+    this.isModelIPX = wepy.$instance.globalData.isModelIPX
+    this.getVersion()
+    this.resetFn()
+    this.getAdvertisement()
+    this.getPrintGuide()
+    wepy.$instance.globalData.subpub.on('auth', this.handleAuth, this)
+    this.$apply()
+  }
+  resetData () {
+    this.start = 1
+    this.actStart = 1
+    this.forumStart = 1
+    this.mineStart = 1
+    this.activityList = []
+    this.videoActivityList = []
+    this.mineList = []
+    this.forumList = []
+  }
+  handleImageQuality () {
+    this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
+    this.listImage.imageHeight = Math.ceil(251 * wx.rpx2px * 2)
+    this.advTopImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
+    this.advTopImage.imageHeight = Math.ceil(152 * wx.rpx2px * 2)
+    this.activitySrcollImage.imageWidth = Math.ceil(155 * wx.rpx2px * 2)
+    this.activitySrcollImage.imageHeight = Math.ceil(120 * wx.rpx2px * 2)
+    this.floatImage.imageWidth = Math.ceil(482 * wx.rpx2px * 2)
+    this.floatImage.imageHeight = Math.ceil(598 * wx.rpx2px * 2)
+    this.listImage.imageQuality = this.advTopImage.imageQuality = this.activitySrcollImage.imageQuality = this.floatImage.imageQuality = wx.imageQuality
+  }
+  resetFn () {
+    if (this.navType === 'topic') {
+      if (this.actType === 'hot') {
+        this.getForumList()
+      } else if (this.actType === 'activity') {
+        this.getListActivity()
+      }
+    } else if (this.navType === -1) { // 发现
+      this.getListActivity()
+      this.getListVideoActivity()
+    } else { // 课程
+      this.getListVideoActivity()
+    }
+    this.handleImageQuality()
+  }
+  onPullDownRefresh () {
+    if (this.template === 'review') {
+      wx.stopPullDownRefresh()
+      return false
+    }
+    this.resetData()
+    if (this.navType === 'topic') {
+      if (this.actType === 'hot' || this.actType === 'follow') {
+        this.getForumList()
+      } else if (this.actType === 'mine') {
+        this.getMyForumReply()
+      } else {
+        this.getListActivity()
+      }
+    } else {
+      this.getListVideoActivity()
+      this.getListActivity()
+    }
+    wx.nextTick(() => {
+      wx.stopPullDownRefresh()
+    })
+  }
+  methods = {
+    imageLoad (e) {
+      const { width, height } = e.detail
+      let imageSize = imageUtil.imageZoomHeightUtil(width, height)
+      this.imageReviewWidth = imageSize.imageWidth
+      this.imageReviewHeight = imageSize.imageHeight
+    }
+  }
+  onShareAppMessage () {
+    const { navType, actType } = this
+    let path = `pages/index/index?navType=${navType}&actType=${actType}`
+    if (this.navType === 'topic') {
+      if (this.actType === 'follow' || this.actType === 'mine') {
+        path = `pages/index/index`
+      }
+    }
+    return {
+      title: '无限三维 · 让孩子创造未来',
+      path
+    }
+  }
+  onReachBottom () {
+    if (this.template === 'review') {
+      wx.stopPullDownRefresh()
+      return false
+    }
+    if (this.hasMoreData) {
       if (this.navType === 'topic') {
         if (this.actType === 'hot' || this.actType === 'follow') {
           this.getForumList()
@@ -542,87 +585,41 @@
         }
       } else {
         this.getListVideoActivity()
-        this.getListActivity()
       }
-      wx.nextTick(() => {
-        wx.stopPullDownRefresh()
-      })
-    }
-    methods = {
-      imageLoad (e) {
-        const { width, height } = e.detail
-        let imageSize = imageUtil.imageZoomHeightUtil(width, height)
-        this.imageReviewWidth = imageSize.imageWidth
-        this.imageReviewHeight = imageSize.imageHeight
-      }
-    }
-    onShareAppMessage () {
-      const { navType, actType } = this
-      let path = `pages/index/index?navType=${navType}&actType=${actType}`
-      if (this.navType === 'topic') {
-        if (this.actType === 'follow' || this.actType === 'mine') {
-          path = `pages/index/index`
-        }
-      }
-      return {
-        title: '无限三维 · 让孩子创造未来',
-        path
-      }
-    }
-    onReachBottom () {
-      if (this.template === 'review') {
-        wx.stopPullDownRefresh()
-        return false
-      }
-      if (this.hasMoreData) {
-        if (this.navType === 'topic') {
-          if (this.actType === 'hot' || this.actType === 'follow') {
-            this.getForumList()
-          } else if (this.actType === 'mine') {
-            this.getMyForumReply()
-          } else {
-            this.getListActivity()
-          }
-        } else {
-          this.getListVideoActivity()
-        }
-      }
-    }
-    onUnload () {
-    }
-    onHide () {
-    }
-    onShow () {
-      var pages = getCurrentPages()
-      var currentPage = pages[pages.length - 1]
-      console.log(currentPage)
-      if (wepy.$instance.globalData.userId) {
-        this.userId = wepy.$instance.globalData.userId
-      }
-      // 1: 创建动画实例animation:
-      var animation = wx.createAnimation({
-        duration: 500,
-        timingFunction: 'ease'
-      })
-      // this.animation = animation
-      var next = true
-      // 连续动画关键步骤
-      setInterval(function () {
-        // 2: 调用动画实例方法来描述动画
-        if (next) {
-          animation.rotate(39).step()
-          next = !next
-        } else {
-          animation.rotate(19).step()
-          next = !next
-        }
-        // 3: 将动画export导出，把动画数据传递组件animation的属性
-        this.animation = animation.export()
-        this.$apply()
-      }.bind(this), 600)
     }
   }
+  onUnload () {
+  }
+  onHide () {
+  }
+  onShow () {
+    if (wepy.$instance.globalData.userId) {
+      this.userId = wepy.$instance.globalData.userId
+    }
+    // 1: 创建动画实例animation:
+    var animation = wx.createAnimation({
+      duration: 500,
+      timingFunction: 'ease'
+    })
+    // this.animation = animation
+    var next = true
+    // 连续动画关键步骤
+    setInterval(function () {
+      // 2: 调用动画实例方法来描述动画
+      if (next) {
+        animation.rotate(39).step()
+        next = !next
+      } else {
+        animation.rotate(19).step()
+        next = !next
+      }
+      // 3: 将动画export导出，把动画数据传递组件animation的属性
+      this.animation = animation.export()
+      this.$apply()
+    }.bind(this), 600)
+  }
+}
 </script>
 <style lang='postcss'>
-  @import 'src/styles/pages/index/common.postcss';
+@import 'src/styles/pages/index/common.postcss';
 </style>

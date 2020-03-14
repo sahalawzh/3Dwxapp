@@ -66,8 +66,8 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
-  import wxutils from '../../utils/wxutils'
+  import printerApis from '@/api/printer'
+  import wxutils from '@/utils/wxutils'
   const link = {
     1: '/pages/printerAdvanced/index',
     2: '/pages/printerList/index'

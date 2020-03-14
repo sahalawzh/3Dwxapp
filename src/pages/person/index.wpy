@@ -59,7 +59,7 @@
 
 <script>
   import wepy from 'wepy'
-  import CommonMixin from '../../mixins/common'
+  import CommonMixin from '@/mixins/common'
   export default class Person extends wepy.page {
     config = {
       navigationBarTitleText: '个人中心'

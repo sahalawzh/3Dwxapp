@@ -1,10 +1,10 @@
 <template>
   <view>
     <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon open-type-btn">
-      <image src="../../images/common/btn_user_white.png" mode="aspectFill"></image>
+      <image src="../../../../../images/common/btn_user_white.png" mode="aspectFill"></image>
     </navigator>
     <button wx:else data-url="/pages/person/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="person-icon open-type-btn">
-      <image src="../../images/common/btn_user_white.png" mode="aspectFill"></image>
+      <image src="../../../../../images/common/btn_user_white.png" mode="aspectFill"></image>
     </button>
   </view>
 </template>

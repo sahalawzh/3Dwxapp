@@ -7,9 +7,9 @@
 
 <script>
   import wepy from 'wepy'
-  import Commet from '../../components/commet'
-  import commetApis from '../../api/commet'
-  import { timeHandle } from '../../utils/commentTimeHandle'
+  import Commet from '@/components/commet'
+  import commetApis from '@/api/commet'
+  import { timeHandle } from '@/utils/commentTimeHandle'
   export default class Comment extends wepy.page {
     config = {
       navigationBarTitleText: '评价'

@@ -78,9 +78,9 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
-  import goodsApis from '../../api/goods'
-  import wxutils from '../../utils/wxutils'
+  import printerApis from '@/api/printer'
+  import goodsApis from '@/api/goods'
+  import wxutils from '@/utils/wxutils'
   export default class PrinterList extends wepy.page {
     config = {
       navigationBarTitleText: '打印机',

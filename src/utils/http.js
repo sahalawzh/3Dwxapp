@@ -13,7 +13,7 @@ export default class http {
       resolve(res)
     }
   }
-  
+
   static checkNeedLogin () {
     return !this.getConfig('isReady')
   }
@@ -105,13 +105,17 @@ export default class http {
       try {
         const { data: loginData } = await this.get(`${this.getConfig('loginUrl')}`, data)
         this.loginStatus = 0
-        const { token, isReady } = loginData
+        const { token, userId, userDO, isReady } = loginData
         this.setConfig('Token', token)
+        this.setConfig('userId', userId)
+        this.setConfig('userDO', userDO)
         this.setConfig('isReady', isReady === 1)
         wx.setStorage({
           key: 'wow',
           data: {
             token,
+            userId,
+            userDO,
             isReady: isReady === 1
           }
         })
@@ -162,15 +166,17 @@ export default class http {
         } else {
           const error = this.requestException(res)
           wx.hideLoading()
-          throw wx.showModal({
-            title: '提示',
-            showCancel: false,
-            content: error.msg || '系统繁忙',
-            success(res) {
-              if (res.confirm) {
+          if (!config.REJECTERRORCONFIG) {
+            throw wx.showModal({
+              title: '提示',
+              showCancel: false,
+              content: error.msg || '系统繁忙',
+              success(res) {
+                if (res.confirm) {
+                }
               }
-            }
-          })
+            })
+          }
         }
       }
     }

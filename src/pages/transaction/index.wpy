@@ -20,7 +20,7 @@
 <script>
   import wepy from 'wepy'
   import Recommend from './modules/recommend'
-  import goodsApis from '../../api/goods'
+  import goodsApis from '@/api/goods'
   export default class Transaction extends wepy.page {
     config = {
       navigationBarTitleText: '交易成功'

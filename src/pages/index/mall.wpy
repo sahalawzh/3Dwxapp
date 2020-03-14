@@ -28,15 +28,15 @@
 
 <script>
   import wepy from 'wepy'
-  import Search from '../../components/search'
+  import Search from '@/components/search'
   import Banner from './modules/banner'
   import Types from './modules/types'
   import Activity from './modules/activity'
-  import GoodList from '../../components/goodList'
-  import Loading from '../../components/loading'
-  import goodsApi from '../../api/goods'
-  import advertisementApis from '../../api/advertisement'
-  import CommonMixin from '../../mixins/common'
+  import GoodList from '@/components/goodList'
+  import Loading from '@/components/loading'
+  import goodsApi from '@/api/goods'
+  import advertisementApis from '@/api/advertisement'
+  import CommonMixin from '@/mixins/common'
   export default class Mall extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',

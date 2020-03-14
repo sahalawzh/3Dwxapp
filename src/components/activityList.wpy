@@ -1,23 +1,32 @@
 <template>
   <view class="activity-lists">
-    <view class="activity-item" wx:for="{{activityList}}" wx:key="item">
+    <view class="activity-item"
+          wx:for="{{activityList}}"
+          wx:key="item">
       <view class="item">
-        <image class="bg-default" src="../images/index/bg_video_default.png" mode="aspectFill"></image>
+        <image class="bg-default"
+               src="../images/index/bg_video_default.png"
+               mode="aspectFill"></image>
         <view class="activity-lists__item wow-background-image font-color-white"
-          style="background-image: url({{item.imageUrl}}?x-oss-process=image/resize,w_{{listImage.imageWidth}},h_{{listImage.imageHeight}}/quality,Q_{{listImage.imageQuality}})"
-          @tap.stop="handleToActivity({{item.id}})">
+              style="background-image: url({{item.imageUrl}}?x-oss-process=image/resize,w_{{listImage.imageWidth}},h_{{listImage.imageHeight}}/quality,Q_{{listImage.imageQuality}})"
+              @tap.stop="handleToActivity({{item.activityType}}, {{item.id}})">
           <view class="bg-mask"></view>
-          <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
+          <view class="activity-status font-size--26"
+                :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
         </view>
       </view>
       <view class="title font-size--36">{{item.title}}</view>
       <view class="activity-desc wow-flex is-align-middle is-justify-space-between font-size--24">
         <view class="wow-flex is-align-middle">
-          <image class="ico_duration" src="../images/common/ico_duration.png" mode="aspectFill"></image>
+          <image class="ico_duration"
+                 src="../images/common/ico_duration.png"
+                 mode="aspectFill"></image>
           <view>{{item.beginTime + '-' + item.endTime}}</view>
         </view>
         <view class="wow-flex is-align-middle">
-          <image class="ico_applicants" src="../images/common/ico_applicants.png" mode="aspectFill"></image>
+          <image class="ico_applicants"
+                 src="../images/common/ico_applicants.png"
+                 mode="aspectFill"></image>
           <view>{{item.member}}</view>
         </view>
       </view>
@@ -43,12 +52,12 @@ export default class activityList extends wepy.component {
     }
   }
   methods = {
-    handleToActivity (id) {
-      wxUtils.backOrNavigate('/pages/activity/index?linkId=' + id)
+    handleToActivity (activityType, id) {
+      wxUtils.backOrNavigate(`/pages/${activityType === 3 ? 'vote' : 'activity'}/index?linkId=${id}`)
     }
   }
 }
 </script>
 <style lang="postcss">
-  @import 'src/styles/modules/activityList.postcss';
+@import 'src/styles/modules/activityList.postcss';
 </style>

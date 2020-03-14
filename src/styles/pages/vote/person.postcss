@@ -1,0 +1,107 @@
+.page-vote-upload {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f6f7f7;
+  .form-container {
+    position: relative;
+    background-color: #fff;
+    .form-item {
+      position: relative;
+      height: 80rpx;
+      line-height: 80rpx;
+      padding-left: 165rpx;
+      &__label {
+        position: absolute;
+        left: 0;
+        padding-left: 48rpx;
+        color: #333;
+      }
+      &__body {
+        .control-com {
+          font-size: 28rpx;
+          color: #333;
+        }
+      }
+    }
+  }
+  .upload-container {
+    position: relative;
+    .upload-action {
+      padding: 45rpx 50rpx 0;
+      background-color: #fff;
+      margin-top: 15rpx;
+      .upload-cover {
+        position: relative;
+        border: 1rpx dotted #333;
+        height: 462rpx;
+        width: 100%;
+        text-align: center;
+        background-color: #F5F8FE;
+        border-radius: 20rpx;
+        overflow: hidden;
+        .cover-img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+    .upload-products {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      .upload-product {
+        position: relative;
+        width: 210rpx;
+        height: 155rpx;
+        border-radius: 10rpx;
+        margin-right: 10rpx;
+        margin-top: 14rpx;
+        box-sizing: border-box;
+        border-radius: 20rpx;
+        overflow: hidden;
+        image {
+          width: 210rpx;
+          height: 155rpx;
+        }
+        .upload-clear {
+          position: absolute;
+          right: -18rpx;
+          top: -18rpx;
+          z-index: 99;
+        }
+        &--3 {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+  .form-area {
+    position: relative;
+    background-color: #fff;
+    padding: 32rpx 50rpx 46rpx;
+    &__wrap {
+      font-size: 28rpx;
+      color: #333;
+      line-height: 48rpx;
+    }
+    .submit-btn {
+      margin-top: 80rpx;
+      height: 80rpx;
+      line-height: 80rpx;
+      text-align: center;
+      background-color: #1A5DE1;
+      color: #fff;
+      border-radius: 40rpx;
+      font-size: 36rpx;
+      &__disabled {
+        background-color: #AFB9CF;
+      }
+    }
+  }
+}

@@ -1,0 +1,131 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-vote-detail" wx:if="{{voteData}}">
+    <view class="detail-header">
+      <view class="detail-header__title font-size--30">作品名称</view>
+      <view class="detail-header__cover">
+        <image src="{{ voteData.cover }}" class="cover-img" mode="aspectFill"></image>
+      </view>
+      <view class="detail-header__info font-size--28">
+        <view class="info-item">编号：{{ voteData.activityNo }}</view>
+        <view class="info-item"
+          wx:for="{{validShowData}}">{{item}}：{{ voteData.visibleData[index] }}</view>
+        <view class="info-item"
+          wx:for="{{invisibleData}}">{{item}}：{{ voteData.invisibleData[index] }}</view>
+      </view>
+      <view class="wow-flex is-align-middle is-justify-space-between font-size--30 detail-header__action">
+        <view class="vote-num">{{ voteData.vote }}票</view>
+        <button wx:if="{{userId}}" @tap.stop="handleToVote" class="vote-btn font-size--30">投TA一票</button>
+        <button
+          wx:else
+          data-type="vote"
+          open-type="getPhoneNumber"
+          bindgetphonenumber="getPhoneNumber"
+          class="vote-btn open-type-btn font-size--26">投TA一票
+        </button>
+      </view>
+    </view>
+
+    <view class="detail-body">
+      <view class="detail-content font-size--28">
+        {{ voteData.introduction }}
+      </view>
+
+      <view class="detail-imgs" wx:if="{{voteData.images.length}}">
+        <image wx:for="{{voteData.images}}" src="{{item}}" class="detail-img" mode="aspectFill"></image>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import activityApis from '@/api/activity'
+import CommonMixin from '@/mixins/common'
+
+export default class voteDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '作品详情'
+  }
+  data = {
+    voteData: '',
+    voteId: '',
+    activityId: '',
+    userId: '',
+    validShowData: {},
+    invisibleData: {}
+  }
+  mixins = [CommonMixin]
+  methods = {
+    handleToVote () {
+      this.handleVote()
+    }
+  }
+  handleToAuth (e) {
+    if (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+      this.handleVote()
+      this.$apply()
+    }
+  }
+  async handleVote () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      const { voteId, activityId } = this
+      const opts = {
+        id: voteId,
+        activityId
+      }
+      let { data } = await activityApis.postCompetitionVote(opts)
+      let { result, type, vote } = data
+      wx.showToast({ title: result, duration: 2000 })
+      if (vote) {
+        this.voteData.vote = vote
+      }
+      if (type === 1 && vote) { // 自己给自己投票
+        wepy.$instance.globalData.subpub.emit('afterVote', vote)
+      }
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  onLoad ({ activityId, voteId }) {
+    this.userId = wepy.$instance.globalData.userId
+    wepy.$instance.globalData.subpub.on('vote', this.handleToAuth, this)
+    this.activityId = activityId
+    this.voteId = voteId
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    const opts = {
+      id: voteId
+    }
+    const params = {
+      activityId
+    }
+    Promise.all([activityApis.getCompetitionDetail(opts), activityApis.getActivityCompetitionData(params)]).then(res => {
+      let { images } = res[0].data
+      res[0].data.images = images.filter(Boolean)
+      this.voteData = res[0].data
+      const { visibleData, invisibleData } = res[1].data
+      this.validShowData = visibleData
+      this.invisibleData = invisibleData
+      this.$apply()
+      wx.hideLoading()
+    }).catch(e => {
+      console.log(e)
+      wx.hideLoading()
+    })
+  }
+}
+</script>
+<style lang='postcss'>
+@import 'src/styles/pages/vote/detail.postcss';
+</style>

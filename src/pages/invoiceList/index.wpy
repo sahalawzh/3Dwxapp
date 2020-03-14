@@ -188,13 +188,13 @@
 
 <script>
   import wepy from 'wepy'
-  import orderApis from '../../api/order'
-  import invoiceApis from '../../api/invoice'
+  import orderApis from '@/api/order'
+  import invoiceApis from '@/api/invoice'
   import commonwxs from './wxs/common.wxs'
-  import wxutils from '../../utils/wxutils'
-  import { accAdd } from '../../utils/arithmetic'
-  import addressApis from '../../api/address'
-  import isEmpty from '../../utils/isEmpty'
+  import wxutils from '@/utils/wxutils'
+  import { accAdd } from '@/utils/arithmetic'
+  import addressApis from '@/api/address'
+  import isEmpty from '@/utils/isEmpty'
   export default class InvoiceList extends wepy.page {
     config = {
       navigationBarTitleText: '申请发票',

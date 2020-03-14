@@ -29,9 +29,9 @@
 
 <script>
   import wepy from 'wepy'
-  import commetApis from '../../api/commet'
-  import wxutils from '../../utils/wxutils'
-  import CommonMixin from '../../mixins/common'
+  import commetApis from '@/api/commet'
+  import wxutils from '@/utils/wxutils'
+  import CommonMixin from '@/mixins/common'
   export default class ForumCommet extends wepy.page {
     config = {
       navigationBarTitleText: '话题评论'

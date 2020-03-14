@@ -1,0 +1,53 @@
+.page-vote-index {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #fff;
+  .index-list {
+    padding: 0 20rpx 20rpx;
+    .index-header {
+      padding: 34rpx 30rpx 0;
+      &__title {
+        color: #333;
+      }
+      &__more {
+        position: relative;
+        width: 140rpx;
+        height: 44rpx;
+        line-height: 44rpx;
+        border-radius: 22rpx;
+        border: 1rpx solid #1A5DE1;
+        color: #1A5DE1;
+        padding-left: 35rpx;
+        box-sizing: border-box;
+        &:before{
+          content: '';
+          position: absolute;
+          top: 15rpx;
+          right: 26rpx;
+          width: 14rpx;
+          height: 14rpx;
+          border-top: 3rpx solid #1A5DE1;
+          border-right: 3rpx solid #1A5DE1;
+          transform: rotate(45deg);
+        }
+      }
+    }
+  }
+  .empty-box {
+    position: relative;
+    text-align: center;
+    padding: 80rpx 0;
+    &__icon {
+      width: 184rpx;
+      height: 199rpx;
+    }
+    &__tip {
+      font-size: 28rpx;
+      color: #ccc;
+      margin-top: 44rpx;
+    }
+  }
+}

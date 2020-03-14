@@ -49,11 +49,11 @@
 
 <script>
   import wepy from 'wepy'
-  import goodsApis from '../../api/goods'
-  import GoodList from '../../components/goodList'
-  import VideoList from '../../components/videoList'
-  import ForumList from '../../components/forumList'
-  import videoApis from '../../api/video'
+  import goodsApis from '@/api/goods'
+  import GoodList from '@/components/goodList'
+  import VideoList from '@/components/videoList'
+  import ForumList from '@/components/forumList'
+  import videoApis from '@/api/video'
   export default class Search extends wepy.page {
     config = {
       navigationBarTitleText: '搜索',

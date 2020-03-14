@@ -18,8 +18,8 @@
       <view class="wow-flex">
         <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
         <view class="btn-box">
-          <form bindsubmit="setFormId" report-submit="true">
-            <button wx:if="{{userId}}" formType="submit" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
+          <form report-submit="true">
+            <button wx:if="{{userId}}" formType="submit" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
             <button
               wx:else
               data-type="activity"
@@ -27,7 +27,7 @@
               bindgetphonenumber="getPhoneNumber"
               disabled="{{activityData.dateType === 2}}"
               formType="submit"
-              class="part-btn open-type-btn font-size--36">{{buttonText}}</button>
+              class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
           </form>
         </view>
       </view>
@@ -58,9 +58,29 @@
         </form>
       </view>
       <view class="wow-ta-c">
-        <icon type="cancel" size="24" color="#fff" class="form-close" @tap.stop="handleCloseForm"/>
+        <icon type="cancel" size="28" color="#fff" class="form-close" @tap.stop="handleCloseForm"/>
       </view>
     </view>
+
+
+    <!-- 订阅提醒 -->
+    <view class="form-box subscibe-box" catchtouchmove="true" wx:if="{{isShowSubscibe}}">
+      <view class="form-mask"></view>
+      <view class="form-content">
+        <view class="subscibe-icon">
+          <image src="../../images/common/icon_sub.png"></image>
+        </view>
+        <view class="subscibe-title font-size--48">报名成功</view>
+        <view class="subscibe-message font-size--24">开启微信推送可以实时了解小维动态哦~</view>
+        <button class="form-content__btn font-size--30" @tap.stop="handleSubScibeMessage">接受</button>
+        <view class="without-message font-size--24" @tap.stop="handleCloseSubscibe">暂不需要</view>
+      </view>
+
+      <view class="wow-ta-c">
+        <icon type="cancel" size="28" color="#fff" class="form-close" @tap.stop="handleCloseSubscibe"/>
+      </view>
+    </view>
+
 
     <share></share>
 
@@ -89,377 +109,411 @@
   </view>
 </template>
 <script>
-  import wepy from 'wepy'
-  import activityApis from '../../api/activity'
-  import shareApis from '../../api/share'
-  import CommonMixin from '../../mixins/common'
-  import formIdMixin from '../../mixins/formId'
-  import imageUtil from '../../utils/image'
-  import Commet from '../../components/commet'
-  import Share from '../../components/share'
-  import { parseQueryString } from '../../utils/utils'
-  import commetApis from '../../api/commet'
-  import { timeHandle } from '../../utils/commentTimeHandle'
-  export default class activity extends wepy.page {
-    data = {
-      userId: '',
-      linkId: '',
-      controlList: [],
-      activityData: '',
-      isShowForm: false,
-      indexs: [0],
-      currentValues: [],
-      currentIndex: 0,
-      verifyData: {},
-      imageContentWidth: '',
-      imageContentHeight: '',
-      isShowCommetInput: false,
-      isShowControls: true,
-      commetList: [],
-      commetTotal: '',
-      sendInfo: '',
-      status: {
-        0: '未开始',
-        1: '进行中',
-        2: '已结束'
-      }
+import wepy from 'wepy'
+import activityApis from '@/api/activity'
+import templateApis from '@/api/template'
+import shareApis from '@/api/share'
+import CommonMixin from '@/mixins/common'
+import imageUtil from '@/utils/image'
+import Commet from '@/components/commet'
+import Share from '@/components/share'
+import { parseQueryString } from '@/utils/utils'
+import commetApis from '@/api/commet'
+import { timeHandle } from '@/utils/commentTimeHandle'
+export default class activity extends wepy.page {
+  data = {
+    userId: '',
+    linkId: '',
+    controlList: [],
+    activityData: '',
+    isShowForm: false,
+    indexs: [0],
+    currentValues: [],
+    currentIndex: 0,
+    verifyData: {},
+    imageContentWidth: '',
+    imageContentHeight: '',
+    isShowCommetInput: false,
+    isShowControls: true,
+    commetList: [],
+    commetTotal: '',
+    sendInfo: '',
+    status: {
+      0: '未开始',
+      1: '进行中',
+      2: '已结束'
+    },
+    templateList: [],
+    isShowSubscibe: false
+  }
+  components = {
+    commet: Commet,
+    share: Share
+  }
+  mixins = [CommonMixin]
+  config = {
+    navigationBarTitleText: '',
+    usingComponents: {
+      'wow-popup': '../../packages/popup/index'
     }
-    components = {
-      commet: Commet,
-      share: Share
+  }
+  onLoad (options) {
+    if (options.scene) {
+      let sceneObj = decodeURIComponent(options.scene)
+      let urlObj = 'url?' + sceneObj
+      options = parseQueryString(urlObj)
     }
-    mixins = [CommonMixin, formIdMixin]
-    config = {
-      navigationBarTitleText: '',
-      usingComponents: {
-        'wow-popup': '../../packages/popup/index'
-      }
+    this.linkId = options.linkId
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    const api1 = {
+      templateType: 0
     }
-    onLoad (options) {
-      if (options.scene) {
-        let sceneObj = decodeURIComponent(options.scene)
-        let urlObj = 'url?' + sceneObj
-        options = parseQueryString(urlObj)
-      }
-      this.linkId = options.linkId
-      this.advDetail()
-      this.getActivityComment()
+    const api2 = {
+      id: this.linkId
     }
-    async getActivityComment () {
-      try {
-        const opts = {
-          activityId: this.linkId
+    Promise.all([templateApis.getListTemplateId(api1), activityApis.detail(api2), this.getActivityComment()]).then(res => {
+      const { data: templateData } = res[0]
+      this.templateList = templateData
+      const { data: activityData } = res[1]
+      this.activityData = activityData
+      this.controlList = activityData.formInfo.controlList
+      this.controlList.forEach(item => {
+        this.verifyData = {
+          ...this.verifyData,
+          [item.controlKey]: item.title
         }
-        const { data: commetData } = await commetApis.getActivityComment(opts)
-        commetData.data.length && commetData.data.forEach(item => {
-          item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
-        })
-        this.commetList = commetData.data
-        this.commetTotal = commetData.total
-        this.isShowCommetInput = false
-        this.isShowControls = true
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    computed = {
-      buttonText () {
-        return this.activityData && this.activityData.buttonName
-      },
-      controlHeight () {
-        let maxHeight = ''
-        wx.getSystemInfo({
-          success: function (res) {
-            let windowHeight = res.windowHeight
-            maxHeight = windowHeight - 30 - 12 - 18 - 24 - 26 - 38
-          }
-        })
-        return maxHeight
-      }
-    }
-    async handleToActivity (e) {
-      if (e) {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        wepy.$instance.globalData.userId = e
-        this.userId = e
-        this.$apply()
-      }
-      const { id, activityType } = this.activityData
-      const param = {
-        id,
-        activityType
-      }
-      this.getTemplateFormId()
-      const { data } = await activityApis.checkForm(param)
+      })
+      wepy.$instance.globalData.subpub.on('activityCommet', this.handleActivityCommet, this)
+      wepy.$instance.globalData.subpub.on('activity', this.handleToActivity, this)
+      wepy.$instance.globalData.subpub.on('activitySign', this.handleActivitySign, this)
+      wx.setNavigationBarTitle({
+        title: decodeURIComponent(activityData.title)
+      })
       wx.hideLoading()
-      if (data.isEnable === 1) {
-        wx.nextTick(() => {
-          wx.showToast({
-            title: '您已成功报名',
-            success: function () {
-              setTimeout(() => {
-                wx.hideToast()
-              }, 1000)
-            }
-          })
-        })
-        return
+      this.$apply()
+    }).catch(err => {
+      console.log(err)
+      wx.hideLoading()
+    })
+  }
+  async getActivityComment () {
+    try {
+      const opts = {
+        activityId: this.linkId
       }
-      this.isShowForm = true
+      const { data: commetData } = await commetApis.getActivityComment(opts)
+      commetData.data.length && commetData.data.forEach(item => {
+        item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
+      })
+      this.commetList = commetData.data
+      this.commetTotal = commetData.total
+      this.isShowCommetInput = false
+      this.isShowControls = true
+      this.$apply()
+      return commetData
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  computed = {
+    buttonText () {
+      return this.activityData && this.activityData.buttonName
+    },
+    controlHeight () {
+      let maxHeight = ''
+      wx.getSystemInfo({
+        success: function (res) {
+          let windowHeight = res.windowHeight
+          maxHeight = windowHeight - 30 - 12 - 18 - 24 - 26 - 38
+        }
+      })
+      return maxHeight
+    }
+  }
+  async handleToActivity (e) {
+    if (e) {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      wepy.$instance.globalData.userId = e
+      this.userId = e
       this.$apply()
     }
-    async advDetail () {
-      try {
-        wx.showLoading({
-          title: '加载中',
-          mask: true
-        })
-        const opts = {
-          id: this.linkId
-        }
-        const { data } = await activityApis.detail(opts)
-        this.activityData = data
-        this.controlList = data.formInfo.controlList
-        this.controlList.forEach(item => {
-          this.verifyData = {
-            ...this.verifyData,
-            [item.controlKey]: item.title
-          }
-        })
-        wepy.$instance.globalData.subpub.on('activityCommet', this.handleActivityCommet, this)
-        wepy.$instance.globalData.subpub.on('activity', this.handleToActivity, this)
-        wepy.$instance.globalData.subpub.on('activitySign', this.handleActivitySign, this)
-        wx.setNavigationBarTitle({
-          title: decodeURIComponent(data.title)
-        })
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
+    const { id, activityType } = this.activityData
+    const param = {
+      id,
+      activityType
     }
-    onShareAppMessage () {
-      const { title, imageUrl } = this.activityData
-      this.$wxpage.selectComponent('.wow_share').hide()
-      return {
-        title,
-        imageUrl: imageUrl,
-        path: 'pages/activity/index?linkId=' + this.linkId
-      }
-    }
-    verification (formData) {
-      const errVaild = {
-        vaild: true,
-        msg: ''
-      }
-      /* eslint-disable */
-      const mailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
-      /* eslint-disable */
-      for (let key in formData) {
-        if (!formData[key]) {
-          errVaild.vaild = false
-          errVaild.msg = this.verifyData[key] + '不能为空'
-          return errVaild
-        }
-        if (key === 'phone' && !/^1\d{10}$/.test(formData[key])) {
-          errVaild.vaild = false
-          errVaild.msg = this.verifyData[key] + '格式错误'
-          return errVaild
-        }
-        if (key === 'email' && !mailReg.test(formData[key])) {
-          errVaild.vaild = false
-          errVaild.msg = this.verifyData[key] + '格式错误'
-          return errVaild
-        }
-      }
-      return errVaild
-    }
-    events = {
-      handleSharePoster () {
-        this.getSharePoster()
-      },
-      handleCloseCommetMask () {
-        this.isShowCommetInput = false
-        this.isShowControls = true
-      },
-      handleGetInfo (val) {
-        this.sendInfo = val
-      },
-      async handleSendInfo () {
-        try {
-          if (!this.sendInfo) return
-          wx.showLoading({
-            title: '发送中',
-            mask: true
-          })
-          const { linkId, sendInfo } = this
-          const opts = {
-            activityId: linkId,
-            content: sendInfo
-          }
-          await commetApis.insertActivityComment(opts)
-          wepy.$instance.globalData.subpub.off('activityCommet', this.handleActivityCommet)
-          this.sendInfo = ''
-          this.$broadcast('handleClearInput', this.sendInfo)
-          this.getActivityComment()
-          wx.hideLoading()
-          this.$apply()
-        } catch (error) {
-          wx.hideLoading()
-        }
-      }
-    }
-    async getSharePoster () {
-      try {
-        wx.showLoading({
-          title: '生成中',
-          mask: true
-        })
-        const { linkId, linkType } = this.activityData
-        const opts = {
-          type: 'activity',
-          id: this.linkId,
-          page: 'pages/activity/index',
-          scene: `linkId=${linkId}`
-        }
-        const { data } = await shareApis.createSharePoster(opts)
-        this.$wxpage.selectComponent('.wow_share').hide()
-        wx.previewImage({
-          current: data,
-          urls: [data]
-        })
-        wx.hideLoading()
-        this.$apply()
-      } catch (error) {
-        console.log(error)
-        wx.hideLoading()
-      }
-    }
-    async handleActivitySign () {
-      const { formData, formId, activityData, linkId } = this
-      const errVaild = this.verification(formData)
-      if (!errVaild.vaild) {
+    const { data } = await activityApis.checkForm(param)
+    wx.hideLoading()
+    if (data.isEnable === 1) {
+      wx.nextTick(() => {
         wx.showToast({
-          title: errVaild.msg,
-          icon: 'none'
+          title: '您已成功报名',
+          success: function () {
+            setTimeout(() => {
+              wx.hideToast()
+            }, 1000)
+          }
         })
-        return
+      })
+      return
+    }
+    this.isShowForm = true
+    this.$apply()
+  }
+  onShareAppMessage () {
+    const { title, imageUrl } = this.activityData
+    this.$wxpage.selectComponent('.wow_share').hide()
+    return {
+      title,
+      imageUrl: imageUrl,
+      path: 'pages/activity/index?linkId=' + this.linkId
+    }
+  }
+  verification (formData) {
+    const errVaild = {
+      vaild: true,
+      msg: ''
+    }
+    /* eslint-disable */
+    const mailReg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/
+    /* eslint-disable */
+    for (let key in formData) {
+      if (!formData[key]) {
+        errVaild.vaild = false
+        errVaild.msg = this.verifyData[key] + '不能为空'
+        return errVaild
       }
+      if (key === 'phone' && !/^1\d{10}$/.test(formData[key])) {
+        errVaild.vaild = false
+        errVaild.msg = this.verifyData[key] + '格式错误'
+        return errVaild
+      }
+      if (key === 'email' && !mailReg.test(formData[key])) {
+        errVaild.vaild = false
+        errVaild.msg = this.verifyData[key] + '格式错误'
+        return errVaild
+      }
+    }
+    return errVaild
+  }
+  events = {
+    handleSharePoster () {
+      this.getSharePoster()
+    },
+    handleCloseCommetMask () {
+      this.isShowCommetInput = false
+      this.isShowControls = true
+    },
+    handleGetInfo (val) {
+      this.sendInfo = val
+    },
+    async handleSendInfo () {
       try {
+        if (!this.sendInfo) return
         wx.showLoading({
-          title: '加载中',
+          title: '发送中',
           mask: true
         })
-        const content = []
-        for (let key in formData) {
-          content.push({
-            'key': key,
-            'value': formData[key]
-          })
-        }
+        const { linkId, sendInfo } = this
         const opts = {
           activityId: linkId,
-          id: activityData.formId, // 表单id
-          content, // 表单内容(数组）
-          wxFormId: formId,
-          activityTitle: activityData.title // 活动名
+          content: sendInfo
         }
-        await activityApis.submit(opts)
+        await commetApis.insertActivityComment(opts)
+        wepy.$instance.globalData.subpub.off('activityCommet', this.handleActivityCommet)
+        this.sendInfo = ''
+        this.$broadcast('handleClearInput', this.sendInfo)
+        this.getActivityComment()
         wx.hideLoading()
-        this.controlList.forEach(item => {
-          item.value = ''
-        })
-        this.isShowForm = false
-        const that = this
-        wx.nextTick(() => {
-          wx.showToast({
-            title: '提交成功',
-            success: function () {
-              setTimeout(() => {
-                wx.hideToast()
-                if (that.activityData.isBackHome === 1) {
-                  wx.switchTab({url: '/pages/index/index'})
-                }
-              }, 200)
-            }
-          })
-        })
         this.$apply()
-      } catch (e) {
-        console.log(e)
+      } catch (error) {
         wx.hideLoading()
-      }
-    }
-    methods = {
-      handleLoadContent (e) {
-        const { width, height } = e.detail
-        let imageSize = imageUtil.imageZoomHeightUtil(width, height)
-        this.imageContentWidth = imageSize.imageWidth
-        this.imageContentHeight = imageSize.imageHeight
-        this.$apply()
-      },
-      handleToSend () {
-        this.handleToActivity()
-      },
-      handleCloseForm () {
-        this.isShowForm = false
-      },
-      handleBindinput (index, e) {
-        const { value } = e.detail
-        this.controlList[index].value = value
-      },
-      formSubmitSend (e) {
-        const { value, formId } = e.detail
-        this.formData = value
-        this.formSubmitId = formId
-      },
-      handleSelectedArea () {
-        this.controlList[this.currentIndex].value = this.currentValues[this.indexs.join('')]
-        let $popup = this.$wxpage.selectComponent('.j_select')
-        $popup && $popup.hide()
-      },
-      handleChangeArea (e) {
-        const { value } = e.detail
-        this.indexs = value
-      },
-      handleCancelArea () {
-        let $popup = this.$wxpage.selectComponent('.j_select')
-        $popup && $popup.hide()
-      },
-      handleShowPopup (item, index) {
-        if (item.controlType !== 2) return
-        this.currentIndex = index
-        this.currentValues = item.controlValues.split(',')
-        let $popup = this.$wxpage.selectComponent('.j_select')
-        $popup && $popup.show()
-      },
-      handleShareItems () {
-        this.$broadcast('handleShowSharePopup')
-      },
-      handleShowCommetInput () {
-        this.handleActivityCommet()
-      }
-    }
-    handleActivityCommet (e) {
-      if (e) {
-        wepy.$instance.globalData.userId = e
-        this.userId = e
-      }
-      this.isShowControls = false
-      this.isShowCommetInput = true
-      this.$apply()
-    }
-    onShow () {
-      if (wepy.$instance.globalData.userId) {
-        this.userId = wepy.$instance.globalData.userId
       }
     }
   }
+  async getSharePoster () {
+    try {
+      wx.showLoading({
+        title: '生成中',
+        mask: true
+      })
+      const { linkId, linkType } = this.activityData
+      const opts = {
+        type: 'activity',
+        id: this.linkId,
+        page: 'pages/activity/index',
+        scene: `linkId=${linkId}`
+      }
+      const { data } = await shareApis.createSharePoster(opts)
+      this.$wxpage.selectComponent('.wow_share').hide()
+      wx.previewImage({
+        current: data,
+        urls: [data]
+      })
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  async handleActivitySign () {
+    const { formData, formId, activityData, linkId } = this
+    const errVaild = this.verification(formData)
+    if (!errVaild.vaild) {
+      wx.showToast({
+        title: errVaild.msg,
+        icon: 'none'
+      })
+      return
+    }
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      const content = []
+      for (let key in formData) {
+        content.push({
+          'key': key,
+          'value': formData[key]
+        })
+      }
+      const opts = {
+        activityId: linkId,
+        id: activityData.formId, // 表单id
+        content, // 表单内容(数组）
+        wxFormId: formId,
+        activityTitle: activityData.title // 活动名
+      }
+      await activityApis.submit(opts)
+      wx.hideLoading()
+      this.isShowForm = false
+      this.isShowSubscibe = true
+      this.$apply()
+    } catch (e) {
+      console.log(e)
+      wx.hideLoading()
+    }
+  }
+  handleSubscibe () { // 处理订阅回调
+    this.controlList.forEach(item => {
+      item.value = ''
+    })
+    const that = this
+    wx.nextTick(() => {
+      wx.showToast({
+        title: '信息提交成功',
+        success: function () {
+          setTimeout(() => {
+            wx.hideToast()
+            if (that.activityData.isBackHome === 1) {
+              wx.switchTab({ url: '/pages/index/index' })
+            }
+          }, 200)
+        }
+      })
+    })
+  }
+  async handleSubScibeRemind (wxsubData) {
+    try {
+      await templateApis.insertTemplateMessage(wxsubData, { REJECTERRORCONFIG: true })
+      this.isShowSubscibe = false
+      this.$apply()
+      this.handleSubscibe()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  methods = {
+    handleSubScibeMessage () { // 订阅消息
+      const that = this
+      console.log(that.templateList)
+      wx.requestSubscribeMessage({
+        tmplIds: that.templateList,
+        success (res) {
+          console.log(res)
+          that.handleSubScibeRemind(res)
+        },
+        fail (err) {
+          console.log(err)
+        }
+      })
+    },
+    handleLoadContent (e) {
+      const { width, height } = e.detail
+      let imageSize = imageUtil.imageZoomHeightUtil(width, height)
+      this.imageContentWidth = imageSize.imageWidth
+      this.imageContentHeight = imageSize.imageHeight
+      this.$apply()
+    },
+    async handleToSend () {
+      this.handleToActivity()
+    },
+    handleCloseSubscibe () {
+      this.isShowSubscibe = false
+      this.handleSubscibe()
+    },
+    handleCloseForm () {
+      this.isShowForm = false
+    },
+    handleBindinput (index, e) {
+      const { value } = e.detail
+      this.controlList[index].value = value
+    },
+    formSubmitSend (e) {
+      const { value, formId } = e.detail
+      this.formData = value
+      this.formSubmitId = formId
+    },
+    handleSelectedArea () {
+      this.controlList[this.currentIndex].value = this.currentValues[this.indexs.join('')]
+      let $popup = this.$wxpage.selectComponent('.j_select')
+      $popup && $popup.hide()
+    },
+    handleChangeArea (e) {
+      const { value } = e.detail
+      this.indexs = value
+    },
+    handleCancelArea () {
+      let $popup = this.$wxpage.selectComponent('.j_select')
+      $popup && $popup.hide()
+    },
+    handleShowPopup (item, index) {
+      if (item.controlType !== 2) return
+      this.currentIndex = index
+      this.currentValues = item.controlValues.split(',')
+      let $popup = this.$wxpage.selectComponent('.j_select')
+      $popup && $popup.show()
+    },
+    handleShareItems () {
+      this.$broadcast('handleShowSharePopup')
+    },
+    handleShowCommetInput () {
+      this.handleActivityCommet()
+    }
+  }
+  handleActivityCommet (e) {
+    if (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+    }
+    this.isShowControls = false
+    this.isShowCommetInput = true
+    this.$apply()
+  }
+  onShow () {
+    if (wepy.$instance.globalData.userId) {
+      this.userId = wepy.$instance.globalData.userId
+    }
+  }
+}
 </script>
 
 <style lang="postcss">

@@ -60,7 +60,7 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
+  import printerApis from '@/api/printer'
   export default class PrinterSet extends wepy.page {
     config = {
       navigationBarTitleText: '设置'

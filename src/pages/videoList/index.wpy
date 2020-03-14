@@ -11,9 +11,9 @@
 
 <script>
   import wepy from 'wepy'
-  import VideoList from '../../components/videoList'
-  import Loading from '../../components/loading'
-  import videoApis from '../../api/video'
+  import VideoList from '@/components/videoList'
+  import Loading from '@/components/loading'
+  import videoApis from '@/api/video'
   export default class VideoItem extends wepy.page {
     components = {
       videoList: VideoList,

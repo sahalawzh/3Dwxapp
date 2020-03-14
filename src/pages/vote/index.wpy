@@ -1,0 +1,424 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-activity page-vote-index">
+    <view class="activity-banner">
+      <image class="icon-banner" src="{{activityData.imageUrl}}" mode="aspectFill"></image>
+      <view class="activity-status font-size--26" :class="{'activity-status__end': activityData.dateType === 2, 'activity-status__start': activityData.dateType === 0}">{{status[activityData.dateType]}}</view>
+    </view>
+    <navigator wx:if="{{activityData.isBack === 1}}" url="/pages/index/index" hover-class="none" open-type="switchTab" class="icon-mall">
+      <image class="icon" src="../../images/detail/icon-mall.png" mode="aspectFill"></image>
+    </navigator>
+    <view class="activity-section">
+      <image class="icon-section" bindload="handleLoadContent" style="width: {{imageContentWidth}}px; height: {{imageContentHeight}}px" src="{{ activityData.content }}" mode="aspectFill"></image>
+    </view>
+
+    <view class="index-list">
+      <view class="wow-flex is-align-middle is-justify-space-between font-size--28 index-header">
+        <view class="index-header__title">参赛作品</view>
+        <view class="index-header__more" wx:if="{{voteList.length}}" @tap.stop="handleToMore">更多</view>
+      </view>
+      <block wx:if="{{voteList.length}}">
+        <voteList :voteList.sync="voteList" :validShowData.sync="validShowData" :activityId.sync="linkId"></voteList>
+      </block>
+      <view class="empty-box" wx:else>
+        <view>
+          <image class="empty-box__icon" src="../../images/common/ico_empty_vote.png" mode="aspectFill"></image>
+        </view>
+        <view class="empty-box__tip">Come on~快来秀秀你的作品</view>
+      </view>
+    </view>
+
+    <view class="controls wow-flex is-justify-space-between" wx:if="{{isShowControls}}">
+      <image wx:if="{{userId}}" @tap.stop="handleShowCommetInput" class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      <button wx:else data-type="activityCommet" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+        <image class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      </button>
+      <view class="wow-flex">
+        <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
+        <view class="btn-box">
+          <form report-submit="true">
+            <button wx:if="{{userId}}" formType="submit" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
+            <button
+              wx:else
+              data-type="activity"
+              open-type="getPhoneNumber"
+              bindgetphonenumber="getPhoneNumber"
+              disabled="{{activityData.dateType === 2}}"
+              formType="submit"
+              class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
+          </form>
+        </view>
+      </view>
+    </view>
+
+
+    <share></share>
+
+    <!-- 评论 -->
+    <commet
+      :isShowCommetInput.sync="isShowCommetInput"
+      :userId.sync="userId"
+      :commetList.sync="commetList"
+      :commetTotal.sync="commetTotal"
+    ></commet>
+
+    <!-- 审核未通过 -->
+    <view class="form-box subscibe-box" catchtouchmove="true" wx:if="{{isShowAudit}}">
+      <view class="form-mask"></view>
+      <view class="form-content">
+        <view class="subscibe-icon">
+          <image src="../../images/common/ico_vote.png"></image>
+        </view>
+        <view class="subscibe-title font-size--48">啊哦哦，审核未通过</view>
+        <view class="subscibe-message font-size--24">{{ voteData.reason }}</view>
+        <button class="form-content__btn font-size--30" @tap.stop="hanldeToUpload">重新上传</button>
+      </view>
+
+      <view class="wow-ta-c">
+        <icon type="cancel" size="28" color="#fff" class="form-close" @tap.stop="handleCloseAudit"/>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import activityApis from '@/api/activity'
+import shareApis from '@/api/share'
+import CommonMixin from '@/mixins/common'
+import imageUtil from '@/utils/image'
+import Commet from '@/components/commet'
+import Share from '@/components/share'
+import { parseQueryString } from '@/utils/utils'
+import commetApis from '@/api/commet'
+import { timeHandle } from '@/utils/commentTimeHandle'
+import VoteList from '@/components/vote'
+import wxutils from '@/utils/wxutils'
+const voteBtnTag = {
+  0: '审核中',
+  1: '查看作品(0票)',
+  2: '不通过'
+}
+export default class Vote extends wepy.page {
+  data = {
+    userId: '',
+    linkId: '',
+    controlList: [],
+    activityData: '',
+    isShowForm: false,
+    indexs: [0],
+    currentValues: [],
+    currentIndex: 0,
+    verifyData: {},
+    imageContentWidth: '',
+    imageContentHeight: '',
+    isShowCommetInput: false,
+    isShowControls: true,
+    commetList: [],
+    commetTotal: '',
+    sendInfo: '',
+    status: {
+      0: '未开始',
+      1: '进行中',
+      2: '已结束'
+    },
+    isShowSubscibe: false,
+    voteList: [],
+    validShowData: {},
+    voteStatus: '',
+    voteId: '',
+    isShowAudit: false,
+    voteData: '',
+    voteNum: 0
+  }
+  components = {
+    commet: Commet,
+    share: Share,
+    voteList: VoteList
+  }
+  mixins = [CommonMixin]
+  config = {
+    usingComponents: {
+      'wow-popup': '../../packages/popup/index'
+    }
+  }
+  onLoad (options) {
+    if (options.scene) {
+      let sceneObj = decodeURIComponent(options.scene)
+      let urlObj = 'url?' + sceneObj
+      options = parseQueryString(urlObj)
+    }
+    this.linkId = options.linkId
+    wepy.$instance.globalData.subpub.on('afterVote', this.handleAfterVote, this)
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    const api1 = {
+      id: this.linkId
+    }
+    const voteParam = {
+      activityId: this.linkId
+    }
+    Promise.all([
+      activityApis.detail(api1),
+      activityApis.getListCompetition({ ...voteParam, ...{ start: 1 } }),
+      activityApis.getActivityCompetitionData(voteParam),
+      this.getActivityComment(),
+      activityApis.getCompetitionStatus(voteParam),
+      activityApis.getCompetition(voteParam)
+    ]).then(res => {
+      const { data: activityData } = res[0]
+      this.activityData = activityData
+      this.controlList = activityData.formInfo.controlList
+      this.controlList.forEach(item => {
+        this.verifyData = {
+          ...this.verifyData,
+          [item.controlKey]: item.title
+        }
+      })
+      const { data: voteData } = res[1]
+      this.voteList = voteData.data
+      const { data: voteShowData } = res[2]
+      this.validShowData = voteShowData.visibleData
+      const { data: voteStatus } = res[4]
+      this.voteStatus = voteStatus
+      this.voteData = res[5].data
+      this.voteId = this.voteData.id
+      wepy.$instance.globalData.subpub.on('activityCommet', this.handleActivityCommet, this)
+      wepy.$instance.globalData.subpub.on('activity', this.handleActivityUpload, this)
+      wx.setNavigationBarTitle({
+        title: decodeURIComponent(activityData.title)
+      })
+      wx.hideLoading()
+      this.$apply()
+    }).catch(err => {
+      console.log(err)
+      wx.hideLoading()
+    })
+  }
+  async getActivityComment () {
+    try {
+      const opts = {
+        activityId: this.linkId
+      }
+      const { data: commetData } = await commetApis.getActivityComment(opts)
+      commetData.data.length && commetData.data.forEach(item => {
+        item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
+      })
+      this.commetList = commetData.data
+      this.commetTotal = commetData.total
+      this.isShowCommetInput = false
+      this.isShowControls = true
+      this.$apply()
+      return commetData
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  computed = {
+    buttonText () {
+      if (this.voteStatus === -1) {
+        return this.activityData && this.activityData.buttonName
+      } else {
+        return this.voteStatus === 1 ? `查看作品(${this.voteNum}票)` : voteBtnTag[this.voteStatus]
+      }
+    },
+    controlHeight () {
+      let maxHeight = ''
+      wx.getSystemInfo({
+        success: function (res) {
+          let windowHeight = res.windowHeight
+          maxHeight = windowHeight - 30 - 12 - 18 - 24 - 26 - 38
+        }
+      })
+      return maxHeight
+    }
+  }
+  onShareAppMessage () {
+    const { title, imageUrl } = this.activityData
+    this.$wxpage.selectComponent('.wow_share').hide()
+    return {
+      title,
+      imageUrl: imageUrl,
+      path: 'pages/vote/index?linkId=' + this.linkId
+    }
+  }
+  events = {
+    handleSelfVote (vote) {
+      this.handleSelfVoteNum(vote)
+    },
+    handleSharePoster () {
+      this.getSharePoster()
+    },
+    handleCloseCommetMask () {
+      this.isShowCommetInput = false
+      this.isShowControls = true
+    },
+    handleGetInfo (val) {
+      this.sendInfo = val
+    },
+    async handleSendInfo () {
+      try {
+        if (!this.sendInfo) return
+        wx.showLoading({
+          title: '发送中',
+          mask: true
+        })
+        const { linkId, sendInfo } = this
+        const opts = {
+          activityId: linkId,
+          content: sendInfo
+        }
+        await commetApis.insertActivityComment(opts)
+        wepy.$instance.globalData.subpub.off('activityCommet', this.handleActivityCommet)
+        this.sendInfo = ''
+        this.$broadcast('handleClearInput', this.sendInfo)
+        this.getActivityComment()
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+  }
+  async getSharePoster () {
+    try {
+      wx.showLoading({
+        title: '生成中',
+        mask: true
+      })
+      const { linkId } = this.activityData
+      const opts = {
+        type: 'activity',
+        id: this.linkId,
+        page: 'pages/vote/index',
+        scene: `linkId=${linkId}`
+      }
+      const { data } = await shareApis.createSharePoster(opts)
+      this.$wxpage.selectComponent('.wow_share').hide()
+      wx.previewImage({
+        current: data,
+        urls: [data]
+      })
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  methods = {
+    hanldeToUpload () {
+      wxutils.backOrNavigate(`/pages/vote/upload?activityId=${this.linkId}&voteStatus=${this.voteStatus}`)
+    },
+    handleCloseAudit () {
+      this.isShowAudit = false
+    },
+    handleToMore () {
+      wxutils.backOrNavigate(`/pages/vote/list?activityId=${this.linkId}`)
+    },
+    handleLoadContent (e) {
+      const { width, height } = e.detail
+      let imageSize = imageUtil.imageZoomHeightUtil(width, height)
+      this.imageContentWidth = imageSize.imageWidth
+      this.imageContentHeight = imageSize.imageHeight
+      this.$apply()
+    },
+    handleToSend () {
+      this.handleActivityUpload()
+    },
+    handleCloseForm () {
+      this.isShowForm = false
+    },
+    handleBindinput (index, e) {
+      const { value } = e.detail
+      this.controlList[index].value = value
+    },
+    formSubmitSend (e) {
+      const { value, formId } = e.detail
+      this.formData = value
+      this.formSubmitId = formId
+    },
+    handleSelectedArea () {
+      this.controlList[this.currentIndex].value = this.currentValues[this.indexs.join('')]
+      let $popup = this.$wxpage.selectComponent('.j_select')
+      $popup && $popup.hide()
+    },
+    handleChangeArea (e) {
+      const { value } = e.detail
+      this.indexs = value
+    },
+    handleCancelArea () {
+      let $popup = this.$wxpage.selectComponent('.j_select')
+      $popup && $popup.hide()
+    },
+    handleShowPopup (item, index) {
+      if (item.controlType !== 2) return
+      this.currentIndex = index
+      this.currentValues = item.controlValues.split(',')
+      let $popup = this.$wxpage.selectComponent('.j_select')
+      $popup && $popup.show()
+    },
+    handleShareItems () {
+      this.$broadcast('handleShowSharePopup')
+    },
+    handleShowCommetInput () {
+      this.handleActivityCommet()
+    }
+  }
+  handleActivityCommet (e) {
+    if (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+    }
+    this.isShowControls = false
+    this.isShowCommetInput = true
+    this.$apply()
+  }
+  handleSelfVoteNum (vote) {
+    this.voteNum = +vote < 100 ? vote : '99+'
+  }
+  handleAfterVote (vote) {
+    this.handleSelfVoteNum(vote)
+  }
+  handleActivityUpload () {
+    if (this.voteStatus === 0) { // 审核中到个人作品
+      wxutils.backOrNavigate(`/pages/vote/person?activityId=${this.linkId}`)
+    } else if (this.voteStatus === 1) { // 审核通过到作品预览页
+      wxutils.backOrNavigate(`/pages/vote/detail?activityId=${this.linkId}&voteId=${this.voteId}`)
+    } else if (this.voteStatus === 2) { // 审核不通过
+      this.isShowAudit = true
+    } else {
+      wxutils.backOrNavigate(`/pages/vote/upload?activityId=${this.linkId}&voteStatus=${this.voteStatus}`)
+    }
+  }
+  async getSelftVote () {
+    try {
+      const opts = {
+        activityId: this.linkId
+      }
+      const { data } = await activityApis.getVote(opts)
+      this.handleSelfVoteNum(data)
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  watch = {
+    voteStatus (val) {
+      if (val === 1) { // 审核通过，获取自己的票数
+        this.getSelftVote()
+      }
+    }
+  }
+  onShow () {
+    if (wepy.$instance.globalData.userId) {
+      this.userId = wepy.$instance.globalData.userId
+    }
+  }
+}
+</script>
+
+<style lang="postcss">
+@import 'src/styles/pages/activity/common.postcss';
+@import 'src/styles/pages/vote/index.postcss';
+</style>

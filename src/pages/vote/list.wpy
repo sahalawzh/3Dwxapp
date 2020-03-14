@@ -1,0 +1,138 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-vote-list">
+    <view class="activity-banner">
+      <image class="icon-banner" src="{{activityData.imageUrl}}" mode="aspectFill"></image>
+      <view class="activity-status font-size--26" :class="{'activity-status__end': activityData.dateType === 2, 'activity-status__start': activityData.dateType === 0}">{{status[activityData.dateType]}}</view>
+    </view>
+    <view class="activity-section">
+      <image class="icon-section" bindload="handleLoadContent" style="width: {{imageContentWidth}}px; height: {{imageContentHeight}}px" src="{{ activityData.content }}" mode="aspectFill"></image>
+    </view>
+
+    <view class="list-container">
+      <view class="search-box">
+        <view class="search-wrap">
+          <input
+            type="text"
+            confirm-type="search"
+            class="search-control"
+            bindconfirm="handleToSearch"
+            placeholder="搜索学校/作品编号/作者姓名">
+        </view>
+      </view>
+      <voteList :voteList.sync="voteList" :validShowData.sync="validShowData" :activityId.sync="activityId"></voteList>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import activityApis from '@/api/activity'
+import VoteProductList from '@/components/vote'
+import imageUtil from '@/utils/image'
+export default class VoteList extends wepy.page {
+  config = {
+    enablePullDownRefresh: true,
+    navigationBarTitleText: '作品列表'
+  }
+  components = {
+    voteList: VoteProductList
+  }
+  data = {
+    activityId: '',
+    start: 1,
+    voteList: [],
+    validShowData: {},
+    hasMoreData: false,
+    searchVal: '',
+    imageContentWidth: '',
+    imageContentHeight: '',
+    status: {
+      0: '未开始',
+      1: '进行中',
+      2: '已结束'
+    },
+    activityData: ''
+  }
+  methods = {
+    handleLoadContent (e) {
+      const { width, height } = e.detail
+      let imageSize = imageUtil.imageZoomHeightUtil(width, height)
+      this.imageContentWidth = imageSize.imageWidth
+      this.imageContentHeight = imageSize.imageHeight
+      this.$apply()
+    },
+    handleToSearch (e) {
+      const { value } = e.detail
+      this.start = 1
+      this.searchVal = value
+      this.getVoteList()
+    }
+  }
+  async getVoteList () {
+    let { activityId, start, voteList, searchVal, validShowData } = this
+    let res
+    if (searchVal) {
+      let fieId = []
+      for (var key in validShowData) {
+        fieId.push(key)
+      }
+      let opts = {
+        fieId,
+        value: searchVal,
+        start
+      }
+      console.log(opts)
+      res = await activityApis.getSearchCompetition(opts)
+    } else {
+      const opts = {
+        activityId,
+        start
+      }
+      res = await activityApis.getListCompetition(opts)
+    }
+    const { data, total } = res.data
+    if (start === 1) {
+      voteList = []
+    }
+    this.voteList = voteList.concat(data)
+    if (this.voteList.length >= total) {
+      this.hasMoreData = false
+    } else {
+      this.hasMoreData = true
+      this.start++
+    }
+    this.$apply()
+  }
+  onReachBottom () {
+    if (this.hasMoreData) {
+      this.getVoteList()
+    }
+  }
+  onLoad ({ activityId }) {
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    this.activityId = activityId
+    const voteParam = {
+      activityId
+    }
+    const api1 = {
+      id: activityId
+    }
+    Promise.all([activityApis.getActivityCompetitionData(voteParam), this.getVoteList(), activityApis.detail(api1)]).then(res => {
+      const { data: voteShowData } = res[0]
+      this.validShowData = voteShowData.visibleData
+      this.activityData = res[2].data
+      wx.hideLoading()
+      this.$apply()
+    }).catch(err => {
+      console.log(err)
+      wx.hideLoading()
+    })
+  }
+}
+</script>
+<style lang='postcss'>
+@import 'src/styles/pages/vote/list.postcss';
+</style>

@@ -30,7 +30,7 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
+  import printerApis from '@/api/printer'
   export default class printerAdd extends wepy.page {
     config = {
       navigationBarTitleText: '添加打印机'

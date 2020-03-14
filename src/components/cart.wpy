@@ -1,11 +1,11 @@
 <template>
   <view>
     <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-icon open-type-btn">
-      <image src="../../images/common/btn_cart_white.png" mode="aspectFill"></image>
+      <image src="../../../../../images/common/btn_cart_white.png" mode="aspectFill"></image>
       <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
     </navigator>
     <button wx:else data-url="/pages/cart/index" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="cart-icon open-type-btn">
-      <image src="../../images/common/btn_cart_white.png" mode="aspectFill"></image>
+      <image src="../../../../../images/common/btn_cart_white.png" mode="aspectFill"></image>
       <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
     </button>
   </view>

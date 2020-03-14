@@ -7,7 +7,7 @@
     </view>
     <view class="activity-content">
       <scroll-view class="activity-scroll" scroll-x="true">
-        <navigator class="activity-item" wx:for="{{activityList}}" wx:key="index" url="/pages/activity/index?linkId={{item.id}}">
+        <navigator class="activity-item" wx:for="{{activityList}}" wx:key="index" url="/pages/{{item.activityType === 3 ? 'vote' : 'activity'}}/index?linkId={{item.id}}">
           <image class="activity-img" lazy-load="true" src="{{item.imageUrl}}?x-oss-process=image/resize,w_{{activitySrcollImage.imageWidth}},h_{{activitySrcollImage.imageHeight}}/quality,Q_{{activitySrcollImage.imageQuality}}" mode="aspectFill"></image>
           <view class="activity-status font-size--26" :class="{'activity-status__end': item.dateType === 2, 'activity-status__start': item.dateType === 0}">{{status[item.dateType]}}</view>
         </navigator>
@@ -16,32 +16,32 @@
   </view>
 </template>
 <script>
-  import wepy from 'wepy'
-  export default class ActivityScroll extends wepy.component {
-    props = {
-      activityList: Array,
-      activitySrcollImage: Object
-    }
-    data = {
-      status: {
-        0: '未开始',
-        1: '进行中',
-        2: '已结束'
-      }
-    }
-
-    events = {
-    }
-
-    methods = {
-      handleToActivityList () {
-        this.$emit('handleToActivityList')
-      }
-    }
-
-    onLoad () {
+import wepy from 'wepy'
+export default class ActivityScroll extends wepy.component {
+  props = {
+    activityList: Array,
+    activitySrcollImage: Object
+  }
+  data = {
+    status: {
+      0: '未开始',
+      1: '进行中',
+      2: '已结束'
     }
   }
+
+  events = {
+  }
+
+  methods = {
+    handleToActivityList () {
+      this.$emit('handleToActivityList')
+    }
+  }
+
+  onLoad () {
+  }
+}
 </script>
 <style lang='postcss'>
 </style>

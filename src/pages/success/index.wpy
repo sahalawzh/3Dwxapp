@@ -21,8 +21,8 @@
 <script>
   import wepy from 'wepy'
   import Recommend from './modules/recommend'
-  import goodsApis from '../../api/goods'
-  import orderApis from '../../api/order'
+  import goodsApis from '@/api/goods'
+  import orderApis from '@/api/order'
   export default class Success extends wepy.page {
     config = {
       navigationBarTitleText: '成功页面'

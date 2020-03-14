@@ -85,10 +85,10 @@
 <script>
   import wepy from 'wepy'
   import Tab from './modules/tab'
-  import goodsApis from '../../api/goods'
-  import GoodList from '../../components/goodList'
-  import wxUtils from '../../utils/wxutils'
-  import CommonMixin from '../../mixins/common'
+  import goodsApis from '@/api/goods'
+  import GoodList from '@/components/goodList'
+  import wxUtils from '@/utils/wxutils'
+  import CommonMixin from '@/mixins/common'
   export default class GoodsList extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',

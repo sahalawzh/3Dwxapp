@@ -8,7 +8,7 @@
           <view class="font-size--28 font-size--white">剩余{{secs.hours}}时{{secs.minutes}}分自动关闭</view>
         </block>
         <block wx:if="{{orderData.orderStatus === 1}}">
-          <view class="font-size--42 font-size--white header-status__txt">过期</view>
+          <view class="font-size--42 font-size--white header-status__txt">订单已过期</view>
         </block>
         <block wx:if="{{orderData.orderStatus === 2}}">
           <view class="font-size--42 font-size--white header-status__txt">{{ refundDetail ? refundStatusTag[refundDetail.refundStatus] : '待发货' }}</view>
@@ -175,12 +175,12 @@
 
 <script>
   import wepy from 'wepy'
-  import orderApis from '../../api/order'
+  import orderApis from '@/api/order'
   import commonwxs from './wxs/common.wxs'
-  import SecTime from '../../utils/secTime.js'
-  import suggestionApis from '../../api/suggestion'
-  import refundApis from '../../api/refund'
-  import wxutils from '../../utils/wxutils'
+  import SecTime from '@/utils/secTime.js'
+  import suggestionApis from '@/api/suggestion'
+  import refundApis from '@/api/refund'
+  import wxutils from '@/utils/wxutils'
   const statusTag = {
     0: '取消订单',
     2: '提醒发货',

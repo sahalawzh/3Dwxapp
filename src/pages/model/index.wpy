@@ -42,9 +42,9 @@
 
 <script>
   import wepy from 'wepy'
-  import modelApis from '../../api/model'
-  import wxutils from '../../utils/wxutils'
-  import param from '../../utils/param'
+  import modelApis from '@/api/model'
+  import wxutils from '@/utils/wxutils'
+  import param from '@/utils/param'
   export default class VideoDetail extends wepy.page {
     config = {
       navigationBarTitleText: '模型库'

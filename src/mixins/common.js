@@ -2,6 +2,7 @@ import wepy from 'wepy'
 import cartApis from '../api/cart'
 import userApis from '../api/user'
 import http from '../utils/http'
+const whiteCartRoute = ['pages/index/index', 'pages/index/mall', 'pages/detail/index', 'pages/goodsList/index']
 export default class CommonMixin extends wepy.mixin {
   data = {
     cartNum: '',
@@ -24,7 +25,11 @@ export default class CommonMixin extends wepy.mixin {
   onShow () {
     const userId = wepy.$instance.globalData.userId
     this.userId = userId
-    if (this.userId) {
+    let currentPages = getCurrentPages()
+    let _this = currentPages[currentPages.length - 1]
+    let pagePath = _this.route
+    let hasCart = whiteCartRoute.some(item => item === pagePath)
+    if (this.userId && hasCart) {
       this.getCartNum()
     }
   }
@@ -47,7 +52,6 @@ export default class CommonMixin extends wepy.mixin {
       }
       await userApis.updateNickname(opts)
       if (target) {
-        // this.$emit('handleSendInfo')
         wepy.$instance.globalData.subpub.emit(target)
       }
     } catch (error) {

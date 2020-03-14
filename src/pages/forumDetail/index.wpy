@@ -21,6 +21,12 @@
 
         <rich-text nodes="{{detail.content}}"></rich-text>
 
+        <!-- <block wx:if="{{ detail.copyType === 1 }}">
+          <view class="key-title">{{ detail.copyTitle }}</view>
+          <view class="has-copy">
+            <view class="copy-btn font-size--28" @tap.stop="handleCopyContent({{detail.copyContent}})">复制</view>
+          </view>
+        </block> -->
         <view :class="{'has-hidden': detail.hiddenContent}" wx:if="{{detail.hiddenType === 1}}">
 
           <rich-text wx:if="{{detail.hiddenContent}}" nodes="{{detail.hiddenContent}}"></rich-text>
@@ -32,7 +38,7 @@
             <button wx:else data-url="/pages/forumCommet/index?forumId={{id}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="tip open-type-btn">回复后可见</button>
           </view>
           
-          <view class="copy-btn font-size--28" wx:if="{{detail.hiddenContent && detail.copyContent}}" @tap.stop="handleCopyHiddenContent">复制</view>
+          <view class="copy-btn font-size--28" wx:if="{{detail.hiddenContent && detail.copyHiddenContent}}" @tap.stop="handleCopyContent({{detail.copyHiddenContent}})">复制</view>
         </view>
 
       </view>
@@ -75,17 +81,17 @@
 
 <script>
   import wepy from 'wepy'
-  import forumApis from '../../api/forum'
-  import commetApis from '../../api/commet'
-  import collectApis from '../../api/collect'
-  import { timeHandle } from '../../utils/commentTimeHandle'
-  import CommonMixin from '../../mixins/common'
-  import Commet from '../../components/commet'
-  import Share from '../../components/share'
-  import wxutils from '../../utils/wxutils'
-  import shareApis from '../../api/share'
-  import momentApis from '../../api/moment'
-  import { parseQueryString } from '../../utils/utils'
+  import forumApis from '@/api/forum'
+  import commetApis from '@/api/commet'
+  import collectApis from '@/api/collect'
+  import { timeHandle } from '@/utils/commentTimeHandle'
+  import CommonMixin from '@/mixins/common'
+  import Commet from '@/components/commet'
+  import Share from '@/components/share'
+  import wxutils from '@/utils/wxutils'
+  import shareApis from '@/api/share'
+  import momentApis from '@/api/moment'
+  import { parseQueryString } from '@/utils/utils'
   export default class ForumDetail extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维',
@@ -356,10 +362,10 @@
       }
     }
     methods = {
-      handleCopyHiddenContent () {
+      handleCopyContent (content) {
         const that = this
         wx.setClipboardData({
-          data: this.detail.copyContent,
+          data: content,
           success(res) {
             wx.getClipboardData({
               success(res) {

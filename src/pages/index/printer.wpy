@@ -104,17 +104,17 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
-  import goodsApis from '../../api/goods'
-  import videoApis from '../../api/video'
-  import guideApis from '../../api/guide'
-  import wxutils from '../../utils/wxutils'
-  import param from '../../utils/param'
-  import CommonMixin from '../../mixins/common'
-  import advertisementApis from '../../api/advertisement'
+  import printerApis from '@/api/printer'
+  import goodsApis from '@/api/goods'
+  import videoApis from '@/api/video'
+  import guideApis from '@/api/guide'
+  import wxutils from '@/utils/wxutils'
+  import param from '@/utils/param'
+  import CommonMixin from '@/mixins/common'
+  import advertisementApis from '@/api/advertisement'
   import Recommend from './modules/recommend'
   import Video from './modules/video'
-  import GuidePrinter from '../../components/guidePrinter'
+  import GuidePrinter from '@/components/guidePrinter'
   export default class Printer extends wepy.page {
     config = {
       navigationBarTitleText: '打印机',

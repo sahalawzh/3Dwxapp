@@ -1,0 +1,103 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-vote-upload" wx:if="{{voteData}}">
+    <view class="form-container">
+      <view class="form-item wow-flex is-align-middle font-size--28" wx:for="{{ validShowData }}" wx:key="index">
+        <view class="form-item__label">
+          {{ item }}
+        </view>
+        <view class="form-item__body">
+          <view>{{voteData.visibleData[index]}}</view>
+        </view>
+      </view>
+      <view class="form-item wow-flex is-align-middle font-size--28" wx:for="{{ invisibleData }}" wx:key="index">
+        <view class="form-item__label">
+          {{ item }}
+        </view>
+        <view class="form-item__body">
+          <view>{{voteData.invisibleData[index]}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="upload-container">
+      <view class="upload-action">
+        <view class="upload-cover" wx:if="{{voteData.cover}}">
+          <image src="{{voteData.cover}}" class="cover-img" mode="aspectFill"></image>
+        </view>
+        <view class="upload-products wow-flex">
+          <view class="upload-product {{ index === 2 ? 'upload-product--3' : ''}}" wx:for="{{voteData.images}}">
+            <image src="{{ item }}" mode="aspectFill"></image>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-area">
+      <view class="form-area__wrap">{{ voteData.introduction }}</view>
+      <view>
+        <button disabled="{{voteStatus === 0}}" class="submit-btn font-size--36">{{buttonText}}</button>
+      </view>
+    </view>
+
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import activityApis from '@/api/activity'
+// import wxutils from '@/utils/wxutils'
+const voteBtnTag = {
+  0: '作品审核中',
+  1: '审核通过',
+  2: '审核不通过'
+}
+export default class VoteUpload extends wepy.page {
+  config = {
+    navigationBarTitleText: '个人作品'
+  }
+  data = {
+    activityId: '',
+    voteData: '',
+    validShowData: {},
+    invisibleData: {},
+    voteStatus: ''
+  }
+  methods = {
+  }
+  computed = {
+    buttonText () {
+      return voteBtnTag[this.voteStatus]
+    }
+  }
+  onLoad ({ activityId }) {
+    this.activityId = activityId
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    const params = {
+      activityId
+    }
+    Promise.all([
+      activityApis.getActivityCompetitionData(params),
+      activityApis.getCompetition(params),
+      activityApis.getCompetitionStatus(params)
+    ]).then(res => {
+      const { visibleData, invisibleData } = res[0].data
+      this.validShowData = visibleData
+      this.invisibleData = invisibleData
+      let { images } = res[1].data
+      res[0].data.images = images.filter(Boolean)
+      this.voteData = res[1].data
+      this.voteStatus = res[2].data
+      wx.hideLoading()
+      this.$apply()
+    }).catch(err => {
+      console.log(err)
+      wx.hideLoading()
+    })
+  }
+}
+</script>
+<style lang='postcss'>
+@import 'src/styles/pages/vote/person.postcss';
+</style>

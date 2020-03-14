@@ -31,7 +31,7 @@
           <view class="wow-flex is-align-middle option-row">
             <view class="font-size--28 label">服务态度</view>
             <image class="icon-star" wx:for="{{stars.service}}" wx:key="index" @tap.stop="handleToStar({{'service'}}, {{index}})" src="../../images/common/btn_evaluate_{{item}}.png" mode="aspectFill"></image>
-          </view> 
+          </view>
         </view>
         <view class="footer">
           <button class="footer-btn font-size--28" form-type="submit">发布</button>
@@ -44,8 +44,8 @@
 
 <script>
   import wepy from 'wepy'
-  import commetApis from '../../api/commet'
-  import wxutils from '../../utils/wxutils'
+  import commetApis from '@/api/commet'
+  import wxutils from '@/utils/wxutils'
   export default class PublishCommet extends wepy.page {
     config = {
       navigationBarTitleText: '发表评论'

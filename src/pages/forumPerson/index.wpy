@@ -44,10 +44,10 @@
 
 <script>
   import wepy from 'wepy'
-  import forumApis from '../../api/forum'
-  import Loading from '../../components/loading'
-  import { timeHandle } from '../../utils/commentTimeHandle'
-  import wxutils from '../../utils/wxutils'
+  import forumApis from '@/api/forum'
+  import Loading from '@/components/loading'
+  import { timeHandle } from '@/utils/commentTimeHandle'
+  import wxutils from '@/utils/wxutils'
   import Issue from './modules/issue'
   const forumTag = {
     0: '草稿',

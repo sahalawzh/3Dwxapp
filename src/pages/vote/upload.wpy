@@ -1,0 +1,339 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="page-contain page-vote-upload">
+    <form bindsubmit="handleSubmit">
+      <view class="form-container">
+        <view class="form-item wow-flex is-align-middle" wx:for="{{ validShowData }}" wx:key="index">
+          <view class="form-item__label font-size--28">
+            {{ item }}
+          </view>
+          <view class="form-item__body">
+            <input type="text" class="control-com" value="{{voteData.visibleData[index]}}" name="{{index}}" placeholder="请输入{{item}}"/>
+          </view>
+        </view>
+        <view class="form-item wow-flex is-align-middle" wx:for="{{ invisibleData }}" wx:key="index">
+          <view class="form-item__label font-size--28">
+            {{ item }}
+          </view>
+          <view class="form-item__body">
+            <input type="text" class="control-com" value="{{voteData.invisibleData[index]}}" name="{{index}}" placeholder="请输入{{item}}"/>
+          </view>
+        </view>
+      </view>
+
+      <view class="upload-container">
+        <view class="upload-action">
+          <view class="upload-title font-size--28">上传作品</view>
+          <view class="upload-cover" wx:if="{{coverImg}}">
+            <image src="{{coverImg}}" class="cover-img" mode="aspectFill"></image>
+            <icon type="clear" size="20" class="upload-clear" @tap.stop="handleRemoveImg({{'cover'}})"/>
+          </view>
+          <view class="upload-cover" wx:else @tap.stop="handleToUploadCover">
+            <image src="../../images/common/icon_upload.png" class="icon_upload" mode="aspectFill"></image>
+            <view class="upload-cover__label font-size--30">上传作品封面</view>
+          </view>
+          <view class="upload-products wow-flex">
+            <block wx:if="{{ uploadImgs.length }}">
+              <view class="upload-product {{ index === 2 ? 'upload-product--3' : ''}}" wx:for="{{uploadImgs}}" wx:key="index">
+                <image src="{{ item }}" mode="aspectFill"></image>
+                <icon type="clear" size="16" class="upload-clear" @tap.stop="handleRemoveImg({{index}})"/>
+              </view>
+            </block>
+            <view class="upload-control" @tap.stop="handleToUpload" wx:if="{{uploadImgs.length < 5}}">
+              <image src="../../images/common/icon_upload.png" class="icon_upload" mode="aspectFill"></image>
+              <view class="upload-control__label font-size--24">上传作品图</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="form-area">
+        <view class="form-area__wrap">
+          <textarea name="introduction" value="{{voteData.introduction}}" bindinput="handleInput" placeholder="请输入作品介绍文字" maxlength="100"/>
+        </view>
+        <view class="font-size--24 limit-num">{{changeLength}}/100</view>
+        <view>
+          <button class="submit-btn font-size--36" form-type="submit">确定</button>
+        </view>
+      </view>
+
+    </form>
+
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import activityApis from '@/api/activity'
+import commonApis from '@/api/common'
+import wxutils from '@/utils/wxutils'
+export default class VoteUpload extends wepy.page {
+  config = {
+    navigationBarTitleText: '上传作品'
+  }
+  data = {
+    activityId: '',
+    validShowData: {},
+    invisibleData: {},
+    uploadImgs: [],
+    coverImg: '',
+    changeLength: 0,
+    worksIndex: [],
+    formData: {},
+    voteData: {},
+    isAdd: true
+  }
+  methods = {
+    handleSubmit (e) {
+      const formData = e.detail.value
+      let i = 0
+      let errorMsg = ''
+      if (!formData.introduction) {
+        errorMsg = '作品介绍不能为空'
+        i++
+      }
+      if (!this.coverImg) {
+        errorMsg = '封面不能为空'
+        i++
+      }
+      if (!this.uploadImgs.length) {
+        errorMsg = '作品图不能为空'
+        i++
+      }
+      const getLabelValue = { ...this.validShowData, ...this.invisibleData }
+      for (let key in formData) {
+        if (key === 'introduction') break
+        if (!formData[key]) {
+          errorMsg = getLabelValue[key] + '不能为空'
+          i++
+        }
+      }
+      if (i > 0) {
+        return wx.showToast({
+          title: errorMsg,
+          icon: 'none'
+        })
+      }
+      this.formData = formData
+      this.createrVote()
+    },
+    handleInput (e) {
+      const { value } = e.detail
+      this.changeLength = value.length
+    },
+    async handleRemoveImg (type) {
+      let fileName = type === 'cover' ? this.coverImg : this.uploadImgs[type]
+      try {
+        const opts = {
+          fileName
+        }
+        const { msg } = await commonApis.deleteImg(opts)
+        wx.showToast({ title: msg })
+        if (type === 'cover') {
+          this.coverImg = ''
+        } else {
+          this.uploadImgs.splice(type, 1)
+          this.worksIndex.splice(type, 1)
+          console.log(this.worksIndex)
+        }
+        this.$apply()
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    handleToUploadCover () {
+      const that = this
+      wx.chooseImage({
+        count: 1,
+        success: function (res) {
+          const { errMsg, tempFilePaths, tempFiles } = res
+          if (errMsg === 'chooseImage:ok') {
+            const MAXSIZE = 2000000
+            let isLimit = tempFiles.some(item => item.size > MAXSIZE)
+            if (isLimit) {
+              wx.showToast({
+                title: '上传图片不能大于2M!',
+                icon: 'none'
+              })
+            } else {
+              that.handleUploadImg(tempFilePaths, 3)
+            }
+          }
+        }
+      })
+    },
+    handleToUpload () {
+      const that = this
+      wx.chooseImage({
+        count: 5,
+        success: function (res) {
+          console.log(res)
+          const { errMsg, tempFilePaths, tempFiles } = res
+          if (errMsg === 'chooseImage:ok') {
+            const MAXSIZE = 2000000
+            let isLimit = tempFiles.some(item => item.size > MAXSIZE)
+            if (isLimit) {
+              wx.showToast({
+                title: '上传图片不能大于2M!',
+                icon: 'none'
+              })
+            } else {
+              that.handleUploadImg(tempFilePaths, 4)
+            }
+          }
+        }
+      })
+    }
+  }
+  async createrVote () {
+    try {
+      wx.showLoading({
+        title: '提交中',
+        mask: true
+      })
+      const { activityId, coverImg, formData, worksIndex, validShowData, invisibleData, isAdd, voteData } = this
+      const opts = {
+        activityId,
+        cover: coverImg,
+        worksIndex: worksIndex.join('_'),
+        introduction: formData.introduction
+      }
+      for (let key in formData) {
+        if (key === 'introduction') break
+        if (validShowData[key]) {
+          opts.visibleData = {
+            [key]: formData[key],
+            ...opts.visibleData
+          }
+        }
+        if (invisibleData[key]) {
+          opts.invisibleData = {
+            [key]: formData[key],
+            ...opts.invisibleData
+          }
+        }
+      }
+      opts.visibleData = JSON.stringify(opts.visibleData)
+      opts.invisibleData = JSON.stringify(opts.invisibleData)
+      if (!isAdd) {
+        opts.id = voteData.id
+      }
+      const API = isAdd ? 'postInsertCompetition' : 'updateCompetition'
+      await activityApis[API](opts)
+      wx.hideLoading()
+      wx.nextTick(() => {
+        wx.showToast({
+          title: '提交作品成功',
+          icon: 'none',
+          success: function () {
+            setTimeout(() => {
+              wx.hideToast()
+              wxutils.backOrNavigate(`/pages/vote/index?linkId=${activityId}`)
+            }, 2000)
+          }
+        })
+      })
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  handleUploadImg (imgPaths, fileType) {
+    wx.showLoading({
+      title: '上传中',
+      mask: true
+    })
+    let uploadImgs = []
+    if (fileType === 4) {
+      const LIMIT = 5
+      let resetLen = LIMIT - this.uploadImgs.length
+      let currentImgLen = imgPaths.length
+      let min = Math.min(resetLen, currentImgLen)
+      imgPaths = imgPaths.slice(0, min)
+    }
+    imgPaths.map((item, index) => {
+      uploadImgs[index] = new Promise((resolve, reject) => {
+        wx.uploadFile({
+          url: wepy.$instance.globalData.baseUrl + '/api/file/upload',
+          filePath: item,
+          name: 'file',
+          header: {
+            'token': wepy.$instance.globalData.Token,
+            'Content-Type': 'multipart/form-data'
+          },
+          formData: {
+            'fileType': fileType
+          },
+          success: function (res) {
+            resolve(JSON.parse(res.data).data)
+          },
+          fail: function (error) {
+            reject(error)
+          }
+        })
+      })
+    })
+    Promise.all(uploadImgs).then(result => {
+      let arr = [].concat.apply([], result)
+      if (fileType === 3) {
+        this.coverImg = arr[0].file
+      } else if (fileType === 4) {
+        let uploadsId = []
+        let imgs = []
+        arr.forEach(element => {
+          uploadsId.push(element.id)
+          imgs.push(element.file)
+        })
+        this.uploadImgs = [...imgs, ...this.uploadImgs].reverse()
+        this.worksIndex = [...uploadsId, ...this.worksIndex].reverse()
+      }
+      wx.hideLoading()
+      this.$apply()
+    }).catch((err) => {
+      console.log(err)
+      wx.hideLoading()
+      wx.showToast({
+        title: '图片上传失败',
+        icon: 'none'
+      })
+    })
+  }
+  onLoad ({ activityId, voteStatus }) {
+    this.activityId = activityId
+    this.isAdd = +voteStatus === -1
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    const params = {
+      activityId
+    }
+    let apiList = []
+    if (this.isAdd) { // 新增
+      apiList = [activityApis.getActivityCompetitionData(params)]
+    } else {
+      apiList = [activityApis.getActivityCompetitionData(params), activityApis.getCompetition(params)]
+    }
+    Promise.all(apiList).then(res => {
+      const { visibleData, invisibleData } = res[0].data
+      this.validShowData = visibleData
+      this.invisibleData = invisibleData
+      if (res[1]) {
+        const { data: voteData } = res[1]
+        this.voteData = voteData
+        this.coverImg = voteData.cover
+        voteData.images = voteData.images.filter(Boolean)
+        this.uploadImgs = voteData.images
+        this.worksIndex = voteData.worksIndex.split('_')
+        this.changeLength = voteData.introduction.length
+      }
+      wx.hideLoading()
+      this.$apply()
+    }).catch(err => {
+      console.log(err)
+      wx.hideLoading()
+    })
+  }
+}
+</script>
+<style lang='postcss'>
+@import 'src/styles/pages/vote/upload.postcss';
+</style>

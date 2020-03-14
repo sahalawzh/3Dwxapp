@@ -108,7 +108,7 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
+  import printerApis from '@/api/printer'
   export default class printerDebug extends wepy.page {
     config = {
       navigationBarTitleText: '调试打印机'

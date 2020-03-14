@@ -75,9 +75,9 @@
 
 <script>
   import wepy from 'wepy'
-  import orderApis from '../../api/order'
+  import orderApis from '@/api/order'
   import commonwxs from './wxs/common.wxs'
-  import wxutils from '../../utils/wxutils'
+  import wxutils from '@/utils/wxutils'
   export default class Order extends wepy.page {
     config = {
       navigationBarTitleText: '我的订单',

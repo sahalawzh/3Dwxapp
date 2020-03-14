@@ -107,8 +107,8 @@
 
 <script>
   import wepy from 'wepy'
-  import printerApis from '../../api/printer'
-  import wxutils from '../../utils/wxutils'
+  import printerApis from '@/api/printer'
+  import wxutils from '@/utils/wxutils'
   const tag = {
     everythickness: '层厚',
     filldensities: '填充密度',

@@ -61,8 +61,8 @@
 
 <script>
   import wepy from 'wepy'
-  import forumApis from '../../api/forum'
-  import wxutils from '../../utils/wxutils'
+  import forumApis from '@/api/forum'
+  import wxutils from '@/utils/wxutils'
   export default class forumSubmit extends wepy.page {
     config = {
       navigationBarTitleText: '无限三维'
