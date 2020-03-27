@@ -1,55 +1,105 @@
 <template>
   <!-- 评论 -->
   <view class="commet-wrap">
-    <view class="mask" @tap.stop="handleCloseCommetMask" wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}"></view>
-    <view class="commet-box" wx:if="{{commetList.length}}">
+    <view class="mask"
+          @tap.stop="handleCloseCommetMask"
+          wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}"></view>
+    <view class="commet-box"
+          wx:if="{{commetList.length}}">
       <view class="title">{{commetTotal}}条评论</view>
       <view class="commet-items">
-        <view wx:for="{{commetList}}" wx:key="item" class="wow-flex commet-items_item {{item.isShowMenu && menuShow ? 'active' : ''}}" @tap.stop="handleShowMenu({{index}})">
-          <view class="menu-box wow-flex" wx:if="{{item.isShowMenu && menuShow}}">
-            <view wx:if="{{userId}}" class="menu-box__item" @tap.stop="handleMenu({{index}}, {{'reply'}})">
-              <image class="menu-icon" src="../images/common/btn_comment_white.png" mode="aspectFill"></image>
+        <view wx:for="{{commetList}}"
+              wx:key="index"
+              class="wow-flex commet-items_item {{item.isShowMenu && menuShow ? 'active' : ''}}"
+              @tap.stop="handleShowMenu({{index}})">
+          <view class="menu-box wow-flex"
+                wx:if="{{item.isShowMenu && menuShow}}">
+            <view wx:if="{{userId}}"
+                  class="menu-box__item"
+                  @tap.stop="handleMenu({{index}}, {{'reply'}})">
+              <image class="menu-icon"
+                     src="../images/common/btn_comment_white.png"
+                     mode="aspectFill"></image>
               <view class="font-size--24">回复</view>
             </view>
-            <button wx:else data-url="/pages/forumCommet/index?forumId={{item.forumId}}&nickname={{item.nickname}}&parentId={{item.id}}&replyId={{item.replyId}}" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="open-type-btn menu-box__item">
-              <image class="menu-icon" src="../images/common/btn_comment_white.png" mode="aspectFill"></image>
+            <button wx:else
+                    data-url="/pages/forumCommet/index?forumId={{item.forumId}}&nickname={{item.nickname}}&parentId={{item.id}}&replyId={{item.replyId}}"
+                    open-type="getPhoneNumber"
+                    bindgetphonenumber="getPhoneNumber"
+                    class="open-type-btn menu-box__item">
+              <image class="menu-icon"
+                     src="../images/common/btn_comment_white.png"
+                     mode="aspectFill"></image>
               <view class="font-size--24">回复</view>
             </button>
-            <view class="menu-box__item" @tap.stop="handleMenu({{index}}, {{'copy'}})">
-              <image class="menu-icon" src="../images/common/btn_copy.png" mode="aspectFill"></image>
+            <view class="menu-box__item"
+                  @tap.stop="handleMenu({{index}}, {{'copy'}})">
+              <image class="menu-icon"
+                     src="../images/common/btn_copy.png"
+                     mode="aspectFill"></image>
               <view class="font-size--24">复制</view>
             </view>
-            <view class="menu-box__item" wx:if="{{userId}}" @tap.stop="handleMenu({{index}}, {{'report'}})">
-              <image class="menu-icon" src="../images/common/btn_report.png" mode="aspectFill"></image>
+            <view class="menu-box__item"
+                  wx:if="{{userId}}"
+                  @tap.stop="handleMenu({{index}}, {{'report'}})">
+              <image class="menu-icon"
+                     src="../images/common/btn_report.png"
+                     mode="aspectFill"></image>
               <view class="font-size--24">举报</view>
             </view>
           </view>
-          
-          <image class="head" src="{{item.smallAvator}}" mode="aspectFill"></image>
+
+          <image class="head"
+                 src="{{item.smallAvator}}"
+                 mode="aspectFill"></image>
           <view class="content">
-            <view class="name">{{item.nickname}}<text wx:if="{{item.isTopping === 1}}" class="top font-size--24">置顶</text></view>
-            <view class="time">{{item.createTime}}<text class="content-sku" wx:if="{{ item.spec }}">{{item.spec}}</text></view>
+            <view class="name">{{item.nickname}}<text wx:if="{{item.isTopping === 1}}"
+                    class="top font-size--24">置顶</text></view>
+            <view class="time">{{item.createTime}}<text class="content-sku"
+                    wx:if="{{ item.spec }}">{{item.spec}}</text></view>
             <view class="{{lastpage === 'detail' ? 'commet-detail' : ''}}">
-              <view class="forum-reply" wx:if="{{item.forumReplyVO}}">
+              <view class="forum-reply"
+                    wx:if="{{item.forumReplyVO}}">
                 <view class="forum-reply__title font-size--30">回复：{{item.forumReplyVO.nickname}}</view>
                 <view class="forum-reply__content font-size--30">{{item.forumReplyVO.content}}</view>
               </view>
               <view class="message">{{lastpage === 'forum' ? item.commentContent : item.content}}</view>
-              <view class="commet-img wow-flex" wx:if="{{item.image.length}}">
-                <image class="commet-img__upload" wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="imageItem" wx:key="" @tap.stop="handleImagePreview({{item.image}}, {{idx}})" src="{{imageItem}}" mode="aspectFill"></image>
+              <view class="commet-img wow-flex"
+                    wx:if="{{item.image.length}}">
+                <image class="commet-img__upload"
+                       wx:for="{{item.image}}"
+                       wx:for-index="idx"
+                       wx:for-item="imageItem"
+                       wx:key="index"
+                       @tap.stop="handleImagePreview({{item.image}}, {{idx}})"
+                       src="{{imageItem}}"
+                       mode="aspectFill"></image>
               </view>
-              <view class="reply-message font-size--26" wx:if="{{ item.reply }}">
+              <view class="reply-message font-size--26"
+                    wx:if="{{ item.reply }}">
                 <view>客服回复：</view>
                 <view class="reply-message__info">{{ item.reply }}</view>
               </view>
             </view>
             <block wx:if="{{lastpage === 'forum'}}">
-              <view wx:if="{{userId}}" class="like wow-flex is-align-middle" @tap.stop="handleLike({{item.id}}, {{item.forumId}}, {{index}})">
-                <image src="../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png" class="btn_support" mode="aspectFill"></image>
+              <view wx:if="{{userId}}"
+                    class="like wow-flex is-align-middle"
+                    @tap.stop="handleLike({{item.id}}, {{item.forumId}}, {{index}})">
+                <image src="../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png"
+                       class="btn_support"
+                       mode="aspectFill"></image>
                 <view class="font-size--24">{{item.momentNum}}</view>
               </view>
-              <button wx:else data-type="like" data-id="{{index}}" class="like wow-flex is-align-middle open-type-btn" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" @tap.stop="handleHideMenu">
-                <image src="../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png" class="btn_support" mode="aspectFill"></image>
+              <button wx:else
+                      data-type="like"
+                      data-id="{{index}}"
+                      class="like wow-flex is-align-middle open-type-btn"
+                      open-type="getPhoneNumber"
+                      bindgetphonenumber="getPhoneNumber"
+                      @tap.stop="handleHideMenu">
+                <image src="../images/common/btn_support{{item.isMoment ? '_on' : '_default'}}.png"
+                       class="btn_support"
+                       mode="aspectFill"></image>
                 <view class="font-size--24">{{item.momentNum}}</view>
               </button>
             </block>
@@ -58,28 +108,42 @@
       </view>
     </view>
 
-    <view class="commet-empty" wx:else>
-      <image class="icon" src="../images/common/ico_comment_empty.png" mode="aspectFill"></image>
+    <view class="commet-empty"
+          wx:else>
+      <image class="icon"
+             src="../images/common/ico_comment_empty.png"
+             mode="aspectFill"></image>
       <view class="tip font-size--30">暂时还没有评价，快来做第一个吧~</view>
     </view>
 
-    <view class="commet-wrap__apply" wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}">
+    <view class="commet-wrap__apply"
+          wx:if="{{lastpage !== 'detail' && userId && isShowCommetInput}}">
       <view class="commet-wrap__apply_input">
-        <input
-          cursor-spacing="60"
-          bindblur="handleGetInfo"
-          class="font-size--30"
-          focus="{{autoFocus}}"
-          placeholder-class="placeholder-input"
-          value="{{sendVal}}"
-          placeholder="来发表一下你的评论吧..."/>
+        <input cursor-spacing="60"
+               bindblur="handleGetInfo"
+               class="font-size--30"
+               focus="{{autoFocus}}"
+               placeholder-class="placeholder-input"
+               value="{{sendVal}}"
+               placeholder="来发表一下你的评论吧..." />
       </view>
       <view class="send-box">
-        <button wx:if="{{userInfo}}" class="wow-flex is-align-middle is-justify-center open-type-btn send-btn" @tap.stop="handleToSend">
-          发送<image class="icon" src="../images/common/ico_send.png" mode="aspectFill"></image>
+        <button wx:if="{{userInfo}}"
+                class="wow-flex is-align-middle is-justify-center open-type-btn send-btn"
+                @tap.stop="handleToSend">
+          发送<image class="icon"
+                 src="../images/common/ico_send.png"
+                 mode="aspectFill"></image>
         </button>
-        <button wx:else class="wow-flex is-align-middle is-justify-center open-type-btn send-btn" data-target="commet" open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo">
-          发送<image class="icon" src="../images/common/ico_send.png" mode="aspectFill"></image>
+        <button wx:else
+                class="wow-flex is-align-middle is-justify-center open-type-btn send-btn"
+                data-target="commet"
+                open-type="getUserInfo"
+                lang="zh_CN"
+                bindgetuserinfo="onGotUserInfo">
+          发送<image class="icon"
+                 src="../images/common/ico_send.png"
+                 mode="aspectFill"></image>
         </button>
       </view>
     </view>
@@ -89,7 +153,7 @@
 import wepy from 'wepy'
 import CommonMixin from '../mixins/common'
 export default class Commet extends wepy.component {
-  props={
+  props = {
     lastpage: String,
     userId: {
       type: [String, Number],
@@ -132,7 +196,7 @@ export default class Commet extends wepy.component {
   handleTolike (userId, index) {
     this.userId = userId
     const { id, forumId } = this.commetList[index]
-    this.$emit('handleToLike', {forumCommentId: id, forumId, index})
+    this.$emit('handleToLike', { forumCommentId: id, forumId, index })
   }
   handleSendInfo () {
     this.$emit('handleSendInfo')
@@ -142,7 +206,7 @@ export default class Commet extends wepy.component {
       this.menuShow = false
     },
     handleLike (forumCommentId, forumId, index) {
-      this.$emit('handleToLike', {forumCommentId, forumId, index})
+      this.$emit('handleToLike', { forumCommentId, forumId, index })
     },
     handleMenu (index, type) {
       const current = {
@@ -181,5 +245,5 @@ export default class Commet extends wepy.component {
 </script>
 
 <style lang='postcss'>
-  @import 'src/styles/modules/commet.postcss';
+@import 'src/styles/modules/commet.postcss';
 </style>

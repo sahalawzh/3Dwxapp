@@ -35,17 +35,14 @@
       <view class="wow-flex">
         <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
         <view class="btn-box">
-          <form report-submit="true">
-            <button wx:if="{{userId}}" formType="submit" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
-            <button
-              wx:else
-              data-type="activity"
-              open-type="getPhoneNumber"
-              bindgetphonenumber="getPhoneNumber"
-              disabled="{{activityData.dateType === 2}}"
-              formType="submit"
-              class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
-          </form>
+          <button wx:if="{{userId}}" @tap.stop="handleToSend" disabled="{{activityData.dateType === 2}}" class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
+          <button
+            wx:else
+            data-type="activity"
+            open-type="getPhoneNumber"
+            bindgetphonenumber="getPhoneNumber"
+            disabled="{{activityData.dateType === 2}}"
+            class="part-btn open-type-btn {{buttonText.length < 6 ? 'font-size--36' : 'font-size--30'}}">{{buttonText}}</button>
         </view>
       </view>
     </view>
@@ -120,7 +117,6 @@ export default class Vote extends wepy.page {
       1: '进行中',
       2: '已结束'
     },
-    isShowSubscibe: false,
     voteList: [],
     validShowData: {},
     voteStatus: '',
@@ -136,18 +132,16 @@ export default class Vote extends wepy.page {
   }
   mixins = [CommonMixin]
   config = {
+    enablePullDownRefresh: true,
     usingComponents: {
       'wow-popup': '../../packages/popup/index'
     }
   }
-  onLoad (options) {
-    if (options.scene) {
-      let sceneObj = decodeURIComponent(options.scene)
-      let urlObj = 'url?' + sceneObj
-      options = parseQueryString(urlObj)
-    }
-    this.linkId = options.linkId
-    wepy.$instance.globalData.subpub.on('afterVote', this.handleAfterVote, this)
+  onPullDownRefresh () {
+    this.getData()
+    wx.stopPullDownRefresh()
+  }
+  getData () {
     wx.showLoading({
       title: '加载中',
       mask: true
@@ -194,6 +188,16 @@ export default class Vote extends wepy.page {
       console.log(err)
       wx.hideLoading()
     })
+  }
+  onLoad (options) {
+    if (options.scene) {
+      let sceneObj = decodeURIComponent(options.scene)
+      let urlObj = 'url?' + sceneObj
+      options = parseQueryString(urlObj)
+    }
+    this.linkId = options.linkId
+    wepy.$instance.globalData.subpub.on('afterVote', this.handleAfterVote, this)
+    this.getData()
   }
   async getActivityComment () {
     try {
@@ -288,7 +292,7 @@ export default class Vote extends wepy.page {
       })
       const { linkId } = this.activityData
       const opts = {
-        type: 'activity',
+        type: 'activityCompetition',
         id: this.linkId,
         page: 'pages/vote/index',
         scene: `linkId=${linkId}`
@@ -385,8 +389,6 @@ export default class Vote extends wepy.page {
       wxutils.backOrNavigate(`/pages/vote/person?activityId=${this.linkId}`)
     } else if (this.voteStatus === 1) { // 审核通过到作品预览页
       wxutils.backOrNavigate(`/pages/vote/detail?activityId=${this.linkId}&voteId=${this.voteId}`)
-    } else if (this.voteStatus === 2) { // 审核不通过
-      this.isShowAudit = true
     } else {
       wxutils.backOrNavigate(`/pages/vote/upload?activityId=${this.linkId}&voteStatus=${this.voteStatus}`)
     }
@@ -407,6 +409,8 @@ export default class Vote extends wepy.page {
     voteStatus (val) {
       if (val === 1) { // 审核通过，获取自己的票数
         this.getSelftVote()
+      } else if (val === 2) {
+        this.isShowAudit = true
       }
     }
   }

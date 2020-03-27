@@ -47,7 +47,7 @@
     </view>
 
     <block wx:else>
-      <view @tap.stop="handleToAdvDetail" class="printer-advertising">
+      <view wx:if="{{bannerAdv.image}}" @tap.stop="handleToAdvDetail" class="printer-advertising">
         <image src="{{bannerAdv.image}}" class="ad-banner" mode="aspectFill"></image>
       </view>
     </block>
@@ -57,7 +57,7 @@
         <image class="icon" src="../../images/printer/ico_Course.png" mode="aspectFill"></image>
         <view class="font-size--24">{{ topicInfo.topic }}</view>
       </navigator>
-      
+
       <view wx:if="{{userId}}" class="printer-content__add" @tap="handleToScan">
         <image class="icon-help" src="../../images/printer/btn_help.png" mode="aspectFill"></image>
         <image class="icon" src="../../images/printer/btn_printlist_add_printer.png" mode="aspectFill"></image>
@@ -69,7 +69,7 @@
         <image class="icon" src="../../images/printer/btn_printlist_add_printer.png" mode="aspectFill"></image>
         <view class="font-size--28">添加打印机</view>
       </button>
-      
+
       <view wx:if="{{userId}}" class="font-size--24 printer-renew" @tap.stop="handleToScanPay">打印机续费（点此处扫描打印机上二维码）</view>
       <button wx:else data-type="scanpay" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="font-size--24 printer-renew open-type-btn">打印机续费（点此处扫描打印机上二维码）</button>
 
@@ -82,7 +82,7 @@
         <image class="icon" src="../../images/printer/ico_model_base.png" mode="aspectFill"></image>
         <view class="font-size--36">模型库</view>
       </button> -->
-    
+
       <view class="printer-content__videos">
         <view class="title wow-flex is-justify-space-between font-size--26">
           <view :class="{'active': isShowPrinter}" @tap.stop="handleMoreGoods">以下好东西都可以自己打印的哦</view>
@@ -96,330 +96,330 @@
     </view>
 
     <custom-tabbar tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
-  
+
     <guidePrinter wx:if="{{stage}}" :stage.sync="stage"></guidePrinter>
 
   </view>
 </template>
 
 <script>
-  import wepy from 'wepy'
-  import printerApis from '@/api/printer'
-  import goodsApis from '@/api/goods'
-  import videoApis from '@/api/video'
-  import guideApis from '@/api/guide'
-  import wxutils from '@/utils/wxutils'
-  import param from '@/utils/param'
-  import CommonMixin from '@/mixins/common'
-  import advertisementApis from '@/api/advertisement'
-  import Recommend from './modules/recommend'
-  import Video from './modules/video'
-  import GuidePrinter from '@/components/guidePrinter'
-  export default class Printer extends wepy.page {
-    config = {
-      navigationBarTitleText: '打印机',
-      enablePullDownRefresh: true,
-      usingComponents: {
-        'custom-tabbar': '../../customTabBar/index'
+import wepy from 'wepy'
+import printerApis from '@/api/printer'
+import goodsApis from '@/api/goods'
+import videoApis from '@/api/video'
+import guideApis from '@/api/guide'
+import wxutils from '@/utils/wxutils'
+import param from '@/utils/param'
+import CommonMixin from '@/mixins/common'
+import advertisementApis from '@/api/advertisement'
+import Recommend from './modules/recommend'
+import Video from './modules/video'
+import GuidePrinter from '@/components/guidePrinter'
+export default class Printer extends wepy.page {
+  config = {
+    navigationBarTitleText: '打印机',
+    enablePullDownRefresh: true,
+    usingComponents: {
+      'custom-tabbar': '../../customTabBar/index'
+    }
+  }
+  mixins = [CommonMixin]
+  components = {
+    recommend: Recommend,
+    video: Video,
+    guidePrinter: GuidePrinter
+  }
+  data = {
+    isModelIPX: false,
+    isFirst: true,
+    tabbar: {},
+    printerList: [],
+    printerSate: {
+      'Operational': {
+        'status': 'default',
+        'activeColor': '#dedede',
+        'color': '#dedede',
+        'record': 'default'
+      },
+      'Printing': {
+        'status': 'playing',
+        'activeColor': '#1e55bc',
+        'color': '#cbe2ff',
+        'record': 'playing'
+      },
+      'Offline': {
+        'status': 'cannotplay',
+        'activeColor': '#dedede',
+        'color': '#dedede',
+        'record': 'default'
+      },
+      'Paused': {
+        'status': 'pause',
+        'activeColor': '#D29922',
+        'color': '#f6f9e5',
+        'record': 'default'
       }
-    }
-    mixins = [CommonMixin]
-    components = {
-      recommend: Recommend,
-      video: Video,
-      guidePrinter: GuidePrinter
-    }
-    data = {
-      isModelIPX: false,
-      isFirst: true,
-      tabbar: {},
-      printerList: [],
-      printerSate: {
-        'Operational': {
-          'status': 'default',
-          'activeColor': '#dedede',
-          'color': '#dedede',
-          'record': 'default'
-        },
-        'Printing': {
-          'status': 'playing',
-          'activeColor': '#1e55bc',
-          'color': '#cbe2ff',
-          'record': 'playing'
-        },
-        'Offline': {
-          'status': 'cannotplay',
-          'activeColor': '#dedede',
-          'color': '#dedede',
-          'record': 'default'
-        },
-        'Paused': {
-          'status': 'pause',
-          'activeColor': '#D29922',
-          'color': '#f6f9e5',
-          'record': 'default'
-        }
-      },
-      userId: '',
-      bannerAdv: {},
-      printerGoods: [],
-      videoList: [],
-      isShowPrinter: true,
-      topicInfo: '',
-      num: '',
-      stage: 0
-    }
-    events = {
-      async handleEndStage () {
-        try {
-          const opts = {
-            stage: 2
-          }
-          await guideApis.updateByPrintGuide(opts)
-          wxutils.backOrNavigate(`/pages/videoList/index?topicId=${this.topicInfo.id}&topicName=${this.topicInfo.topic}`)
-          this.stage = 0
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-        }
-      }
-    }
-    methods = {
-      handleToAdvDetail () {
-        const { spuId, linkId, marketingType } = this.bannerAdv
-        let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
-        wxutils.backOrNavigate(link)
-      },
-      handleMoreGoods () {
-        this.listPrintSpu()
-      },
-      async handleMoreVideo () {
-        try {
-          const { data } = await videoApis.listVideoPrint()
-          this.videoList = data
-          this.isShowPrinter = false
-          this.$apply()
-        } catch (error) {
-          console.log(error)
-        }
-      },
-      async handleControlPrinter (item, index) {
-        try {
-          const { printerId, printerState } = item
-          if (printerState === 'Operational' || printerState === 'Offline') {
-            return
-          }
-          wx.showLoading({
-            title: '加载中',
-            mask: true
-          })
-          let opts = {
-            printerId,
-            userId: this.userId,
-            command: 'pause'
-          }
-          await printerApis.controlPrinterWork(opts)
-          this.getPrinterList()
-          this.$apply()
-          wx.hideLoading()
-        } catch (error) {
-          wx.hideLoading()
-          console.log(error)
-        }
-      },
-      handleToSetPrinter (printerId, printerSerialNumber, printerAlias) {
-        wxutils.backOrNavigate('/pages/printerSet/index?printerId=' + printerId + '&printerSerialNumber=' + printerSerialNumber + '&title=' + printerAlias)
-      },
-      handleToModel () {
-        wxutils.backOrNavigate('/pages/model/index')
-      },
-      handleToDetail (item) {
-        const { printerId, printerAlias, printerTypeName, printerSerialNumber } = item
-        const opts = {
-          printerId,
-          printerAlias,
-          printerTypeName,
-          printerSerialNumber
-        }
-        console.log(param(opts))
-        wxutils.backOrNavigate('/pages/printerDetail/index?' + param(opts))
-      },
-      handleToScan () {
-        this.getScanCode()
-      },
-      handleToScanPay () {
-        this.getScanPay()
-      }
-    }
-    async getCountQueue () {
+    },
+    userId: '',
+    bannerAdv: {},
+    printerGoods: [],
+    videoList: [],
+    isShowPrinter: true,
+    topicInfo: '',
+    num: '',
+    stage: 0
+  }
+  events = {
+    async handleEndStage () {
       try {
-        const { userId } = this
         const opts = {
-          userId,
-          isDelete: 'N',
-          status: '0,1,2'
+          stage: 2
         }
-        const { data } = await printerApis.getCountQueue(opts)
-        this.num = data
-        this.$apply()
-      } catch (error) {
-      }
-    }
-    getScanCode () {
-      // 允许从相机和相册扫码
-      wx.scanCode({
-        success(res) {
-          const { errMsg, result } = res
-          if (errMsg === 'scanCode:ok') {
-            const scanArr = result.split('=')
-            wxutils.backOrNavigate('/pages/printerAdd/index?id=' + scanArr[1])
-          }
-        },
-        fail (error) {
-          console.log(error)
-        }
-      })
-    }
-    getScanPay () {
-      // 允许从相机和相册扫码
-      wx.scanCode({
-        success(res) {
-          const { errMsg, result } = res
-          if (errMsg === 'scanCode:ok') {
-            const scanArr = result.split('=')
-            wxutils.backOrNavigate('/pages/printerBuy/index?printerSerialNumber=' + scanArr[1])
-          }
-        },
-        fail (error) {
-          console.log(error)
-        }
-      })
-    }
-    handleScan (e) {
-      this.userId = e
-      wx.nextTick(() => {
-        this.getScanCode()
-      })
-    }
-    handleScanPay (e) {
-      this.userId = e
-      wx.nextTick(() => {
-        this.getScanPay()
-      })
-    }
-    computed = {
-      isDefault () {
-        if (!this.userId) {
-          return true
-        }
-        if (this.printerList.length < 1 && this.userId) {
-          return true
-        }
-        return false
-      },
-      playSum () {
-        let sum = 0
-        this.printerList.forEach(item => {
-          if (item.printerState === 'Printing') {
-            sum += 1
-          }
-        })
-        return sum
-      }
-    }
-    async getAdvertisement (type) { // 广告位接口
-      try {
-        const { data: advData } = await advertisementApis.queryAdvertisements()
-        if (type === 'noUserId') {
-          this.isFirst = false
-        }
-        this.bannerAdv = advData.filter(item => item.advertisementType === 0)[0]
+        await guideApis.updateByPrintGuide(opts)
+        wxutils.backOrNavigate(`/pages/videoList/index?topicId=${this.topicInfo.id}&topicName=${this.topicInfo.topic}`)
+        this.stage = 0
         this.$apply()
       } catch (error) {
         console.log(error)
       }
     }
-    async listPrintSpu () { // 打印机商品
+  }
+  methods = {
+    handleToAdvDetail () {
+      const { spuId, linkId, marketingType } = this.bannerAdv
+      let link = marketingType === 0 ? `/pages/detail/index?id=${spuId}` : `/pages/activity/index?linkId=${linkId}`
+      wxutils.backOrNavigate(link)
+    },
+    handleMoreGoods () {
+      this.listPrintSpu()
+    },
+    async handleMoreVideo () {
       try {
-        const { data } = await goodsApis.listPrintSpu()
-        this.printerGoods = data
-        this.isShowPrinter = true
+        const { data } = await videoApis.listVideoPrint()
+        this.videoList = data
+        this.isShowPrinter = false
         this.$apply()
       } catch (error) {
         console.log(error)
       }
-    }
-    async getPrinterList () {
+    },
+    async handleControlPrinter (item, index) {
       try {
+        const { printerId, printerState } = item
+        if (printerState === 'Operational' || printerState === 'Offline') {
+          return
+        }
         wx.showLoading({
           title: '加载中',
           mask: true
         })
-        let opts = {}
-        if (wepy.$instance.globalData.userId) {
-          opts.userId = wepy.$instance.globalData.userId
-        } else {
-          wx.hideLoading()
-          return this.getAdvertisement('noUserId')
+        let opts = {
+          printerId,
+          userId: this.userId,
+          command: 'pause'
         }
-        const { data } = await printerApis.listModels(opts)
-        this.isFirst = false
-        this.printerList = data
-        if (data.length < 1) { // 广告位接口
-          this.getAdvertisement()
-        }
+        await printerApis.controlPrinterWork(opts)
+        this.getPrinterList()
         this.$apply()
         wx.hideLoading()
       } catch (error) {
         wx.hideLoading()
         console.log(error)
       }
-    }
-    onPullDownRefresh () {
-      if (!this.userId || this.stage === 1) {
-        wx.stopPullDownRefresh()
-        return
+    },
+    handleToSetPrinter (printerId, printerSerialNumber, printerAlias) {
+      wxutils.backOrNavigate('/pages/printerSet/index?printerId=' + printerId + '&printerSerialNumber=' + printerSerialNumber + '&title=' + printerAlias)
+    },
+    handleToModel () {
+      wxutils.backOrNavigate('/pages/model/index')
+    },
+    handleToDetail (item) {
+      const { printerId, printerAlias, printerTypeName, printerSerialNumber } = item
+      const opts = {
+        printerId,
+        printerAlias,
+        printerTypeName,
+        printerSerialNumber
       }
-      this.getPrinterList()
-      wx.nextTick(() => {
-        wx.stopPullDownRefresh()
+      console.log(param(opts))
+      wxutils.backOrNavigate('/pages/printerDetail/index?' + param(opts))
+    },
+    handleToScan () {
+      this.getScanCode()
+    },
+    handleToScanPay () {
+      this.getScanPay()
+    }
+  }
+  async getCountQueue () {
+    try {
+      const { userId } = this
+      const opts = {
+        userId,
+        isDelete: 'N',
+        status: '0,1,2'
+      }
+      const { data } = await printerApis.getCountQueue(opts)
+      this.num = data
+      this.$apply()
+    } catch (error) {
+    }
+  }
+  getScanCode () {
+    // 允许从相机和相册扫码
+    wx.scanCode({
+      success (res) {
+        const { errMsg, result } = res
+        if (errMsg === 'scanCode:ok') {
+          const scanArr = result.split('=')
+          wxutils.backOrNavigate('/pages/printerAdd/index?id=' + scanArr[1])
+        }
+      },
+      fail (error) {
+        console.log(error)
+      }
+    })
+  }
+  getScanPay () {
+    // 允许从相机和相册扫码
+    wx.scanCode({
+      success (res) {
+        const { errMsg, result } = res
+        if (errMsg === 'scanCode:ok') {
+          const scanArr = result.split('=')
+          wxutils.backOrNavigate('/pages/printerBuy/index?printerSerialNumber=' + scanArr[1])
+        }
+      },
+      fail (error) {
+        console.log(error)
+      }
+    })
+  }
+  handleScan (e) {
+    this.userId = e
+    wx.nextTick(() => {
+      this.getScanCode()
+    })
+  }
+  handleScanPay (e) {
+    this.userId = e
+    wx.nextTick(() => {
+      this.getScanPay()
+    })
+  }
+  computed = {
+    isDefault () {
+      if (!this.userId) {
+        return true
+      }
+      if (this.printerList.length < 1 && this.userId) {
+        return true
+      }
+      return false
+    },
+    playSum () {
+      let sum = 0
+      this.printerList.forEach(item => {
+        if (item.printerState === 'Printing') {
+          sum += 1
+        }
       })
+      return sum
     }
-    async getTopic () {
-      try {
-        const { data: topicData } = await goodsApis.queryTopic()
-        this.topicInfo = topicData.data[0]
-        this.$apply()
-      } catch (error) {
-        console.log(error)
+  }
+  async getAdvertisement (type) { // 广告位接口
+    try {
+      const { data: advData } = await advertisementApis.queryAdvertisements()
+      if (type === 'noUserId') {
+        this.isFirst = false
       }
+      this.bannerAdv = advData.filter(item => item.advertisementType === 0)[0]
+      this.$apply()
+    } catch (error) {
+      console.log(error)
     }
-    onLoad () {
-      // 隐藏系统tabbar
-      wx.hideTabBar()
+  }
+  async listPrintSpu () { // 打印机商品
+    try {
+      const { data } = await goodsApis.listPrintSpu()
+      this.printerGoods = data
+      this.isShowPrinter = true
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  async getPrinterList () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      let opts = {}
       if (wepy.$instance.globalData.userId) {
-        this.userId = wepy.$instance.globalData.userId
+        opts.userId = wepy.$instance.globalData.userId
+      } else {
+        wx.hideLoading()
+        return this.getAdvertisement('noUserId')
       }
-      wepy.$instance.editTabbar()
-      this.getPrinterList()
-      this.listPrintSpu()
-      this.getTopic()
-      this.getCountQueue()
-      this.stage = wepy.$instance.globalData.stage
-      wepy.$instance.globalData.subpub.on('scan', this.handleScan, this)
-      wepy.$instance.globalData.subpub.on('scanpay', this.handleScanPay, this)
-      wx.hideShareMenu()
-      this.isModelIPX = wepy.$instance.globalData.isModelIPX
+      const { data } = await printerApis.listModels(opts)
+      this.isFirst = false
+      this.printerList = data
+      if (data.length < 1) { // 广告位接口
+        this.getAdvertisement()
+      }
+      this.$apply()
+      wx.hideLoading()
+    } catch (error) {
+      wx.hideLoading()
+      console.log(error)
     }
-    onShow () {
-      if (wepy.$instance.globalData.userId) {
-        if (!this.isFirst) {
-          this.getPrinterList()
-        }
+  }
+  onPullDownRefresh () {
+    if (!this.userId || this.stage === 1) {
+      wx.stopPullDownRefresh()
+      return
+    }
+    this.getPrinterList()
+    wx.nextTick(() => {
+      wx.stopPullDownRefresh()
+    })
+  }
+  async getTopic () {
+    try {
+      const { data: topicData } = await goodsApis.queryTopic()
+      this.topicInfo = topicData.data[0]
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  onLoad () {
+    // 隐藏系统tabbar
+    wx.hideTabBar()
+    if (wepy.$instance.globalData.userId) {
+      this.userId = wepy.$instance.globalData.userId
+    }
+    wepy.$instance.editTabbar()
+    this.getPrinterList()
+    this.listPrintSpu()
+    this.getTopic()
+    this.getCountQueue()
+    this.stage = wepy.$instance.globalData.stage
+    wepy.$instance.globalData.subpub.on('scan', this.handleScan, this)
+    wepy.$instance.globalData.subpub.on('scanpay', this.handleScanPay, this)
+    wx.hideShareMenu()
+    this.isModelIPX = wepy.$instance.globalData.isModelIPX
+  }
+  onShow () {
+    if (wepy.$instance.globalData.userId) {
+      if (!this.isFirst) {
+        this.getPrinterList()
       }
     }
   }
+}
 </script>
 <style lang='postcss'>
-  @import 'src/styles/pages/printer/common.postcss';
+@import 'src/styles/pages/printer/common.postcss';
 </style>

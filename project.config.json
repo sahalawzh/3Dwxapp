@@ -76,7 +76,7 @@
 					"id": 3,
 					"name": "作品详情",
 					"pathName": "pages/vote/detail",
-					"query": "voteId=5&activityId=1",
+					"query": "voteId=7&activityId=1",
 					"scene": null
 				},
 				{

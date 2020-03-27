@@ -169,7 +169,8 @@ export default class activity extends wepy.page {
       mask: true
     })
     const api1 = {
-      templateType: 0
+      templateType: 0,
+      linkId: this.linkId
     }
     const api2 = {
       id: this.linkId
@@ -423,7 +424,13 @@ export default class activity extends wepy.page {
   }
   async handleSubScibeRemind (wxsubData) {
     try {
-      await templateApis.insertTemplateMessage(wxsubData, { REJECTERRORCONFIG: true })
+      const opts = {
+        ...wxsubData,
+        templateType: 0,
+        linkId: this.linkId,
+        templateList: this.templateList
+      }
+      await templateApis.insertTemplateMessage(opts, { REJECTERRORCONFIG: true })
       this.isShowSubscibe = false
       this.$apply()
       this.handleSubscibe()

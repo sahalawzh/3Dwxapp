@@ -2,6 +2,14 @@
   <view class="page-contain page-vote-upload">
     <form bindsubmit="handleSubmit">
       <view class="form-container">
+        <view class="form-item wow-flex is-align-middle">
+          <view class="form-item__label font-size--28">
+            作品名称
+          </view>
+          <view class="form-item__body">
+            <input type="text" class="control-com" value="{{voteData.title}}" name="title" placeholder="请输入作品名称"/>
+          </view>
+        </view>
         <view class="form-item wow-flex is-align-middle" wx:for="{{ validShowData }}" wx:key="index">
           <view class="form-item__label font-size--28">
             {{ item }}
@@ -34,7 +42,7 @@
           <view class="upload-products wow-flex">
             <block wx:if="{{ uploadImgs.length }}">
               <view class="upload-product {{ index === 2 ? 'upload-product--3' : ''}}" wx:for="{{uploadImgs}}" wx:key="index">
-                <image src="{{ item }}" mode="aspectFill"></image>
+                <image src="{{ item.img }}" mode="aspectFill"></image>
                 <icon type="clear" size="16" class="upload-clear" @tap.stop="handleRemoveImg({{index}})"/>
               </view>
             </block>
@@ -65,6 +73,7 @@ import wepy from 'wepy'
 import activityApis from '@/api/activity'
 import commonApis from '@/api/common'
 import wxutils from '@/utils/wxutils'
+const MAXSIZE = 2000000
 export default class VoteUpload extends wepy.page {
   config = {
     navigationBarTitleText: '上传作品'
@@ -100,11 +109,15 @@ export default class VoteUpload extends wepy.page {
       }
       const getLabelValue = { ...this.validShowData, ...this.invisibleData }
       for (let key in formData) {
-        if (key === 'introduction') break
+        if (key === 'introduction' || key === 'title') break
         if (!formData[key]) {
           errorMsg = getLabelValue[key] + '不能为空'
           i++
         }
+      }
+      if (!formData.title) {
+        errorMsg = '作品名称不能为空'
+        i++
       }
       if (i > 0) {
         return wx.showToast({
@@ -120,7 +133,7 @@ export default class VoteUpload extends wepy.page {
       this.changeLength = value.length
     },
     async handleRemoveImg (type) {
-      let fileName = type === 'cover' ? this.coverImg : this.uploadImgs[type]
+      let fileName = type === 'cover' ? this.coverImg : this.uploadImgs[type].img
       try {
         const opts = {
           fileName
@@ -131,8 +144,7 @@ export default class VoteUpload extends wepy.page {
           this.coverImg = ''
         } else {
           this.uploadImgs.splice(type, 1)
-          this.worksIndex.splice(type, 1)
-          console.log(this.worksIndex)
+          console.log(this.uploadImgs)
         }
         this.$apply()
       } catch (error) {
@@ -146,7 +158,6 @@ export default class VoteUpload extends wepy.page {
         success: function (res) {
           const { errMsg, tempFilePaths, tempFiles } = res
           if (errMsg === 'chooseImage:ok') {
-            const MAXSIZE = 2000000
             let isLimit = tempFiles.some(item => item.size > MAXSIZE)
             if (isLimit) {
               wx.showToast({
@@ -168,7 +179,6 @@ export default class VoteUpload extends wepy.page {
           console.log(res)
           const { errMsg, tempFilePaths, tempFiles } = res
           if (errMsg === 'chooseImage:ok') {
-            const MAXSIZE = 2000000
             let isLimit = tempFiles.some(item => item.size > MAXSIZE)
             if (isLimit) {
               wx.showToast({
@@ -189,8 +199,13 @@ export default class VoteUpload extends wepy.page {
         title: '提交中',
         mask: true
       })
-      const { activityId, coverImg, formData, worksIndex, validShowData, invisibleData, isAdd, voteData } = this
+      const { activityId, coverImg, formData, uploadImgs, validShowData, invisibleData, isAdd, voteData } = this
+      let worksIndex = []
+      uploadImgs.forEach(item => {
+        worksIndex.push(item.id)
+      })
       const opts = {
+        title: formData.title,
         activityId,
         cover: coverImg,
         worksIndex: worksIndex.join('_'),
@@ -226,7 +241,7 @@ export default class VoteUpload extends wepy.page {
           success: function () {
             setTimeout(() => {
               wx.hideToast()
-              wxutils.backOrNavigate(`/pages/vote/index?linkId=${activityId}`)
+              wxutils.backOrRedirect(`/pages/vote/index?linkId=${activityId}`)
             }, 2000)
           }
         })
@@ -276,14 +291,14 @@ export default class VoteUpload extends wepy.page {
       if (fileType === 3) {
         this.coverImg = arr[0].file
       } else if (fileType === 4) {
-        let uploadsId = []
-        let imgs = []
+        let uploadImgsAndIndex = []
         arr.forEach(element => {
-          uploadsId.push(element.id)
-          imgs.push(element.file)
+          uploadImgsAndIndex.push({
+            img: element.file,
+            id: element.id
+          })
         })
-        this.uploadImgs = [...imgs, ...this.uploadImgs].reverse()
-        this.worksIndex = [...uploadsId, ...this.worksIndex].reverse()
+        this.uploadImgs = [...uploadImgsAndIndex, ...this.uploadImgs]
       }
       wx.hideLoading()
       this.$apply()
@@ -321,8 +336,14 @@ export default class VoteUpload extends wepy.page {
         this.voteData = voteData
         this.coverImg = voteData.cover
         voteData.images = voteData.images.filter(Boolean)
-        this.uploadImgs = voteData.images
-        this.worksIndex = voteData.worksIndex.split('_')
+        let uploadImgsAndIndex = []
+        voteData.images.forEach((item, index) => {
+          uploadImgsAndIndex.push({
+            img: item,
+            id: voteData.worksIndex.split('_')[index]
+          })
+        })
+        this.uploadImgs = uploadImgsAndIndex
         this.changeLength = voteData.introduction.length
       }
       wx.hideLoading()

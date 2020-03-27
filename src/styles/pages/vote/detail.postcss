@@ -5,6 +5,7 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #f6f7f7;
+  padding-bottom: 200rpx;
   .detail-header {
     padding: 0 50rpx 36rpx;
     background-color: #fff;
@@ -41,7 +42,7 @@
         line-height: 66rpx;
         text-align: center;
         border-radius: 32rpx;
-        background-color: #1A5DE1;
+        background-color: #1a5de1;
         color: #fff;
         margin: 0;
       }
@@ -63,6 +64,36 @@
         display: block;
         margin-bottom: 20rpx;
       }
+    }
+  }
+  .controls {
+    position: fixed;
+    left: 46rpx;
+    right: 50rpx;
+    bottom: 104rpx;
+    z-index: 198;
+    .icon {
+      position: relative;
+      width: 120rpx;
+      height: 120rpx;
+      z-index: 199;
+    }
+    .auth-btn {
+      margin: 0;
+    }
+    .part-btn {
+      width: 256rpx;
+      height: 100rpx;
+      line-height: 100rpx;
+      text-align: center;
+      background-color: #1360e1;
+      border-radius: 48rpx;
+      color: #fff;
+      letter-spacing: 2rpx;
+      margin-left: 30rpx;
+    }
+    .btn-box {
+      margin-top: 6rpx;
     }
   }
 }

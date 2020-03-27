@@ -1,7 +1,7 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-vote-detail" wx:if="{{voteData}}">
     <view class="detail-header">
-      <view class="detail-header__title font-size--30">作品名称</view>
+      <view class="detail-header__title font-size--30">作品名称：{{ voteData.title }}</view>
       <view class="detail-header__cover">
         <image src="{{ voteData.cover }}" class="cover-img" mode="aspectFill"></image>
       </view>
@@ -14,13 +14,13 @@
       </view>
       <view class="wow-flex is-align-middle is-justify-space-between font-size--30 detail-header__action">
         <view class="vote-num">{{ voteData.vote }}票</view>
-        <button wx:if="{{userId}}" @tap.stop="handleToVote" class="vote-btn font-size--30">投TA一票</button>
+        <button wx:if="{{userId}}" @tap.stop="handleToVote" class="vote-btn font-size--30">{{ buttonText }}</button>
         <button
           wx:else
           data-type="vote"
           open-type="getPhoneNumber"
           bindgetphonenumber="getPhoneNumber"
-          class="vote-btn open-type-btn font-size--26">投TA一票
+          class="vote-btn open-type-btn font-size--26">{{ buttonText }}
         </button>
       </view>
     </view>
@@ -31,7 +31,37 @@
       </view>
 
       <view class="detail-imgs" wx:if="{{voteData.images.length}}">
-        <image wx:for="{{voteData.images}}" src="{{item}}" class="detail-img" mode="aspectFill"></image>
+        <image wx:for="{{voteData.images}}" wx:key="index" src="{{item}}" class="detail-img" mode="aspectFill"></image>
+      </view>
+    </view>
+
+    <!-- 评论 -->
+    <commet
+      :isShowCommetInput.sync="isShowCommetInput"
+      :userId.sync="userId"
+      :commetList.sync="commetList"
+      :commetTotal.sync="commetTotal"
+    ></commet>
+
+    <!-- 分享 -->
+    <share></share>
+
+    <view class="controls wow-flex is-justify-space-between" wx:if="{{isShowControls}}">
+      <image wx:if="{{userId}}" @tap.stop="handleShowCommetInput" class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      <button wx:else data-type="activityCommet" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber" class="auth-btn open-type-btn">
+        <image class="icon" src="../../images/common/ico_comment.png" mode="aspectFill"></image>
+      </button>
+      <view class="wow-flex">
+        <image @tap.stop="handleShareItems" class="icon" src="../../images/common/ico_share.png" mode="aspectFill"></image>
+        <view class="btn-box">
+          <button wx:if="{{userId}}" @tap.stop="handleToVote" class="part-btn open-type-btn">{{ buttonText }}</button>
+          <button
+            wx:else
+            data-type="vote"
+            open-type="getPhoneNumber"
+            bindgetphonenumber="getPhoneNumber"
+            class="part-btn open-type-btn">{{ buttonText }}</button>
+        </view>
       </view>
     </view>
   </view>
@@ -40,11 +70,18 @@
 <script>
 import wepy from 'wepy'
 import activityApis from '@/api/activity'
+import shareApis from '@/api/share'
 import CommonMixin from '@/mixins/common'
-
+import Commet from '@/components/commet'
+import Share from '@/components/share'
+import commetApis from '@/api/commet'
+import { timeHandle } from '@/utils/commentTimeHandle'
 export default class voteDetail extends wepy.page {
   config = {
-    navigationBarTitleText: '作品详情'
+    navigationBarTitleText: '作品详情',
+    usingComponents: {
+      'wow-popup': '../../packages/popup/index'
+    }
   }
   data = {
     voteData: '',
@@ -52,12 +89,120 @@ export default class voteDetail extends wepy.page {
     activityId: '',
     userId: '',
     validShowData: {},
-    invisibleData: {}
+    invisibleData: {},
+    isShowControls: true,
+    buttonText: '投TA一票',
+    commetList: [],
+    commetTotal: 0,
+    isShowCommetInput: false,
+    sendInfo: ''
+  }
+  components = {
+    commet: Commet,
+    share: Share
   }
   mixins = [CommonMixin]
+  events = {
+    handleSharePoster () {
+      this.getSharePoster()
+    },
+    handleCloseCommetMask () {
+      this.isShowCommetInput = false
+      this.isShowControls = true
+    },
+    handleGetInfo (val) {
+      this.sendInfo = val
+    },
+    async handleSendInfo () {
+      try {
+        if (!this.sendInfo) return
+        wx.showLoading({
+          title: '发送中',
+          mask: true
+        })
+        const { voteId, sendInfo } = this
+        const opts = {
+          competitionId: voteId,
+          content: sendInfo
+        }
+        await commetApis.insertActivityCompetitionComment(opts)
+        wepy.$instance.globalData.subpub.off('activityCommet', this.handleActivityCommet)
+        this.sendInfo = ''
+        this.$broadcast('handleClearInput', this.sendInfo)
+        this.getCompetitionComment()
+        wx.hideLoading()
+        this.$apply()
+      } catch (error) {
+        wx.hideLoading()
+      }
+    }
+  }
   methods = {
     handleToVote () {
       this.handleVote()
+    },
+    handleShowCommetInput () {
+      this.handleActivityCommet()
+    },
+    handleShareItems () {
+      this.$broadcast('handleShowSharePopup')
+    },
+    handleToSend () {
+      this.handleActivityStatus()
+    }
+  }
+  async getCompetitionComment () {
+    try {
+      const opts = {
+        competitionId: this.voteId
+      }
+      const { data: commetData } = await commetApis.getActivityCompetitionComment(opts)
+      commetData.data.length && commetData.data.forEach(item => {
+        item.createTime = timeHandle(item.createTime.replace(/-/g, '/'))
+      })
+      this.commetList = commetData.data
+      this.commetTotal = commetData.total
+      this.isShowCommetInput = false
+      this.isShowControls = true
+      this.$apply()
+      return commetData
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  handleActivityCommet (e) {
+    if (e) {
+      wepy.$instance.globalData.userId = e
+      this.userId = e
+    }
+    this.isShowControls = false
+    this.isShowCommetInput = true
+    this.$apply()
+  }
+  async getSharePoster () {
+    try {
+      wx.showLoading({
+        title: '生成中',
+        mask: true
+      })
+      const { voteId, activityId } = this
+      const opts = {
+        type: 'competition',
+        id: voteId,
+        page: 'pages/vote/detail',
+        scene: `voteId=${voteId}&activityId=${activityId}`
+      }
+      const { data } = await shareApis.createSharePoster(opts)
+      this.$wxpage.selectComponent('.wow_share').hide()
+      wx.previewImage({
+        current: data,
+        urls: [data]
+      })
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
     }
   }
   handleToAuth (e) {
@@ -66,6 +211,15 @@ export default class voteDetail extends wepy.page {
       this.userId = e
       this.handleVote()
       this.$apply()
+    }
+  }
+  onShareAppMessage () {
+    const { voteId, activityId, voteData } = this
+    this.$wxpage.selectComponent('.wow_share').hide()
+    return {
+      title: voteData.title,
+      imageUrl: voteData.cover,
+      path: `pages/vote/detail?voteId=${voteId}&activityId=${activityId}`
     }
   }
   async handleVote () {
@@ -81,14 +235,23 @@ export default class voteDetail extends wepy.page {
       }
       let { data } = await activityApis.postCompetitionVote(opts)
       let { result, type, vote } = data
-      wx.showToast({ title: result, duration: 2000 })
+      wx.hideLoading()
       if (vote) {
         this.voteData.vote = vote
       }
       if (type === 1 && vote) { // 自己给自己投票
         wepy.$instance.globalData.subpub.emit('afterVote', vote)
       }
-      wx.hideLoading()
+      wx.nextTick(() => {
+        wx.showToast({
+          title: result,
+          success: function () {
+            setTimeout(() => {
+              wx.hideToast()
+            }, 2000)
+          }
+        })
+      })
       this.$apply()
     } catch (error) {
       console.log(error)
@@ -110,13 +273,19 @@ export default class voteDetail extends wepy.page {
     const params = {
       activityId
     }
-    Promise.all([activityApis.getCompetitionDetail(opts), activityApis.getActivityCompetitionData(params)]).then(res => {
+    Promise.all([
+      activityApis.getCompetitionDetail(opts),
+      activityApis.getActivityCompetitionData(params),
+      this.getCompetitionComment()
+    ]).then(res => {
       let { images } = res[0].data
       res[0].data.images = images.filter(Boolean)
       this.voteData = res[0].data
       const { visibleData, invisibleData } = res[1].data
       this.validShowData = visibleData
       this.invisibleData = invisibleData
+      wepy.$instance.globalData.subpub.on('activityCommet', this.handleActivityCommet, this)
+      wepy.$instance.globalData.subpub.on('activity', this.handleActivityStatus, this)
       this.$apply()
       wx.hideLoading()
     }).catch(e => {

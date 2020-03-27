@@ -78,7 +78,7 @@ export default class activity extends base {
    * 搜索作品
    */
   static getSearchCompetition(opts) {
-    return this.get(`api/activityCompetition/searchCompetition`, opts);
+    return this.post(`api/activityCompetition/searchCompetition`, opts);
   }
   /**
    * 编辑作品

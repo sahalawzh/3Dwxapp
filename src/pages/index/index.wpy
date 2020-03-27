@@ -442,7 +442,7 @@ export default class Index extends wepy.page {
         activityList = []
       }
       this.activityList = activityList.concat(actData.data)
-      if (actData.data.length >= actData.total) {
+      if (this.activityList.length >= actData.total) {
         this.hasMoreData = false
       } else {
         this.hasMoreData = true

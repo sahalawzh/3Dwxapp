@@ -1,7 +1,7 @@
 <!--miniprogram/customTabBar/index.wxml-->
 <view class="tab-bar {{ isModelIPX ? 'tab-bar__heightX' : '' }}">
   <view class="tab-bar-border"></view>
-  <block wx:for="{{tabbar.list}}" wx:key="{{item.pagePath}}">
+  <block wx:for="{{tabbar.list}}" wx:key="{{index}}">
     <navigator hover-class="none" url="{{item.pagePath}}" style="color:{{item.selected ? tabbar.selectedColor : tabbar.color}}" open-type="switchTab" class="tab-bar-item">
       <image class="tab-icon" mode="aspectFill" src="{{item.selected ? item.selectedIconPath : item.iconPath}}"></image>
       <view class="tab-text">{{item.text}}</view>

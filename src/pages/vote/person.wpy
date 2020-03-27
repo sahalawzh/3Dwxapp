@@ -1,6 +1,14 @@
 <template lang="wxml" miniapp="wepy">
   <view class="page-contain page-vote-upload" wx:if="{{voteData}}">
     <view class="form-container">
+      <view class="form-item wow-flex is-align-middle font-size--28">
+        <view class="form-item__label">
+          作品名称
+        </view>
+        <view class="form-item__body">
+          <view>{{voteData.title}}</view>
+        </view>
+      </view>
       <view class="form-item wow-flex is-align-middle font-size--28" wx:for="{{ validShowData }}" wx:key="index">
         <view class="form-item__label">
           {{ item }}
@@ -44,7 +52,6 @@
 <script>
 import wepy from 'wepy'
 import activityApis from '@/api/activity'
-// import wxutils from '@/utils/wxutils'
 const voteBtnTag = {
   0: '作品审核中',
   1: '审核通过',
@@ -86,7 +93,7 @@ export default class VoteUpload extends wepy.page {
       this.validShowData = visibleData
       this.invisibleData = invisibleData
       let { images } = res[1].data
-      res[0].data.images = images.filter(Boolean)
+      res[1].data.images = images.filter(Boolean)
       this.voteData = res[1].data
       this.voteStatus = res[2].data
       wx.hideLoading()

@@ -22,7 +22,7 @@
       </view>
 
       <goodsTab :order.sync="order" :type.sync="types"></goodsTab>
-    </view> 
+    </view>
 
     <view class="goods">
       <goodList :list.sync="lists" :listImage.sync="listImage" wx:if="{{lists.length}}"></goodList>
@@ -214,7 +214,7 @@
           item.finishLoadFlag = false
         })
         this.lists = lists.concat(data)
-        if (total < limits) {
+        if (this.lists.length >= total) {
           this.hasMoreData = false
         } else {
           this.hasMoreData = true
