@@ -122,7 +122,7 @@
           <image class="title-icon" src="../../images/mall/ico_shop_recommend.png" mode="aspectFill"></image>
           <view>小编推荐</view>
         </view>
-        <goodList :list.sync="lists"></goodList>
+        <goodList :list.sync="lists" :listImage.sync="listImage"></goodList>
       </view>
     </view>
   </view>
@@ -199,7 +199,12 @@ export default class Cart extends wepy.page {
     select: {},
     indexs: '',
     isCheckLease: false,
-    max: 99
+    max: 99,
+    listImage: {
+      imageWidth: 0,
+      imageHeight: 0,
+      imageQuality: 100
+    }
   }
   async getCartList () {
     try {
@@ -257,9 +262,15 @@ export default class Cart extends wepy.page {
       console.log(error)
     }
   }
+  handleImageQuality () {
+    this.listImage.imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px)
+    this.listImage.imageHeight = Math.ceil(251 * wx.rpx2px * 2)
+    this.listImage.imageQuality = wx.imageQuality
+  }
   onLoad ({ userId }) {
     this.userId = wepy.$instance.globalData.userId
     this.getCartList()
+    this.handleImageQuality()
   }
   onReachBottom () {
     if (this.hasMoreData) {

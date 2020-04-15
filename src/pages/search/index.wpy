@@ -13,16 +13,18 @@
           auto-focus
           bindconfirm="handleToSearch"
           value="{{searchVal}}"
-          class="control font-size--28"/>  
+          class="control font-size--28"/>
       </view>
-    </view> 
+    </view>
 
     <view class="goods" wx:if="{{lists.length}}">
       <block wx:if="{{lastpage === 'index'}}">
         <videoList :lists.sync="lists" :listImage.sync="listImage" wx:if="{{dropVal.id !== -2}}"></videoList>
         <forumList :lists.sync="lists" wx:else></forumList>
       </block>
-      <goodList :list.sync="lists" wx:else></goodList>
+      <view wx:else class="goods-list">
+        <goodList :list.sync="lists" :listImage.sync="listImage"></goodList>
+      </view>
     </view>
 
     <block wx:else>

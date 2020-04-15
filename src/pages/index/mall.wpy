@@ -1,9 +1,9 @@
 
 <template lang="wxml" miniapp="wepy">
-  <view class="page-contain pages-mall">  
+  <view class="page-contain pages-mall">
     <!-- 轮播 -->
     <banner :bannerAdv.sync="bannerAdv" :bannerImage.sync="bannerImage" :bannerImage.sync="bannerImage"></banner>
-    
+
     <search :userId.sync="userId" :cartNum.sync="cartNum"></search>
     <!-- 类型材质 -->
     <types></types>
