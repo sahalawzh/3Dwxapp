@@ -1,6 +1,12 @@
 
 <template lang="wxml" miniapp="wepy">
   <view class="page-index__position">
+
+    <navigator url="/pages/live/index" class="cart-icon open-type-btn live-icon">
+      <view class="live-icon__text" wx:if="{{ liveStatus === 1 }}">正在直播</view>
+      <image src="../../../images/live/ico_live.png" mode="aspectFill"></image>
+    </navigator>
+
     <navigator url="/pages/cart/index" wx:if="{{userId}}" class="cart-icon open-type-btn">
       <image src="../../../images/common/btn_cart_default.png" mode="aspectFill"></image>
       <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
@@ -9,7 +15,7 @@
       <image src="../../../images/common/btn_cart_default.png" mode="aspectFill"></image>
       <view class="cart-icon__sign" wx:if="{{cartNum}}"></view>
     </button>
-    
+
     <navigator url="/pages/person/index" wx:if="{{userId}}" class="person-icon open-type-btn">
       <image src="../../../images/common/btn_user_normal.png" mode="aspectFill"></image>
     </navigator>
@@ -28,7 +34,11 @@
   export default class Silder extends wepy.component {
     props = {
       userId: [String, Number],
-      cartNum: [String, Number]
+      cartNum: [String, Number],
+      liveStatus: {
+        type: Number,
+        default: 0
+      }
     }
     mixins = [CommonMixin]
     data = {

@@ -20,11 +20,17 @@
       ></advertising>
 
       <!-- 发现滚动活动 -->
-      <activityScroll
-        wx:if="{{activityList.length && navType === -1}}"
-        :activityList.sync="activityList"
-        :activitySrcollImage.sync="activitySrcollImage"
-      ></activityScroll>
+      <block wx:if="{{navType === -1}}">
+        <activityScroll
+          wx:if="{{activityList.length}}"
+          :activityList.sync="activityList"
+          :activitySrcollImage.sync="activitySrcollImage"
+        ></activityScroll>
+
+        <liveList
+          wx:if="{{liveList.length}}"
+          :liveList.sync="liveList"></liveList>
+      </block>
 
       <videoList
         :lists.sync="videoActivityList"
@@ -74,7 +80,7 @@
 
     </block>
 
-    <silder :userId.sync="userId" :cartNum.sync="cartNum"></silder>
+    <silder :userId.sync="userId" :cartNum.sync="cartNum" :liveStatus.sync="liveStatus"></silder>
 
     <custom-tabbar wx:if="{{tabbar}}" tabbar="{{tabbar}}" isModelIPX="{{isModelIPX}}"></custom-tabbar>
 
@@ -109,6 +115,8 @@ import { timeHandle } from '@/utils/commentTimeHandle'
 import CommonMixin from '@/mixins/common'
 import configApis from '@/api/config'
 import imageUtil from '@/utils/image'
+import liveApis from '@/api/live'
+import LiveList from '@/components/liveItem'
 export default class Index extends wepy.page {
   config = {
     navigationBarTitleText: '无限三维',
@@ -130,7 +138,8 @@ export default class Index extends wepy.page {
     topicNav: TopicNav,
     nav: Nav,
     advertising: Advertising,
-    forumBtn: ForumBtn
+    forumBtn: ForumBtn,
+    liveList: LiveList
   }
   computed = {
     hasData (val) {
@@ -203,7 +212,9 @@ export default class Index extends wepy.page {
     template: '',
     viewImg: 'https://wxsw.oss-cn-hangzhou.aliyuncs.com/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20191115172059.jpg',
     imageReviewWidth: '',
-    imageReviewHeight: ''
+    imageReviewHeight: '',
+    liveStatus: 0,
+    liveList: []
   }
   watch = {
     actType (val) {
@@ -392,7 +403,6 @@ export default class Index extends wepy.page {
       } else {
         this.videoActivityList = [...videoActivityList, ...videoDOList]
       }
-      console.log(this.videoActivityList)
       if (this.videoActivityList.length >= total) {
         this.hasMoreData = false
       } else {
@@ -483,10 +493,27 @@ export default class Index extends wepy.page {
     wx.hideTabBar()
     wepy.$instance.editTabbar()
     this.isModelIPX = wepy.$instance.globalData.isModelIPX
-    this.getVersion()
-    this.resetFn()
-    this.getAdvertisement()
-    this.getPrintGuide()
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    Promise.all([
+      liveApis.getLiveStatus(),
+      liveApis.listLiveShow(),
+      this.getVersion(),
+      this.resetFn(),
+      this.getAdvertisement(),
+      this.getPrintGuide()
+    ]).then(res => {
+      console.log(res)
+      const [ liveStatusData, liveListData ] = res
+      this.liveStatus = liveStatusData.data
+      this.liveList = liveListData.data
+      wx.hideLoading()
+    }).catch((err) => {
+      console.log(err)
+      wx.hideLoading()
+    })
     wepy.$instance.globalData.subpub.on('auth', this.handleAuth, this)
     this.$apply()
   }

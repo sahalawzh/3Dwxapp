@@ -135,6 +135,7 @@ import GoodList from '@/components/goodList'
 import goodsApi from '@/api/goods'
 import wxutils from '@/utils/wxutils'
 import commonwxs from './wxs/common.wxs'
+import FormIdMixins from '@/mixins/formId'
 export default class Cart extends wepy.page {
   config = {
     navigationBarTitleText: '购物车',
@@ -144,6 +145,7 @@ export default class Cart extends wepy.page {
       'wow-stepper': '../../packages/stepper/index'
     }
   }
+  mixins = [ FormIdMixins ]
   wxs = {
     commonwxs: commonwxs
   }

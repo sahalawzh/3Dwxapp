@@ -1,0 +1,193 @@
+<template lang="wxml" miniapp="wepy">
+  <view class="live-page">
+    <view class="live-bg"></view>
+    <view class="live" wx:if="{{roomList.length > 0}}">
+      <view class="live-header">
+        <image class="ico_livelist" mode="aspectFill" src='../../images/live/ico_livelist.png'></image>
+        <view class="font-size--28">所有直播</view>
+      </view>
+
+      <liveList
+        wx:if="{{roomList.length}}"
+        :liveList.sync="roomList"></liveList>
+
+      <view class="live-recommed">
+        <view class="live-recommed__title">精彩推荐</view>
+        <view class="live-recommed__item wow-flex is-align-middle" wx:for="{{recommedList}}" wx:key="index">
+          <view class="recommed-cover">
+            <image mode="aspectFill" src="{{ item.coverImg }}"></image>
+          </view>
+          <view class="recommed-content">
+            <view class="title">
+              <wow-elip line="2">{{ item.name }}</wow-elip>
+            </view>
+            <view class="anchor-name">{{ item.anchorName }}</view>
+            <view class="hot-box wow-flex is-align-middle">
+              <image class="ico_hot" mode="aspectFill" src="../../images/live/ico_hot.png" lazy-load></image>
+              <view class="font-size--28">{{ item.hot }}热度</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="live-empty" wx:if="{{ loading && list.length === 0}}">
+      没有直播计划哦
+    </view>
+  </view>
+</template>
+<script>
+import liveApis from '@/api/live'
+import wepy from 'wepy'
+import LiveList from '@/components/liveItem'
+// const roomStatus = {
+//   101: '直播中',
+//   102: '未开始',
+//   103: '已结束',
+//   104: '禁播',
+//   105: '暂停中',
+//   106: '异常',
+//   107: '已过期'
+// }
+// eslint-disable-next-line no-undef
+// var livePlayer = requirePlugin('live-player-plugin')
+export default class Live extends wepy.page {
+  config = {
+    navigationBarTitleText: '直播',
+    usingComponents: {
+      'subscribe': 'plugin-private://wx2b03c6e691cd7370/components/subscribe/subscribe',
+      'wow-elip': '../../packages/elip/index'
+    }
+  }
+  components = {
+    liveList: LiveList
+  }
+  data = {
+    roomList: [],
+    loading: false,
+    start: 1,
+    limit: 5,
+    hasMoreData: false,
+    recommedList: []
+  }
+  methods = {
+  }
+  onReachBottom () {
+    if (this.hasMoreData) {
+      this.getLiveList()
+      wx.stopPullDownRefresh()
+    }
+  }
+  async getLiveList () {
+    wx.showLoading({ title: '加载中' })
+    try {
+      const { data } = await liveApis.liveRoomList()
+      this.roomList = data
+      let { start, limit, recommedList } = this
+      const opts = {
+        start,
+        limit
+      }
+      const { data: recommedData } = await liveApis.highlights(opts)
+      if (start === 1) {
+        recommedList = []
+      }
+      this.recommedList = recommedList.concat(recommedData.data)
+      this.hasMoreData = this.recommedList.length < recommedData.total
+      if (this.hasMoreData) {
+        this.start++
+      }
+      console.log(this.recommedList)
+      wx.hideLoading()
+      this.$apply()
+    } catch (e) {
+      this.loading = true
+      wx.hideLoading()
+    }
+  }
+  onShow () {
+    this.getLiveList()
+  }
+}
+</script>
+<style lang='postcss'>
+.live-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 546rpx;
+  width: 100%;
+  background: linear-gradient(to bottom, #d9e4fa, #fff);
+}
+.live {
+  padding: 30rpx 0 20rpx;
+  background-color: #f8f8f8;
+  &-header {
+    position: relative;
+    color: #373737;
+    font-weight: 600;
+    padding: 30rpx 50rpx;
+    display: inline-flex;
+    align-items: center;
+    .ico_livelist {
+      width: 38rpx;
+      height: 28rpx;
+      margin-right: 10rpx;
+    }
+  }
+  &-empty {
+    font-size: 30rpx;
+    text-align: center;
+    color: #808080;
+    padding: 100rpx 30rpx;
+  }
+  &-recommed {
+    padding: 36rpx 0 90rpx;
+    background-color: #fff;
+    &__title {
+      font-size: 32rpx;
+      color: #000;
+      font-weight: 600;
+      padding: 0 50rpx;
+    }
+    &__item {
+      position: relative;
+      padding: 32rpx 52rpx;
+      .recommed-cover {
+        width: 284rpx;
+        height: 160rpx;
+        border-radius: 20rpx;
+        overflow: hidden;
+        image {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .recommed-content {
+        flex: 1;
+        color: #4a4a4a;
+        margin-left: 22rpx;
+        .title {
+          font-size: 30rpx;
+          font-weight: 600;
+          min-height: 74rpx;
+          margin-bottom: 10rpx;
+        }
+        .anchor-name {
+          margin-bottom: 12rpx;
+          font-size: 28rpx;
+        }
+        .hot-box {
+          font-size: 24rpx;
+          color: #ccc;
+          font-weight: 500;
+          .ico_hot {
+            width: 20rpx;
+            height: 24rpx;
+            margin-right: 8rpx;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,30 @@
+module.exports = {
+  class: function (status) {
+    if (status === 101) {
+      return 'ing'
+    } else if (status === 102) {
+      return 'begin'
+    } else if (status === 103) {
+      return 'end'
+    } else {
+      return 'default'
+    }
+  },
+  name: function (status) {
+    if (status === 101) {
+      return '直播中'
+    } else if (status === 102) {
+      return '即将开始'
+    } else if (status === 103) {
+      return '直播回放'
+    } else if (status === 104) {
+      return '禁播种'
+    } else if (status === 105) {
+      return '暂停中'
+    } else if (status === 106) {
+      return '异常'
+    } else if (status === 107) {
+      return '已过期'
+    }
+  }
+}
