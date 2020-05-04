@@ -1,0 +1,103 @@
+<template>
+  <view class="course-container">
+    <videoList
+      :lists.sync="courseList"
+      :listImage.sync="listImage"
+      wx:if="{{courseList.length}}"></videoList>
+    <view class="empty-list" wx:else>暂无视频数据~</view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import VideoList from '@/components/videoList'
+import videoApis from '@/api/video'
+export default class CourseList extends wepy.page {
+  config = {
+    navigationBarTitleText: '视频列表'
+  }
+  data = {
+    start: 1,
+    limits: 5,
+    courseList: [],
+    hasMoreData: false,
+    categoryId: ''
+  }
+  components = {
+    videoList: VideoList
+  }
+  onReachBottom () {
+    if (this.hasMoreData) {
+      this.getCourseList()
+    }
+  }
+  async getCourseList () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      let { start, limits, courseList, categoryId } = this
+      const opts = {
+        start,
+        limits
+      }
+      if (categoryId) {
+        opts.categoryId = categoryId
+      }
+      let videoList = []
+      let totalNum = 0
+      if (categoryId) {
+        const { data: videoData } = await videoApis.getListVideoByCategory(opts)
+        const { data: videoVOList, total } = videoData
+        videoList = videoVOList
+        totalNum = total
+      } else {
+        const { data: videoData } = await videoApis.listVideoForum(opts)
+        const { videoVOList, total } = videoData
+        videoList = videoVOList
+        totalNum = total
+      }
+      if (start === 1) {
+        courseList = []
+      }
+      this.courseList = [...courseList, ...videoList]
+      if (this.courseList.length >= totalNum) {
+        this.hasMoreData = false
+      } else {
+        this.hasMoreData = true
+        this.start++
+      }
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  computed = {
+    listImage () {
+      let imageWidth = Math.ceil((wx.windowWidth * 2 - 52 * 2) * wx.rpx2px) || 0
+      let imageHeight = Math.ceil(251 * wx.rpx2px * 2) || 0
+      let imageQuality = wx.imageQuality || 100
+      return {
+        imageWidth,
+        imageHeight,
+        imageQuality
+      }
+    }
+  }
+  onLoad ({ categoryId }) {
+    this.categoryId = categoryId
+    this.getCourseList()
+  }
+}
+</script>
+<style lang="postcss" scoped>
+.course-container {
+  .empty-list {
+    font-size: 28rpx;
+    color: #474747;
+    padding: 120rpx 0;
+    text-align: center;
+  }
+}
+</style>

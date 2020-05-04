@@ -1,0 +1,102 @@
+<template>
+	<view class="category-conatiner">
+
+		<view class="category-content wow-flex">
+			<scroll-view scroll-y class="left-aside">
+				<view
+					wx:for="{{cateList}}"
+					wx:key="index"
+					class="aside-item"
+          @tap.stop="handleToViewList({{ item.categoryId }})"
+					:class="{'active': item.categoryId === currentCategoryId }">{{ item.name }}</view>
+			</scroll-view>
+			<scroll-view scroll-with-animation scroll-y class="right-aside">
+				<block wx:if="{{childCateList.length}}">
+          <view
+            class="category-item {{ currentChildIndex === index ? 'active' : ''}}"
+            wx:for="{{ childCateList }}"
+            @tap.stop="handleVideoList({{item.categoryId}}, {{index}})"
+            wx:key="index">
+            {{item.name}}
+          </view>
+        </block>
+        <view class="empty-content" wx:else>暂无数据~</view>
+			</scroll-view>
+		</view>
+
+	</view>
+</template>
+<script>
+import wepy from 'wepy'
+import videoApis from '@/api/video'
+import wxutils from '@/utils/wxutils'
+export default class LiveCategory extends wepy.page {
+  config = {
+    navigationBarTitleText: '视频分类',
+    usingComponents: {
+      'wow-elip': '../../packages/elip/index'
+    }
+  }
+  watch = {
+    currentLiveType (val) {
+      // this.getCategoryDetail(val)
+    }
+  }
+  data = {
+    cateList: [],
+    currentCategoryId: 1,
+    start: 1,
+    limit: 10,
+    hasMoreData: false,
+    currentChildIndex: ''
+  }
+  computed = {
+    childCateList () {
+      let currentItem = this.cateList.length && this.cateList.filter(item => item.categoryId === this.currentCategoryId)[0]
+      return currentItem.list || []
+    }
+  }
+  methods = {
+    handleVideoList (categoryId, index) {
+      this.currentChildIndex = index
+      wxutils.backOrNavigate(`/pages/courseList/index?categoryId=${categoryId}`)
+    },
+    handleToViewList (categoryId) {
+      if (categoryId === 0) {
+        wxutils.backOrNavigate('/pages/courseList/index')
+      } else {
+        this.currentCategoryId = categoryId
+      }
+    }
+  }
+  onReachBottom () {
+    if (this.hasMoreData) {
+      this.getCategoryData()
+      wx.stopPullDownRefresh()
+    }
+  }
+  async getCategoryData () {
+    try {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      const { data } = await videoApis.getListVideoCategory()
+      this.cateList = data
+      this.cateList.unshift({name: '热门', categoryId: 0})
+      wx.hideLoading()
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+      wx.hideLoading()
+    }
+  }
+  onLoad () {
+    this.getCategoryData()
+  }
+}
+</script>
+
+<style lang="postcss" scoped>
+@import 'src/styles/pages/videoCategory/common.postcss';
+</style>

@@ -67,7 +67,9 @@ export default class extends wepy.app {
       'pages/vote/upload',
       'pages/vote/person',
       'pages/live/index',
-      'pages/live/category'
+      'pages/live/category',
+      'pages/videoCategory/index',
+      'pages/courseList/index'
     ],
     tabBar: {
       backgroundColor: '#ffffff',

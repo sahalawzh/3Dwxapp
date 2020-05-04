@@ -80,4 +80,18 @@ export default class video extends base {
   static getVideoHeatSearch (opts) {
     return this.get(`api/video/getHeatSearch`, opts)
   }
+  /**
+   * 视频分类
+   * @param {object} opts 参数
+   */
+  static getListVideoCategory (opts) {
+    return this.get(`api/videoCategory/listVideoCategory`, opts)
+  }
+  /**
+   * 根据分类id获取list
+   * @param {object} opts 参数
+   */
+  static getListVideoByCategory (opts) {
+    return this.get(`api/video/listVideoByCategory`, opts)
+  }
 }

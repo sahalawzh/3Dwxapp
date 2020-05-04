@@ -69,7 +69,7 @@
       <view class="font-size--26 title">相关商品</view>
       <view class="products-layout">
         <view class="mall-scroll-content">
-          <scroll-view 
+          <scroll-view
             class="mall-scroll"
             scroll-x="true">
             <navigator url="/pages/detail/index?id={{item.id}}" class="scroll-view-item" wx:for="{{info.spuVO}}" wx:key="item">

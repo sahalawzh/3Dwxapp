@@ -1,6 +1,11 @@
 
 <template>
   <view class="page-index__nav wow-flex is-justify-space-around">
+    <view class="nav-item wow-flex is-align-middle {{navType === 1 ? 'active' : ''}}" @tap.stop="handleNav({{1}})">
+      <image class="ico_free" src="../../../images/common/ico_free.png" mode="aspectFill"></image>
+      <image class="icon" src="../../../images/common/ico_class.png" mode="aspectFill"></image>
+      <view class="value font-size--30">课程<view class="active-bar"></view></view>
+    </view>
     <view class="nav-item wow-flex is-align-middle" @tap.stop="handleToSearch">
       <image class="icon" src="../../../images/common/btn_bar_search_black.png" mode="aspectFill"></image>
       <view class="value font-size--30">搜索<view class="active-bar"></view></view>
@@ -8,11 +13,6 @@
     <view class="nav-item wow-flex is-align-middle {{navType === -1 ? 'active' : ''}}" @tap.stop="handleNav({{-1}})">
       <image class="icon" src="../../../images/common/ico_index.png" mode="aspectFill"></image>
       <view class="value font-size--30">发现<view class="active-bar"></view></view>
-    </view>
-    <view class="nav-item wow-flex is-align-middle {{navType === 1 ? 'active' : ''}}" @tap.stop="handleNav({{1}})">
-      <image class="ico_free" src="../../../images/common/ico_free.png" mode="aspectFill"></image>
-      <image class="icon" src="../../../images/common/ico_class.png" mode="aspectFill"></image>
-      <view class="value font-size--30">课程<view class="active-bar"></view></view>
     </view>
     <view class="nav-item wow-flex is-align-middle {{navType === 'topic' ? 'active' : ''}}" @tap.stop="handleNav({{'topic'}})">
       <image class="icon" src="../../../images/common/ico_activity.png" mode="aspectFill"></image>
@@ -39,7 +39,12 @@
     methods = {
       handleNav (type) {
         if (this.navType === type) return
-        this.$emit('handleNav', type)
+        if (type === 1) {
+          wxutils.backOrNavigate('/pages/videoCategory/index')
+        } else {
+          this.$emit('handleNav', type)
+        }
+        // this.$emit('handleNav', type)
       },
       handleToSearch () {
         wxutils.backOrNavigate('/pages/search/index?form=index')

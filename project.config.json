@@ -59,9 +59,23 @@
 					"scene": null
 				},
 				{
+					"id": -1,
+					"name": "直播",
+					"pathName": "pages/live/index",
+					"query": "",
+					"scene": null
+				},
+				{
+					"id": 2,
+					"name": "直播分类",
+					"pathName": "pages/live/category",
+					"query": "",
+					"scene": null
+				},
+				{
 					"id": 1,
 					"name": "视频分类",
-					"pathName": "pages/live/category",
+					"pathName": "pages/videoCategory/index",
 					"query": "linkId=1",
 					"scene": null
 				},
@@ -349,13 +363,6 @@
 					"id": -1,
 					"name": "模型",
 					"pathName": "pages/model/index",
-					"query": "",
-					"scene": null
-				},
-				{
-					"id": -1,
-					"name": "直播",
-					"pathName": "pages/live/index",
 					"query": "",
 					"scene": null
 				}

@@ -29,6 +29,7 @@
 
         <liveList
           wx:if="{{liveList.length}}"
+          :source.sync="pageSource"
           :liveList.sync="liveList"></liveList>
       </block>
 
@@ -214,7 +215,8 @@ export default class Index extends wepy.page {
     imageReviewWidth: '',
     imageReviewHeight: '',
     liveStatus: 0,
-    liveList: []
+    liveList: [],
+    pageSource: 'index'
   }
   watch = {
     actType (val) {
@@ -391,7 +393,7 @@ export default class Index extends wepy.page {
         videoType: navType
       }
       let { data: indexData } = await videoApis.listVideoForum(opts)
-      const { videoDOList, total, forumVOList } = indexData
+      const { videoVOList, total, forumVOList } = indexData
       if (start === 1) {
         videoActivityList = []
       }
@@ -399,9 +401,9 @@ export default class Index extends wepy.page {
         item.time = timeHandle(item.createTime)
       })
       if (navType === -1) {
-        this.videoActivityList = [...videoActivityList, ...forumVOList, ...videoDOList]
+        this.videoActivityList = [...videoActivityList, ...forumVOList, ...videoVOList]
       } else {
-        this.videoActivityList = [...videoActivityList, ...videoDOList]
+        this.videoActivityList = [...videoActivityList, ...videoVOList]
       }
       if (this.videoActivityList.length >= total) {
         this.hasMoreData = false

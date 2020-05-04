@@ -8,33 +8,43 @@
 					wx:key="index"
 					class="aside-item"
           @tap.stop="handleChangeLiveType({{ item.liveType }})"
-					:class="{'active': item.liveType === currentLiveType }">{{ item.name }}</view>
-			</scroll-view>
-			<scroll-view scroll-with-animation scroll-y class="right-aside" wx:if="{{ cateLiveData.length }}">
-				<view class="category-item" wx:for="{{ cateLiveData }}">
-          <view class="category-item__status">
-            <text class="circle"></text>
-            <text>{{ item.liveStatusText }}</text>
-          </view>
-          <view class="category-item__time font-size--26">
-            {{ item.startTime }}
-          </view>
-          <wow-elip line="2" class="category-item__title font-size--28">
-            {{ item.anchorName }}
-          </wow-elip>
-          <wow-elip line="2" class="category-item__content font-size--28">
-            {{ item.name }}
-          </wow-elip>
+					:class="{'active': item.liveType === currentLiveType }">
+          {{ item.name }}
         </view>
 			</scroll-view>
-      <view class="empty-content" wx:else>暂无直播数据~</view>
+			<scroll-view scroll-with-animation scroll-y class="right-aside">
+				<block wx:if="{{ cateLiveData.length }}">
+          <view
+            wx:for="{{ cateLiveData }}"
+            @tap.stop="handleToScreenVideo({{ item.replyUrl }})"
+            class="category-item category-item-{{ListStatusWXS.class(item.liveStatus)}}">
+            <view class="category-item__status">
+              <text class="circle"></text>
+              <text>{{ ListStatusWXS.name(item.liveStatus) }}</text>
+            </view>
+            <view class="category-item__time font-size--26">
+              {{ item.startTime }}
+            </view>
+            <wow-elip line="2" class="category-item__title font-size--28">
+              {{ item.anchorName }}
+            </wow-elip>
+            <wow-elip line="2" class="category-item__content font-size--28">
+              {{ item.name }}
+            </wow-elip>
+          </view>
+        </block>
+        <view class="empty-content" wx:else>暂无直播数据~</view>
+			</scroll-view>
 		</view>
+
+    <video src="{{ videoLink }}" bindfullscreenchange="screenChange" direction="0" controls="true" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
 
 	</view>
 </template>
 <script>
 import wepy from 'wepy'
 import liveApis from '@/api/live'
+import ListStatusWXS from '../../wxs/liveStatus.wxs'
 const liveStatus = {
   101: '直播中',
   102: '即将开始', // 未开始
@@ -51,9 +61,11 @@ export default class LiveCategory extends wepy.page {
       'wow-elip': '../../packages/elip/index'
     }
   }
+  wxs = {
+    ListStatusWXS: ListStatusWXS
+  }
   watch = {
     currentLiveType (val) {
-      console.log(val)
       this.getCategoryDetail(val)
     }
   }
@@ -63,9 +75,24 @@ export default class LiveCategory extends wepy.page {
     start: 1,
     limit: 10,
     cateLiveData: [],
-    hasMoreData: false
+    hasMoreData: false,
+    videoOpacityStyle: 0,
+    videoLink: ''
   }
   methods = {
+    handleToScreenVideo (mp4) {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      this.videoOpacityStyle = 1
+      this.videoLink = mp4
+      this.videoContext.requestFullScreen()
+      setTimeout(() => {
+        this.videoContext.play()
+        wx.hideLoading()
+      }, 500)
+    },
     handleChangeLiveType (type) {
       this.currentLiveType = type
     }
@@ -82,7 +109,7 @@ export default class LiveCategory extends wepy.page {
       if (start === 1) {
         cateLiveData = []
       }
-      data.data.forEach(item => {
+      data.forEach(item => {
         item.liveStatusText = liveStatus[item.liveStatus]
       })
       this.cateLiveData = cateLiveData.concat(data.data)
@@ -90,8 +117,7 @@ export default class LiveCategory extends wepy.page {
       if (this.hasMoreData) {
         this.start++
       }
-      console.log(data)
-      this.cateLiveData = data.data
+      this.cateLiveData = data
       this.$apply()
     } catch (error) {
       console.log(error)
@@ -120,107 +146,12 @@ export default class LiveCategory extends wepy.page {
     }
   }
   onLoad () {
+    this.videoContext = wx.createVideoContext('videoId')
     this.getCategoryData()
   }
 }
 </script>
 
 <style lang="postcss" scoped>
-.category-conatiner {
-	width: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-	.category-content {
-		min-height: 100vh;
-	}
-	.left-aside {
-		position: fixed;
-		flex-shrink: 0;
-		width: 320rpx;
-    height: 100%;
-		background-color: #5e5e5e;
-		.aside-item {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			width: 100%;
-			height: 90rpx;
-			font-size: 28rpx;
-			color: #fff;
-			position: relative;
-      &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 1rpx;
-        transform: scaleY(0.5);
-        background-color: #cfcfcf;
-      }
-      &.active {
-        background-color: #fff;
-        color: #373737;
-      }
-		}
-	}
-	.right-aside{
-		flex: 1;
-		overflow: hidden;
-		background-color: #fff;
-    padding-top: 6rpx;
-    padding-left: 370rpx;
-		.category-item {
-			position: relative;
-			padding: 40rpx 30rpx 30rpx 6rpx;
-      &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 1rpx;
-        transform: scaleY(0.5);
-        background-color: #cfcfcf;
-      }
-      &__status {
-        padding: 6rpx 14rpx 8rpx 10rpx;
-        color: #bb2867;
-        border: 4rpx solid #bb2867;
-        border-radius: 12rpx;
-        display: inline-flex;
-        align-items: center;
-        font-weight: 600;
-        margin-bottom: 14rpx;
-        font-size: 30rpx;
-        .circle {
-          width: 18rpx;
-          height: 18rpx;
-          border-radius: 50%;
-          background-color: #bb2867;
-          margin-right: 8rpx;
-        }
-      }
-      &__time {
-        color: #cfcfcf;
-        margin-bottom: 10rpx;
-      }
-      &__title {
-        color: #373737;
-        padding-bottom: 8rpx;
-        display: block;
-      }
-      &__content {
-        color: #373737;
-      }
-		}
-	}
-  .empty-content {
-    flex: 1;
-    margin: 60rpx 0;
-    text-align: center;
-  }
-}
+ @import 'src/styles/pages/live/category.postcss';
 </style>

@@ -4,7 +4,7 @@
       <view class="live-info">
         <view class="live-info__hd wow-flex is-align-middle is-justify-space-between">
           <view class="wow-flex is-align-middle">
-            <image class="hd-img" mode="aspectFill" src="{{ item.coverImg }}"></image>
+            <image class="hd-img" mode="aspectFill" src="{{ item.anchorImg }}"></image>
             <view class="hd-name font-size--28">{{ item.anchorName }}</view>
           </view>
           <view class="hd-time">{{ item.startTime }}</view>
@@ -12,7 +12,7 @@
         <view class="live-name font-size--30"><wow-elip line="2">{{ item.name }}</wow-elip></view>
       </view>
     </view>
-    <view class="live-cover" style="background-image: url({{ item.coverImg }})" @tap.stop="handleClickLiveHot({{item.id}})">
+    <view class="live-cover" wx:if="{{ source === 'index' }}" style="background-image: url({{ item.coverImg }})" @tap.stop="handleClickLiveHot({{item.id}})">
       <view class="status-item status-item-{{ListStatusWXS.class(item.liveStatus)}}">
         <text class="circle"></text>
         <text>{{ ListStatusWXS.name(item.liveStatus) }}</text>
@@ -22,6 +22,38 @@
         <view class="font-size--28">{{ item.hot }}热度</view>
       </view>
     </view>
+    <view class="video-main" wx:if="{{ item.liveStatus === 103 && !source }}">
+      <video
+        poster="{{ item.coverImg }}"
+        src="{{ item.defaultShow }}"
+        bindplay="handleScreenVideo"
+        bindfullscreenchange="handlefullscreenchange"
+        class="video-cover"
+        id="liveVideo">
+        <cover-view class="cover-main" wx:if="{{isShowMask}}">
+          <cover-view class="status-item wow-flex status-item-{{ListStatusWXS.class(item.liveStatus)}}">
+            <cover-view class="circle"></cover-view>
+            <cover-view>{{ ListStatusWXS.name(item.liveStatus) }}</cover-view>
+          </cover-view>
+          <cover-view class="hot-item wow-flex is-align-middle">
+            <cover-image class="ico_hot" src="/images/live/ico_hot.png"></cover-image>
+            <cover-view class="font-size--28">{{ item.hot }}热度</cover-view>
+          </cover-view>
+        </cover-view>
+      </video>
+      <scroll-view class="video-scroll" scroll-x="true">
+        <view
+          wx:for="{{item.showList}}"
+          wx:for-item="_item"
+          wx:for-index="_index"
+          @tap.stop="handleChangeVideo({{index}}, {{_item.replyUrl}}, {{_index}})"
+          class="video-item {{ currentPlayVideoIndex ===  _index ? 'active' : ''}}"
+          wx:key="_index">
+          <image class="video-img" lazy-load="true" src="{{_item.coverImg}}" mode="aspectFill"></image>
+        </view>
+      </scroll-view>
+    </view>
+
   </view>
 </template>
 <script>
@@ -31,135 +63,57 @@ import LiveBi from '../mixins/liveBi'
 export default class LiveItem extends wepy.component {
   props = {
     liveList: {
-      type: Array
+      type: Array,
+      twoWay: true
+    },
+    source: {
+      type: String,
+      default: ''
     }
   }
   mixins = [ LiveBi ]
   wxs = {
     ListStatusWXS: ListStatusWXS
   }
+  data = {
+    currentPlayVideoIndex: 0,
+    isShowMask: true
+  }
+  onLoad () {
+  }
+  methods = {
+    handleScreenVideo (e) {
+      this.liveVideoContext = wx.createVideoContext('liveVideo')
+      this.liveVideoContext.requestFullScreen()
+      setTimeout(() => {
+        this.liveVideoContext.play()
+        wx.hideLoading()
+      }, 500)
+    },
+    handleChangeVideo (index, replyUrl, _index) {
+      wx.showLoading({
+        title: '加载中',
+        mask: true
+      })
+      this.currentPlayVideoIndex = _index
+      this.liveList[index].defaultShow = replyUrl
+      wx.hideLoading()
+    },
+    handlefullscreenchange (e) {
+      this.liveVideoContext = wx.createVideoContext('liveVideo')
+      let fullScreen = e.detail.fullScreen
+      if (!fullScreen) {
+        this.isShowMask = true
+        setTimeout(() => {
+          this.liveVideoContext.pause()
+        }, 500)
+      } else {
+        this.isShowMask = false
+      }
+    }
+  }
 }
 </script>
 <style lang="postcss" scoped>
-.live {
-  &-item {
-    min-height: 300rpx;
-    background-color: #ffffff;
-    border-radius: 16rpx;
-    overflow: hidden;
-    padding: 0 50rpx 60rpx;
-    margin-bottom: 20rpx;
-  }
-  &-cover {
-    width: 100%;
-    padding-bottom: 78%;
-    position: relative;
-    overflow: hidden;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
-    border-radius: 38rpx;
-    .hot-item {
-      position: absolute;
-      top: 36rpx;
-      right: 40rpx;
-      font-size: 24rpx;
-      color: #ccc;
-      font-weight: 500;
-      .ico_hot {
-        width: 20rpx;
-        height: 24rpx;
-        margin-right: 8rpx;
-      }
-    }
-    .status-item {
-      position: absolute;
-      top: 36rpx;
-      left: 40rpx;
-      padding: 6rpx 14rpx 8rpx 10rpx;
-      border-radius: 12rpx;
-      display: inline-flex;
-      align-items: center;
-      font-weight: 600;
-      margin-bottom: 14rpx;
-      font-size: 30rpx;
-      .circle {
-        width: 18rpx;
-        height: 18rpx;
-        border-radius: 50%;
-        margin-right: 8rpx;
-      }
-      &-default {
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        border: 4rpx solid #fff;
-        color: #fff;
-        background-color: rgba(0, 0, 0, 0.4);
-        padding: 6rpx 24rpx 8rpx;
-        margin-bottom: 0;
-        .circle {
-          background-color: #fff;
-        }
-      }
-      &-ing {
-        color: #bb2867;
-        border: 4rpx solid #bb2867;
-        .circle {
-          background-color: #bb2867;
-        }
-      }
-      &-begin {
-        color: #00f077;
-        border: 4rpx solid #00f077;
-        .circle {
-          background-color: #00f077;
-        }
-      }
-      &-end {
-        color: #1a5fcd;
-        border: 4rpx solid #1a5fcd;
-        .circle {
-          background-color: #1a5fcd;
-        }
-      }
-    }
-  }
-  &-content {
-    min-height: 136rpx;
-    position: relative;
-    padding: px2rem(24) px2rem(25) px2rem(28);
-    display: flex;
-    box-sizing: border-box;
-  }
-  &-name {
-    color: #000;
-    font-weight: 500;
-    margin-bottom: 12rpx;
-  }
-  &-title {
-    font-size: 24rpx;
-    color: #4a4a4a;
-  }
-  &-info {
-    width: 100%;
-    &__hd {
-      margin-bottom: 14rpx;
-      .hd-img {
-        width: 50rpx;
-        height: 50rpx;
-        border-radius: 50%;
-        margin-right: 14rpx;
-      }
-      .hd-name {
-        color: #4a4a4a;
-        font-weight: 600;
-      }
-      .hd-time {
-        color: #a1a3a8;
-        font-size: 24rpx;
-      }
-    }
-  }
-}
+ @import 'src/styles/modules/liveItem.postcss';
 </style>
