@@ -6,19 +6,20 @@
 				<view
 					wx:for="{{cateList}}"
 					wx:key="index"
-					class="aside-item"
+					class="aside-item aside-item-{{ListStatusWXS.class(item.liveStatus)}}"
           @tap.stop="handleChangeLiveType({{ item.liveType }})"
 					:class="{'active': item.liveType === currentLiveType }">
-          {{ item.name }}
+          <text class="circle"></text>
+          <text>{{ item.name }}</text>
         </view>
 			</scroll-view>
 			<scroll-view scroll-with-animation scroll-y class="right-aside">
 				<block wx:if="{{ cateLiveData.length }}">
           <view
             wx:for="{{ cateLiveData }}"
-            @tap.stop="handleToScreenVideo({{ item.replyUrl }})"
+            @tap.stop="handleToScreenVideo({{ item }})"
             class="category-item category-item-{{ListStatusWXS.class(item.liveStatus)}}">
-            <view class="category-item__status">
+            <view class="category-item__status" wx:if="{{item.liveStatus !== 103}}">
               <text class="circle"></text>
               <text>{{ ListStatusWXS.name(item.liveStatus) }}</text>
             </view>
@@ -45,6 +46,7 @@
 import wepy from 'wepy'
 import liveApis from '@/api/live'
 import ListStatusWXS from '../../wxs/liveStatus.wxs'
+import LiveBi from '@/mixins/liveBi'
 const liveStatus = {
   101: '直播中',
   102: '即将开始', // 未开始
@@ -61,6 +63,7 @@ export default class LiveCategory extends wepy.page {
       'wow-elip': '../../packages/elip/index'
     }
   }
+  mixins = [ LiveBi ]
   wxs = {
     ListStatusWXS: ListStatusWXS
   }
@@ -80,18 +83,23 @@ export default class LiveCategory extends wepy.page {
     videoLink: ''
   }
   methods = {
-    handleToScreenVideo (mp4) {
-      wx.showLoading({
-        title: '加载中',
-        mask: true
-      })
-      this.videoOpacityStyle = 1
-      this.videoLink = mp4
-      this.videoContext.requestFullScreen()
-      setTimeout(() => {
-        this.videoContext.play()
-        wx.hideLoading()
-      }, 500)
+    handleToScreenVideo (item) {
+      const { replyUrl, liveStatus, id } = item
+      if (liveStatus === 103) {
+        wx.showLoading({
+          title: '加载中',
+          mask: true
+        })
+        this.videoOpacityStyle = 1
+        this.videoLink = replyUrl
+        this.videoContext.requestFullScreen()
+        setTimeout(() => {
+          this.videoContext.play()
+          wx.hideLoading()
+        }, 500)
+      } else {
+        this.handleClickLiveHot(id)
+      }
     },
     handleChangeLiveType (type) {
       this.currentLiveType = type

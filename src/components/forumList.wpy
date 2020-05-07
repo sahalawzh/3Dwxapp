@@ -10,7 +10,7 @@
         <view class="title font-size--36" wx:if="{{item.title}}">
           {{ item.title }}<image wx:if="{{item.hotShow === 1}}" src="../images/forum/hot.png" class="hot" mode="aspectFill"></image><text wx:if="{{item.isTopping === 1}}" class="top font-size--24">置顶</text>
         </view>
-        <view class="content" wx:elif="{{item.content}}">
+        <view class="content" wx:if="{{item.content}}">
           <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
         </view>
         <view class="imgs wow-flex" wx:if="{{item.image.length}}">

@@ -34,6 +34,12 @@ export default class live extends base {
     return this.get(`api/liveRoom/enterRoom`, opts)
   }
   /**
+   * 进入历史直播间前调用的修改热度接口
+   */
+  static enterReplyRoom (opts) {
+    return this.get(`api/liveRoom/enterReplyRoom`, opts)
+  }
+  /**
    * 获取type信息
    */
   static getLiveType (opts) {

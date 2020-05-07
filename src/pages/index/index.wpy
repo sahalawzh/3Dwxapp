@@ -30,6 +30,7 @@
         <liveList
           wx:if="{{liveList.length}}"
           :source.sync="pageSource"
+          :source="pageSource"
           :liveList.sync="liveList"></liveList>
       </block>
 
@@ -476,6 +477,17 @@ export default class Index extends wepy.page {
       this.getMyForumReply()
     }
   }
+  async getLiveData () {
+    try {
+      const { data: liveStatusData } = await liveApis.getLiveStatus()
+      const { data: liveListData } = await liveApis.listLiveShow()
+      this.liveStatus = liveStatusData
+      this.liveList = liveListData
+      this.$apply()
+    } catch (error) {
+      console.log(error)
+    }
+  }
   async getVersion () {
     try {
       const { data } = await configApis.version()
@@ -500,17 +512,11 @@ export default class Index extends wepy.page {
       mask: true
     })
     Promise.all([
-      liveApis.getLiveStatus(),
-      liveApis.listLiveShow(),
       this.getVersion(),
       this.resetFn(),
       this.getAdvertisement(),
       this.getPrintGuide()
     ]).then(res => {
-      console.log(res)
-      const [ liveStatusData, liveListData ] = res
-      this.liveStatus = liveStatusData.data
-      this.liveList = liveListData.data
       wx.hideLoading()
     }).catch((err) => {
       console.log(err)
@@ -548,6 +554,7 @@ export default class Index extends wepy.page {
         this.getListActivity()
       }
     } else if (this.navType === -1) { // 发现
+      this.getLiveData()
       this.getListActivity()
       this.getListVideoActivity()
     } else { // 课程
@@ -572,6 +579,7 @@ export default class Index extends wepy.page {
     } else {
       this.getListVideoActivity()
       this.getListActivity()
+      this.getLiveData()
     }
     wx.nextTick(() => {
       wx.stopPullDownRefresh()

@@ -11,7 +11,7 @@
           <view class="title font-size--36" wx:if="{{item.title}}">
             {{ item.title }}<image wx:if="{{item.hotShow === 1}}" src="../images/forum/hot.png" class="hot" mode="aspectFill"></image>
           </view>
-          <view class="content" wx:elif="{{item.content}}">
+          <view class="content" wx:if="{{item.content}}">
             <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
             <view class="imgs wow-flex" wx:if="{{item.image.length}}">
               <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" @tap.stop="handleImagePreview({{_item}}, {{index}})" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
@@ -37,14 +37,14 @@
 
             <view class="wow-flex is-align-middle viewtimes">
               <image class="icon" lazy-load="true" src="../images/index/ico_home_viewtimes.png" mode="aspectFill"></image>
-              <text class="font-size--24">{{item.hot}}</text>
+              <text class="font-size--24">{{item.views}}</text>
             </view>
 
           </view>
         </view>
         <view class="title font-size--36">{{item.title}}</view>
 
-        <view class="desc font-size--26">{{ item.videoType === 0 ? '创意' : '课程' }}<text class="desc-duration">{{item.duration}}</text></view>
+        <view class="desc font-size--26">{{ item.categoryName }}<text class="desc-duration">{{item.duration}}</text></view>
       </view>
     </block>
   </view>

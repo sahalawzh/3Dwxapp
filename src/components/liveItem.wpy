@@ -1,28 +1,18 @@
 <template>
-  <view class="live-item" wx:for="{{ liveList }}" wx:key="{{index}}">
+  <view class="live-item {{source === 'index' ? 'live-item-index' : ''}}" wx:for="{{ liveList }}" wx:key="{{index}}">
     <view class="live-content">
       <view class="live-info">
         <view class="live-info__hd wow-flex is-align-middle is-justify-space-between">
           <view class="wow-flex is-align-middle">
             <image class="hd-img" mode="aspectFill" src="{{ item.anchorImg }}"></image>
-            <view class="hd-name font-size--28">{{ item.anchorName }}</view>
+            <view class="hd-name font-size--32">{{ item.anchorName }}</view>
           </view>
           <view class="hd-time">{{ item.startTime }}</view>
         </view>
-        <view class="live-name font-size--30"><wow-elip line="2">{{ item.name }}</wow-elip></view>
+        <view class="live-name font-size--36"><wow-elip line="2">{{ item.name }}</wow-elip></view>
       </view>
     </view>
-    <view class="live-cover" wx:if="{{ source === 'index' }}" style="background-image: url({{ item.coverImg }})" @tap.stop="handleClickLiveHot({{item.id}})">
-      <view class="status-item status-item-{{ListStatusWXS.class(item.liveStatus)}}">
-        <text class="circle"></text>
-        <text>{{ ListStatusWXS.name(item.liveStatus) }}</text>
-      </view>
-      <view class="hot-item wow-flex is-align-middle">
-        <image class="ico_hot" mode="aspectFill" src="../images/live/ico_hot.png"></image>
-        <view class="font-size--28">{{ item.hot }}热度</view>
-      </view>
-    </view>
-    <view class="video-main" wx:if="{{ item.liveStatus === 103 && !source }}">
+    <view class="video-main" wx:if="{{ item.liveStatus === 103 && source !== 'index' }}">
       <video
         poster="{{ item.coverImg }}"
         src="{{ item.defaultShow }}"
@@ -41,12 +31,12 @@
           </cover-view>
         </cover-view>
       </video>
-      <scroll-view class="video-scroll" scroll-x="true">
+      <scroll-view class="video-scroll" scroll-x="true" wx:if="{{ item.showList.length > 1 }}">
         <view
           wx:for="{{item.showList}}"
           wx:for-item="_item"
           wx:for-index="_index"
-          @tap.stop="handleChangeVideo({{index}}, {{_item.replyUrl}}, {{_index}})"
+          @tap.stop="handleChangeVideo({{index}}, {{_item}}, {{_index}})"
           class="video-item {{ currentPlayVideoIndex ===  _index ? 'active' : ''}}"
           wx:key="_index">
           <image class="video-img" lazy-load="true" src="{{_item.coverImg}}" mode="aspectFill"></image>
@@ -54,12 +44,27 @@
       </scroll-view>
     </view>
 
+    <view class="live-cover"
+      wx:else
+      style="background-image: url({{ item.coverImg }})"
+      @tap.stop="handleClickLive({{item.id}})">
+      <view class="bg-mask"></view>
+      <view class="status-item status-item-{{ListStatusWXS.class(item.liveStatus)}}">
+        <text class="circle"></text>
+        <text>{{ ListStatusWXS.name(item.liveStatus) }}</text>
+      </view>
+      <view class="hot-item wow-flex is-align-middle">
+        <image class="ico_hot" mode="aspectFill" src="../images/live/ico_hot.png"></image>
+        <view class="font-size--28">{{ item.hot }}热度</view>
+      </view>
+    </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
 import ListStatusWXS from '../wxs/liveStatus.wxs'
 import LiveBi from '../mixins/liveBi'
+import wxUtils from '../utils/wxutils'
 export default class LiveItem extends wepy.component {
   props = {
     liveList: {
@@ -79,9 +84,18 @@ export default class LiveItem extends wepy.component {
     currentPlayVideoIndex: 0,
     isShowMask: true
   }
+  computed = {
+  }
   onLoad () {
   }
   methods = {
+    handleClickLive (id) {
+      if (this.source === 'index') {
+        wxUtils.backOrNavigate('/pages/live/index')
+      } else {
+        this.handleClickLiveHot(id)
+      }
+    },
     handleScreenVideo (e) {
       this.liveVideoContext = wx.createVideoContext('liveVideo')
       this.liveVideoContext.requestFullScreen()
@@ -90,11 +104,13 @@ export default class LiveItem extends wepy.component {
         wx.hideLoading()
       }, 500)
     },
-    handleChangeVideo (index, replyUrl, _index) {
+    handleChangeVideo (index, _item, _index) {
+      const { replyUrl, id } = _item
       wx.showLoading({
         title: '加载中',
         mask: true
       })
+      this.handleClickReplyLiveHot(id)
       this.currentPlayVideoIndex = _index
       this.liveList[index].defaultShow = replyUrl
       wx.hideLoading()

@@ -6,6 +6,7 @@
   min-height: 100vh;
 	.category-content {
 		min-height: 100vh;
+    border-top: 1rpx solid #ddd;
 	}
 	.left-aside {
 		position: fixed;
@@ -31,6 +32,22 @@
         height: 1rpx;
         transform: scaleY(0.5);
         background-color: #cfcfcf;
+      }
+      .circle {
+        width: 18rpx;
+        height: 18rpx;
+        border-radius: 50%;
+        margin-right: 8rpx;
+      }
+      &-ing {
+        .circle {
+          background-color: #bb2867;
+        }
+      }
+      &-begin {
+        .circle {
+          background-color: #00f077;
+        }
       }
       &.active {
         background-color: #fff;
