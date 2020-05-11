@@ -26,5 +26,8 @@ module.exports = {
     } else if (status === 107) {
       return '已过期'
     }
+  },
+  hot: function (val) {
+    return Number(val) < 10000 ? val : (val / 10000).toFixed(2) + '万'
   }
 }

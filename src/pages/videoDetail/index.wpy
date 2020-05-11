@@ -42,7 +42,7 @@
           <!-- 观看次数 -->
           <view class="suspend-box__item">
             <image class="icon" src="../../images/common/ico_seetime_big_black.png" mode="aspectFill"></image>
-            <view class="font-size--24">{{info.hot}}</view>
+            <view class="font-size--24">{{info.views}}</view>
           </view>
         </view>
       </view>

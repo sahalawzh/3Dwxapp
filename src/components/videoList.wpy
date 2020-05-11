@@ -12,7 +12,7 @@
             {{ item.title }}<image wx:if="{{item.hotShow === 1}}" src="../images/forum/hot.png" class="hot" mode="aspectFill"></image>
           </view>
           <view class="content" wx:if="{{item.content}}">
-            <view class="font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
+            <view class="content-info font-size--28">{{item.content}}<text wx:if="{{item.isOmission === 1}}" class="showtext">展开</text></view>
             <view class="imgs wow-flex" wx:if="{{item.image.length}}">
               <image wx:for="{{item.image}}" wx:for-index="idx" wx:for-item="_item" wx:key="idx" @tap.stop="handleImagePreview({{_item}}, {{index}})" src="{{_item}}" class="imgs-{{item.image.length > 1 ? 'more' : 'single'}}" mode="aspectFill"></image>
             </view>

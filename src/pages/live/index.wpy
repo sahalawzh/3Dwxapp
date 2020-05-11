@@ -16,7 +16,7 @@
       <view class="live-recommed" wx:if="{{recommedList.length}}">
         <view class="live-recommed__title">精彩推荐</view>
         <view class="live-recommed__item wow-flex is-align-middle"
-          @tap.stop="handleToScreenVideo({{ item }})"
+          @tap.stop="handleScreenVideo({{ item }})"
           wx:for="{{recommedList}}"
           wx:key="index">
           <view class="recommed-cover">
@@ -29,13 +29,13 @@
             <view class="anchor-name">{{ item.anchorName }}</view>
             <view class="hot-box wow-flex is-align-middle">
               <image class="ico_hot" mode="aspectFill" src="../../images/live/ico_hot.png" lazy-load></image>
-              <view class="font-size--24">{{ item.hot }}热度</view>
+              <view class="font-size--24">{{ ListStatusWXS.hot(item.hot) }}热度</view>
             </view>
           </view>
         </view>
       </view>
 
-      <video src="{{ videoLink }}" bindfullscreenchange="screenChange" controls="true" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
+      <video src="{{ videoLink }}" bindfullscreenchange="screenChange" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
 
     </view>
     <view class="live-empty" wx:if="{{ loading && list.length === 0}}">
@@ -51,6 +51,7 @@ import LiveList from '@/components/liveItem'
 // var livePlayer = requirePlugin('live-player-plugin')
 import wxutils from '@/utils/wxutils'
 import LiveBi from '@/mixins/liveBi'
+import ListStatusWXS from '../../wxs/liveStatus.wxs'
 export default class Live extends wepy.page {
   config = {
     navigationBarTitleText: '直播',
@@ -62,6 +63,14 @@ export default class Live extends wepy.page {
   }
   components = {
     liveList: LiveList
+  }
+  wxs = {
+    ListStatusWXS: ListStatusWXS
+  }
+  events = {
+    handleOnScreenVideo (item) {
+      this.handleToScreenVideo(item)
+    }
   }
   data = {
     roomList: [],
@@ -76,31 +85,36 @@ export default class Live extends wepy.page {
   }
   mixins = [ LiveBi ]
   methods = {
-    handleToScreenVideo (item) {
-      const { replyUrl, id } = item
-      wx.showLoading({
-        title: '加载中',
-        mask: true
-      })
-      this.handleClickReplyLiveHot(id)
-      this.videoOpacityStyle = 1
-      this.videoLink = replyUrl
-      this.videoContext.requestFullScreen()
-      setTimeout(() => {
-        this.videoContext.play()
-        wx.hideLoading()
-      }, 500)
+    handleScreenVideo (item) {
+      this.handleToScreenVideo(item)
     },
     handleToCate () {
       wxutils.backOrNavigate('/pages/live/category')
     }
   }
+  handleToScreenVideo (item) {
+    this.videoContext = wx.createVideoContext('videoId')
+    const { replyUrl, id } = item
+    wx.showLoading({
+      title: '加载中',
+      mask: true
+    })
+    this.handleClickReplyLiveHot(id)
+    this.videoOpacityStyle = 1
+    this.videoLink = replyUrl
+    this.videoContext.requestFullScreen()
+    setTimeout(() => {
+      this.videoContext.play()
+      wx.hideLoading()
+    }, 500)
+  }
   screenChange (e) {
+    this.videoContext = wx.createVideoContext('videoId')
     let fullScreen = e.detail.fullScreen
     if (!fullScreen) {
       this.videoOpacityStyle = 0
+      this.videoContext.pause()
     }
-    this.videoContext.pause()
     this.videoLink = null
   }
   onPullDownRefresh () {
