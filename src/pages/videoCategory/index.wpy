@@ -83,6 +83,7 @@ export default class LiveCategory extends wepy.page {
       })
       const { data } = await videoApis.getListVideoCategory()
       this.cateList = data
+      this.currentCategoryId = data[0].categoryId
       this.cateList.unshift({name: '热门', categoryId: 0})
       wx.hideLoading()
       this.$apply()

@@ -61,6 +61,7 @@ export default class CourseList extends wepy.page {
         courseList = []
       }
       this.courseList = [...courseList, ...videoList]
+      console.log(this.courseList)
       if (this.courseList.length >= totalNum) {
         this.hasMoreData = false
       } else {

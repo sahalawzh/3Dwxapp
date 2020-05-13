@@ -38,7 +38,7 @@
 			</scroll-view>
 		</view>
 
-    <video src="{{ videoLink }}" bindfullscreenchange="screenChange" direction="0" controls="true" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
+    <video src="{{ videoLink }}" bindfullscreenchange="screenChange" controls="true" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
 
 	</view>
 </template>
