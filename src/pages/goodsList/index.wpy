@@ -146,6 +146,7 @@
     events = {
       handleToggleTab (type) {
         this.types = type
+        this.start = 1
         if (this.order === 'desc') {
           this.order = 'asc'
         } else {

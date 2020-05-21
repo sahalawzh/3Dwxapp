@@ -1,8 +1,8 @@
 <template>
   <view class="goods-list-tabbar wow-flex is-align-middle">
     <view class="goods-list-tabbar-items">
-      <view 
-        wx:for="{{tabbarItems}}" 
+      <view
+        wx:for="{{tabbarItems}}"
         wx:key="item"
         @tap.stop="handleTabChange({{item.type}})"
         class="goods-list-tabbar__item font-size--28">
@@ -50,7 +50,7 @@ export default class Tab extends wepy.component {
       },
       {
         label: '价格',
-        type: 'recommended_price'
+        type: 'price'
       }
     ]
   }
