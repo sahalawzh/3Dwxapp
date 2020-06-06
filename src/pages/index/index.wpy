@@ -406,6 +406,8 @@ export default class Index extends wepy.page {
       } else {
         this.videoActivityList = [...videoActivityList, ...videoVOList]
       }
+      console.log(this.videoActivityList.length)
+      console.log(total)
       if (this.videoActivityList.length >= total) {
         this.hasMoreData = false
       } else {

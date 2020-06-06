@@ -57,7 +57,7 @@
         <view class="font-size--28">{{ ListStatusWXS.hot(item.hot) }}热度</view>
       </view>
     </view>
-    <scroll-view class="video-scroll" scroll-x="true" wx:if="{{ item.showList.length && source !== 'index' }}">
+    <scroll-view class="video-scroll" scroll-x="true" wx:if="{{ item.showList.length > 1 && source !== 'index' }}">
       <view
         wx:for="{{item.showList}}"
         wx:for-item="_item"

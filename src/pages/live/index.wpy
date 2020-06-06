@@ -7,9 +7,8 @@
         <view class="font-size--28">所有直播</view>
       </view>
 
-      <view class="room-list">
+      <view class="room-list" wx:if="{{roomList.length}}">
         <liveList
-        wx:if="{{roomList.length}}"
         :liveList.sync="roomList"></liveList>
       </view>
 
@@ -35,7 +34,7 @@
         </view>
       </view>
 
-      <video src="{{ videoLink }}" bindfullscreenchange="screenChange" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
+      <video src="{{ videoLink }}" enable-auto-rotation="true" bindfullscreenchange="screenChange" id="videoId" style="opacity: {{videoOpacityStyle}}" class='video-center'></video>
 
     </view>
     <view class="live-empty" wx:if="{{ loading && list.length === 0}}">
